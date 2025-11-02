@@ -1,0 +1,21 @@
+{
+  "name": "rogue-sim",
+  "version": "1.0.0",
+  "main": "dist/index.js",
+  "type": "module",
+  "scripts": {
+    "build": "tsc",
+    "start": "node dist/index.js",
+    "dev": "tsc && node dist/index.js",
+    "verify": "tsc && node dist/verifyMechanics.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": ["wow", "classic", "rogue", "simulator", "dps"],
+  "author": "",
+  "license": "ISC",
+  "description": "WoW Classic Era Rogue DPS Simulator",
+  "devDependencies": {
+    "@types/node": "^20.0.0",
+    "typescript": "^5.0.0"
+  }
+}
