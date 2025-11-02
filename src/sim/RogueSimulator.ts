@@ -236,14 +236,4 @@ export class RogueSimulator extends MeleeSimulator {
          damageBreakdown: this.damageBreakdown,
       };
    }
-
-   runMultipleIterations(): SimulationResult[] {
-      const results: SimulationResult[] = [];
-
-      for (let i = 0; i < this.config.iterations; i++) {
-         results.push(this.simulate());
-      }
-
-      return results;
-   }
 }

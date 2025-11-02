@@ -1,4 +1,4 @@
-import {RogueSimulationState, SimulationResult, SimulationState} from '../types';
+import {CharacterStats, RogueSimulationState, SimulationConfig, SimulationResult, SimulationState} from '../types';
 
 export interface Simulator {
    simulate(): SimulationResult;
@@ -9,9 +9,22 @@ export interface Simulator {
 export abstract class BaseSimulator implements Simulator {
    protected abstract state: SimulationState;
 
+   protected constructor(
+      protected stats: CharacterStats,
+      protected config: SimulationConfig
+   ) { }
+
    abstract simulate(): SimulationResult;
 
-   abstract runMultipleIterations(): SimulationResult[];
+   runMultipleIterations(): SimulationResult[] {
+      const results: SimulationResult[] = [];
+
+      for (let i = 0; i < this.config.iterations; i++) {
+         results.push(this.simulate());
+      }
+
+      return results;
+   }
 
    static calculateAverageDPS(results: SimulationResult[]): number {
       const totalDPS = results.reduce((sum, result) => sum + result.dps, 0);

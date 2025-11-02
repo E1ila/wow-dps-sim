@@ -1,15 +1,9 @@
 import {BaseSimulator} from './BaseSimulator';
 import {CharacterStats, MeleeSimulationState, SimulationConfig} from '../types';
+import {DamageCalculator} from "../mechanics/DamageCalculator";
 
 export abstract class MeleeSimulator extends BaseSimulator {
    protected abstract state: MeleeSimulationState;
-
-   protected constructor(
-      protected stats: CharacterStats,
-      protected config: SimulationConfig
-   ) {
-      super();
-   }
 
    protected processAutoAttacks(
       onMainHandHit: (damage: number, isCrit: boolean) => void,
