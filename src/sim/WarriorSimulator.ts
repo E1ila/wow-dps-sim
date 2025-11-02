@@ -14,23 +14,23 @@ export class WarriorSimulator extends MeleeSimulator {
       super(stats, config);
    }
 
+   protected initializeState(): MeleeSimulationState {
+      throw new Error('Warrior simulator is not yet implemented.');
+   }
+
+   protected processTimeStep(): void {
+      throw new Error('Warrior simulator is not yet implemented.');
+   }
+
+   protected printState(): void {
+      throw new Error('Warrior simulator is not yet implemented.');
+   }
+
    protected calculateMainHandDamage(): { damage: number; isCrit: boolean } {
       throw new Error('Warrior simulator is not yet implemented.');
    }
 
    protected calculateOffHandDamage(): { damage: number; isCrit: boolean } {
       throw new Error('Warrior simulator is not yet implemented.');
-   }
-
-   simulate(): SimulationResult {
-      throw new Error(
-         'Warrior simulator is not yet implemented. Currently only Rogue class is supported.'
-      );
-   }
-
-   runMultipleIterations(): SimulationResult[] {
-      throw new Error(
-         'Warrior simulator is not yet implemented. Currently only Rogue class is supported.'
-      );
    }
 }

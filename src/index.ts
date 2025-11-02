@@ -29,6 +29,7 @@ program
    .option('--armor <number>', 'Target armor', '3731')
    .option('--length <number>', 'Fight length in seconds', '60')
    .option('--iterations <number>', 'Number of iterations', '100')
+   .option('--speed <number>', 'Playback speed (0 = instant, 1 = real-time, 0.5 = half speed, etc.)')
    .parse(process.argv);
 
 const specFile = program.args[0];
@@ -132,7 +133,17 @@ switch (characterClass) {
       process.exit(1);
 }
 
-const results = simulator.runMultipleIterations();
-BaseSimulator.printResults(results);
+const playbackSpeed = opts.speed !== undefined ? parseFloat(opts.speed) : undefined;
 
-console.log('\nSimulation complete!');
+if (playbackSpeed !== undefined) {
+   // Run single simulation with playback
+   (async () => {
+      await simulator.simulateWithPlayback(playbackSpeed);
+      console.log('\nSimulation complete!');
+   })();
+} else {
+   // Run multiple iterations
+   const results = simulator.runMultipleIterations();
+   BaseSimulator.printResults(results);
+   console.log('\nSimulation complete!');
+}

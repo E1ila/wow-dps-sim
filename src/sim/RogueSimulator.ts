@@ -4,6 +4,7 @@ import {
    SimulationConfig,
    RogueSimulationState,
    SimulationResult,
+   DamageEvent,
    RogueDamageEvent,
    WeaponType,
 } from '../types';
@@ -26,7 +27,7 @@ export class RogueSimulator extends MeleeSimulator {
       this.state = this.initializeState();
    }
 
-   private initializeState(): RogueSimulationState {
+   protected initializeState(): RogueSimulationState {
       return {
          currentTime: 0,
          energy: 100,
@@ -41,7 +42,10 @@ export class RogueSimulator extends MeleeSimulator {
       };
    }
 
-   private addDamage(ability: string, damage: number, isCrit: boolean, comboPointsGained: number = 0): void {
+   /**
+    * Add damage with rogue-specific combo point tracking.
+    */
+   private addRogueDamage(ability: string, damage: number, isCrit: boolean, comboPointsGained: number = 0): void {
       if (damage > 0) {
          this.events.push({
             timestamp: this.state.currentTime,
@@ -78,14 +82,6 @@ export class RogueSimulator extends MeleeSimulator {
       const cp = this.state.comboPoints;
       this.state.comboPoints = 0;
       return cp;
-   }
-
-   private triggerGlobalCooldown(): void {
-      this.state.globalCooldownExpiry = this.state.currentTime + 1.0;
-   }
-
-   private canCastAbility(): boolean {
-      return this.state.currentTime >= this.state.globalCooldownExpiry;
    }
 
    private handleAutoAttacks(): void {
@@ -179,7 +175,7 @@ export class RogueSimulator extends MeleeSimulator {
                }
             }
 
-            this.addDamage(abilityName, damage, isCrit, 1);
+            this.addRogueDamage(abilityName, damage, isCrit, 1);
             this.triggerGlobalCooldown();
             return;
          }
@@ -192,36 +188,35 @@ export class RogueSimulator extends MeleeSimulator {
       }
    }
 
-   simulate(): SimulationResult {
-      this.state = this.initializeState();
-      this.events = [];
-      this.damageBreakdown = new Map();
-
-      const timeStep = 0.1;
-
-      while (this.state.currentTime < this.config.fightLength) {
-         if (this.state.currentTime >= this.state.nextEnergyTick) {
-            this.addEnergy(20);
-            this.state.nextEnergyTick += 2.0;
-         }
-
-         this.handleAutoAttacks();
-
-         this.updateBuffs();
-
-         this.executeRotation();
-
-         this.state.currentTime += timeStep;
+   protected processTimeStep(): void {
+      if (this.state.currentTime >= this.state.nextEnergyTick) {
+         this.addEnergy(20);
+         this.state.nextEnergyTick += 2.0;
       }
 
-      const totalDamage = Array.from(this.damageBreakdown.values()).reduce((a, b) => a + b, 0);
-      const dps = totalDamage / this.config.fightLength;
+      this.handleAutoAttacks();
+      this.updateBuffs();
+      this.executeRotation();
 
-      return {
-         totalDamage,
-         dps,
-         events: this.events,
-         damageBreakdown: this.damageBreakdown,
-      };
+      this.state.currentTime += 0.1;
+   }
+
+   /**
+    * Override printEvent to show combo points for rogue damage events.
+    */
+   protected override printEvent(event: RogueDamageEvent): void {
+      const critStr = event.isCrit ? ' (CRIT!)' : '';
+      const cpStr = event.comboPointsGained > 0 ? ` [+${event.comboPointsGained} CP]` : '';
+      console.log(`[${event.timestamp.toFixed(1)}s] ${event.ability}: ${event.damage}${critStr}${cpStr}`);
+   }
+
+   /**
+    * Print the current rogue state during playback.
+    */
+   protected printState(): void {
+      const sndStatus = this.state.sliceAndDiceActive
+         ? ` | SnD: ${(this.state.sliceAndDiceExpiry - this.state.currentTime).toFixed(1)}s`
+         : '';
+      console.log(`  → Energy: ${this.state.energy} | CP: ${this.state.comboPoints}${sndStatus}`);
    }
 }
