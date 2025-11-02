@@ -1,112 +1,112 @@
 export enum CharacterClass {
-  Rogue = 'rogue',
-  Warrior = 'warrior',
+   Rogue = 'rogue',
+   Warrior = 'warrior',
 }
 
 export interface CharacterStats {
-  class: CharacterClass;
-  level: number;
-  attackPower: number;
-  critChance: number;
-  hitChance: number;
-  agility: number;
-  strength: number;
-  weaponSkill: number;
+   class: CharacterClass;
+   level: number;
+   attackPower: number;
+   critChance: number;
+   hitChance: number;
+   agility: number;
+   strength: number;
+   weaponSkill: number;
 
-  mainHandWeapon: Weapon;
-  offHandWeapon?: Weapon;
+   mainHandWeapon: Weapon;
+   offHandWeapon?: Weapon;
 }
 
 export interface Weapon {
-  minDamage: number;
-  maxDamage: number;
-  speed: number;
-  type: WeaponType;
+   minDamage: number;
+   maxDamage: number;
+   speed: number;
+   type: WeaponType;
 }
 
 export enum WeaponType {
-  Sword = 'Sword',
-  Dagger = 'Dagger',
-  Mace = 'Mace',
-  Fist = 'Fist',
+   Sword = 'Sword',
+   Dagger = 'Dagger',
+   Mace = 'Mace',
+   Fist = 'Fist',
 }
 
 export interface RogueTalents {
-  malice: number;
-  murder: number;
-  improvedSinisterStrike: number;
-  improvedEviscerate: number;
-  relentlessStrikes: number;
-  lethality: number;
-  sealFate: number;
-  coldBlood: boolean;
-  improvedSliceAndDice: number;
-  daggerSpecialization: number;
-  swordSpecialization: number;
-  maceSpecialization: number;
-  fistWeaponSpecialization: number;
-  bladeFurry: boolean;
-  aggression: number;
-  dualWieldSpecialization: number;
-  opportunism: number;
-  improvedBackstab: number;
-  hemorrhage: boolean;
+   malice: number;
+   murder: number;
+   improvedSinisterStrike: number;
+   improvedEviscerate: number;
+   relentlessStrikes: number;
+   lethality: number;
+   sealFate: number;
+   coldBlood: boolean;
+   improvedSliceAndDice: number;
+   daggerSpecialization: number;
+   swordSpecialization: number;
+   maceSpecialization: number;
+   fistWeaponSpecialization: number;
+   bladeFurry: boolean;
+   aggression: number;
+   dualWieldSpecialization: number;
+   opportunism: number;
+   improvedBackstab: number;
+   hemorrhage: boolean;
 }
 
 export interface WarriorTalents {
-  armsTree: Record<string, number>;
-  furyTree: Record<string, number>;
-  protectionTree: Record<string, number>;
+   armsTree: Record<string, number>;
+   furyTree: Record<string, number>;
+   protectionTree: Record<string, number>;
 }
 
 export interface SimulationState {
-  currentTime: number;
-  energy: number;
-  comboPoints: number;
-  targetHealth: number;
+   currentTime: number;
+   energy: number;
+   comboPoints: number;
+   targetHealth: number;
 
-  sliceAndDiceActive: boolean;
-  sliceAndDiceExpiry: number;
+   sliceAndDiceActive: boolean;
+   sliceAndDiceExpiry: number;
 
-  mainHandNextSwing: number;
-  offHandNextSwing: number;
+   mainHandNextSwing: number;
+   offHandNextSwing: number;
 
-  globalCooldownExpiry: number;
-  nextEnergyTick: number;
+   globalCooldownExpiry: number;
+   nextEnergyTick: number;
 }
 
 export interface SimulationConfig {
-  fightLength: number;
-  targetLevel: number;
-  targetArmor: number;
-  iterations: number;
+   fightLength: number;
+   targetLevel: number;
+   targetArmor: number;
+   iterations: number;
 }
 
 export interface DamageEvent {
-  timestamp: number;
-  ability: string;
-  damage: number;
-  isCrit: boolean;
-  comboPointsGained: number;
+   timestamp: number;
+   ability: string;
+   damage: number;
+   isCrit: boolean;
+   comboPointsGained: number;
 }
 
 export interface SimulationResult {
-  totalDamage: number;
-  dps: number;
-  events: DamageEvent[];
-  damageBreakdown: Map<string, number>;
+   totalDamage: number;
+   dps: number;
+   events: DamageEvent[];
+   damageBreakdown: Map<string, number>;
 }
 
 export enum AttackResult {
-  Miss = 'Miss',
-  Dodge = 'Dodge',
-  Glancing = 'Glancing',
-  Hit = 'Hit',
-  Crit = 'Crit',
-  Block = 'Block',
+   Miss = 'Miss',
+   Dodge = 'Dodge',
+   Glancing = 'Glancing',
+   Hit = 'Hit',
+   Crit = 'Crit',
+   Block = 'Block',
 }
 
 export interface AttackTableResult {
-  result: AttackResult;
-  damageModifier: number;
+   result: AttackResult;
+   damageModifier: number;
 }

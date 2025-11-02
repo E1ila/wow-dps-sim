@@ -1,22 +1,22 @@
 {
-  "name": "Fury DPS",
-  "class": "warrior",
-  "description": "Standard fury warrior spec for PvE (NOT IMPLEMENTED)",
-  "talents": {
-    "armsTree": {
-      "deflection": 5,
-      "improvedRend": 0,
-      "tacticalMastery": 0
-    },
-    "furyTree": {
-      "cruelty": 5,
-      "unbridledWrath": 5,
-      "piercingHowl": 0,
-      "dualWieldSpecialization": 5,
-      "enrage": 5,
-      "flurry": 5,
-      "bloodthirst": true
-    },
-    "protectionTree": {}
-  }
+    "name": "Fury DPS",
+    "class": "warrior",
+    "description": "Standard fury warrior spec for PvE (NOT IMPLEMENTED)",
+    "talents": {
+        "armsTree": {
+            "deflection": 5,
+            "improvedRend": 0,
+            "tacticalMastery": 0
+        },
+        "furyTree": {
+            "cruelty": 5,
+            "unbridledWrath": 5,
+            "piercingHowl": 0,
+            "dualWieldSpecialization": 5,
+            "enrage": 5,
+            "flurry": 5,
+            "bloodthirst": true
+        },
+        "protectionTree": {}
+    }
 }
