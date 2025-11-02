@@ -90,6 +90,9 @@ export interface DamageEvent {
    ability: string;
    damage: number;
    isCrit: boolean;
+}
+
+export interface RogueDamageEvent extends DamageEvent {
    comboPointsGained: number;
 }
 

@@ -1,4 +1,13 @@
-import {CharacterStats, RogueSimulationState, SimulationConfig, SimulationResult, SimulationState} from '../types';
+import {
+   CharacterStats,
+   DamageEvent,
+   RogueSimulationState,
+   SimulationConfig,
+   SimulationResult,
+   SimulationState
+} from '../types';
+import {MeleeDamageCalculator} from "../mechanics/MeleeDamageCalculator";
+import {DamageCalculator} from "../mechanics/DamageCalculator";
 
 export interface Simulator {
    simulate(): SimulationResult;
@@ -8,6 +17,9 @@ export interface Simulator {
 
 export abstract class BaseSimulator implements Simulator {
    protected abstract state: SimulationState;
+   protected abstract damageCalculator: DamageCalculator;
+   protected events: DamageEvent[] = [];
+   protected damageBreakdown: Map<string, number> = new Map();
 
    protected constructor(
       protected stats: CharacterStats,

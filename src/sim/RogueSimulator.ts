@@ -4,16 +4,16 @@ import {
    SimulationConfig,
    RogueSimulationState,
    SimulationResult,
-   DamageEvent,
+   RogueDamageEvent,
    WeaponType,
 } from '../types';
-import {DamageCalculator} from '../mechanics/DamageCalculator';
+import {RogueDamageCalculator} from '../mechanics/RogueDamageCalculator';
 import {MeleeSimulator} from './MeleeSimulator';
 
 export class RogueSimulator extends MeleeSimulator {
    protected override state: RogueSimulationState;
-   protected damageCalculator: DamageCalculator;
-   protected events: DamageEvent[] = [];
+   protected override damageCalculator: RogueDamageCalculator;
+   protected override events: RogueDamageEvent[] = [];
    protected damageBreakdown: Map<string, number> = new Map();
 
    constructor(
@@ -22,7 +22,7 @@ export class RogueSimulator extends MeleeSimulator {
       protected talents: RogueTalents,
    ) {
       super(stats, config);
-      this.damageCalculator = new DamageCalculator(stats, talents, config);
+      this.damageCalculator = new RogueDamageCalculator(stats, talents, config);
       this.state = this.initializeState();
    }
 
