@@ -120,11 +120,11 @@ let simulator: BaseSimulator;
 
 switch (characterClass) {
    case CharacterClass.Rogue:
-      simulator = new RogueSimulator(stats, spec.talents as RogueTalents, config);
+      simulator = new RogueSimulator(stats, config, spec.talents as RogueTalents);
       break;
 
    case CharacterClass.Warrior:
-      simulator = new WarriorSimulator(stats, spec.talents as WarriorTalents, config);
+      simulator = new WarriorSimulator(stats, config, spec.talents as WarriorTalents);
       break;
 
    default:

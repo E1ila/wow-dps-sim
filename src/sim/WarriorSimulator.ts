@@ -6,8 +6,8 @@ export class WarriorSimulator extends MeleeSimulator {
 
    constructor(
       stats: CharacterStats,
-      private talents: WarriorTalents,
-      config: SimulationConfig
+      config: SimulationConfig,
+      protected talents: WarriorTalents,
    ) {
       super(stats, config);
    }

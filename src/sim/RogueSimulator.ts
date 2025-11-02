@@ -18,8 +18,8 @@ export class RogueSimulator extends MeleeSimulator {
 
    constructor(
       stats: CharacterStats,
-      private talents: RogueTalents,
-      config: SimulationConfig
+      config: SimulationConfig,
+      protected talents: RogueTalents,
    ) {
       super(stats, config);
       this.damageCalculator = new DamageCalculator(stats, talents, config);
