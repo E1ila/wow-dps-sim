@@ -35,6 +35,7 @@ export class RogueSimulator {
       mainHandNextSwing: 0,
       offHandNextSwing: 0,
       globalCooldownExpiry: 0,
+      nextEnergyTick: 2.0,
     };
   }
 
@@ -209,11 +210,12 @@ export class RogueSimulator {
     this.damageBreakdown = new Map();
 
     const timeStep = 0.1;
-    const energyRegenPerSecond = 20;
-    const energyPerTick = energyRegenPerSecond * timeStep;
 
     while (this.state.currentTime < this.config.fightLength) {
-      this.addEnergy(energyPerTick);
+      if (this.state.currentTime >= this.state.nextEnergyTick) {
+        this.addEnergy(20);
+        this.state.nextEnergyTick += 2.0;
+      }
 
       this.processAutoAttacks();
 

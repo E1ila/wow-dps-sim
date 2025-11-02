@@ -60,6 +60,7 @@ export interface SimulationState {
   offHandNextSwing: number;
 
   globalCooldownExpiry: number;
+  nextEnergyTick: number;
 }
 
 export interface SimulationConfig {
