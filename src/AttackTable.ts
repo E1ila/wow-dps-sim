@@ -1,9 +1,9 @@
 import { AttackResult, AttackTableResult, CharacterStats, SimulationConfig } from './types.js';
 
 export class AttackTable {
-  private missChance: number;
-  private dodgeChance: number;
-  private glancingChance: number;
+  private readonly missChance: number;
+  private readonly dodgeChance: number;
+  private readonly glancingChance: number;
 
   constructor(
     private stats: CharacterStats,

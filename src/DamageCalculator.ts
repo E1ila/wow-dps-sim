@@ -1,13 +1,13 @@
-import { CharacterStats, Talents, Weapon, SimulationConfig } from './types.js';
-import { AttackTable } from './attackTable.js';
+import { CharacterStats, RogueTalents, Weapon, SimulationConfig } from './types.js';
+import { AttackTable } from './AttackTable';
 
 export class DamageCalculator {
-  private attackTable: AttackTable;
-  private targetArmorReduction: number;
+  private readonly attackTable: AttackTable;
+  private readonly targetArmorReduction: number;
 
   constructor(
     private stats: CharacterStats,
-    private talents: Talents,
+    private talents: RogueTalents,
     private config: SimulationConfig
   ) {
     this.attackTable = new AttackTable(stats, config);

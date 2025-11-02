@@ -1,4 +1,10 @@
+export enum CharacterClass {
+  Rogue = 'rogue',
+  Warrior = 'warrior',
+}
+
 export interface CharacterStats {
+  class: CharacterClass;
   level: number;
   attackPower: number;
   critChance: number;
@@ -25,7 +31,7 @@ export enum WeaponType {
   Fist = 'Fist',
 }
 
-export interface Talents {
+export interface RogueTalents {
   malice: number;
   murder: number;
   improvedSinisterStrike: number;
@@ -45,6 +51,12 @@ export interface Talents {
   opportunism: number;
   improvedBackstab: number;
   hemorrhage: boolean;
+}
+
+export interface WarriorTalents {
+  armsTree: Record<string, number>;
+  furyTree: Record<string, number>;
+  protectionTree: Record<string, number>;
 }
 
 export interface SimulationState {

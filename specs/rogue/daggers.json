@@ -1,0 +1,26 @@
+{
+  "name": "Seal Fate Daggers",
+  "class": "rogue",
+  "description": "Standard Seal Fate dagger spec for PvE",
+  "talents": {
+    "malice": 5,
+    "murder": 2,
+    "improvedSinisterStrike": 0,
+    "improvedEviscerate": 3,
+    "relentlessStrikes": 1,
+    "lethality": 5,
+    "sealFate": 5,
+    "coldBlood": true,
+    "improvedSliceAndDice": 3,
+    "daggerSpecialization": 5,
+    "swordSpecialization": 0,
+    "maceSpecialization": 0,
+    "fistWeaponSpecialization": 0,
+    "bladeFurry": false,
+    "aggression": 0,
+    "dualWieldSpecialization": 5,
+    "opportunism": 5,
+    "improvedBackstab": 3,
+    "hemorrhage": false
+  }
+}
