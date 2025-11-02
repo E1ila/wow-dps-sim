@@ -27,6 +27,15 @@ export abstract class MeleeSimulator extends BaseSimulator {
       }
    }
 
-   protected abstract calculateMainHandDamage(): { damage: number; isCrit: boolean };
-   protected abstract calculateOffHandDamage(): { damage: number; isCrit: boolean };
+   protected calculateMainHandDamage(): { damage: number; isCrit: boolean } {
+      const damage = this.damageCalculator.calculateAutoAttackDamage(true);
+      const isCrit = damage > 0 && this.damageCalculator.getAttackTable().rollCrit();
+      return {damage, isCrit};
+   }
+
+   protected calculateOffHandDamage(): { damage: number; isCrit: boolean } {
+      const damage = this.damageCalculator.calculateAutoAttackDamage(false);
+      const isCrit = damage > 0 && this.damageCalculator.getAttackTable().rollCrit();
+      return {damage, isCrit};
+   }
 }

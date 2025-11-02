@@ -22,7 +22,7 @@ export class RogueSimulator extends MeleeSimulator {
       protected talents: RogueTalents,
    ) {
       super(stats, config);
-      this.damageCalculator = new RogueDamageCalculator(stats, talents, config);
+      this.damageCalculator = new RogueDamageCalculator(stats, config, talents);
       this.state = this.initializeState();
    }
 
@@ -82,18 +82,6 @@ export class RogueSimulator extends MeleeSimulator {
 
    private triggerGlobalCooldown(): void {
       this.state.globalCooldownExpiry = this.state.currentTime + 1.0;
-   }
-
-   protected calculateMainHandDamage(): { damage: number; isCrit: boolean } {
-      const damage = this.damageCalculator.calculateAutoAttackDamage(true);
-      const isCrit = damage > 0 && this.damageCalculator.getAttackTable().rollCrit();
-      return {damage, isCrit};
-   }
-
-   protected calculateOffHandDamage(): { damage: number; isCrit: boolean } {
-      const damage = this.damageCalculator.calculateAutoAttackDamage(false);
-      const isCrit = damage > 0 && this.damageCalculator.getAttackTable().rollCrit();
-      return {damage, isCrit};
    }
 
    private canCastAbility(): boolean {

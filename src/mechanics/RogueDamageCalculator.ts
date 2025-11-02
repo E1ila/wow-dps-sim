@@ -4,8 +4,8 @@ import {MeleeDamageCalculator} from './MeleeDamageCalculator';
 export class RogueDamageCalculator extends MeleeDamageCalculator {
    constructor(
       stats: CharacterStats,
+      config: SimulationConfig,
       protected talents: RogueTalents,
-      config: SimulationConfig
    ) {
       super(stats, config);
    }
