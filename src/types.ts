@@ -60,7 +60,7 @@ export interface WarriorTalents {
 }
 
 export interface RogueRotation {
-   refreshSndSecondsBeforeExpiry: number;
+   refreshSndSecondsAhead5Combo: number;
 }
 
 export interface WarriorRotation {

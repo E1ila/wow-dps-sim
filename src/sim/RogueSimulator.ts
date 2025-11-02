@@ -13,11 +13,11 @@ import {RogueDamageCalculator} from '../mechanics/RogueDamageCalculator';
 import {MeleeSimulator} from './MeleeSimulator';
 
 const DEFAULT_DAGGERS_ROTATION: RogueRotation = {
-   refreshSndSecondsBeforeExpiry: 3,
+   refreshSndSecondsAhead5Combo: 3,
 };
 
 const DEFAULT_SWORDS_ROTATION: RogueRotation = {
-   refreshSndSecondsBeforeExpiry: 3,
+   refreshSndSecondsAhead5Combo: 3,
 };
 
 export class RogueSimulator extends MeleeSimulator {
@@ -103,6 +103,103 @@ export class RogueSimulator extends MeleeSimulator {
       return cp;
    }
 
+   private castSliceAndDice(): boolean {
+      if (!this.spendEnergy(25)) {
+         return false;
+      }
+
+      const cp = this.spendComboPoints();
+      const baseDuration = 9 + (cp * 3);
+      const improvedSndBonus = this.talents.improvedSliceAndDice * 0.15;
+      const duration = baseDuration * (1 + improvedSndBonus);
+
+      this.state.sliceAndDiceActive = true;
+      this.state.sliceAndDiceExpiry = this.state.currentTime + duration;
+      this.triggerGlobalCooldown();
+      return true;
+   }
+
+   private castEviscerate(): boolean {
+      if (!this.spendEnergy(35)) {
+         return false;
+      }
+
+      const cp = this.spendComboPoints();
+      const {damage, isCrit} = this.damageCalculator.calculateEviscerateDamage(cp);
+      this.addDamage('Eviscerate', damage, isCrit);
+      this.triggerGlobalCooldown();
+      return true;
+   }
+
+   private castSinisterStrike(): boolean {
+      let energyCost = 45;
+      const improvedSSCostReduction = this.talents.improvedSinisterStrike * 2;
+      energyCost -= improvedSSCostReduction;
+
+      if (!this.spendEnergy(energyCost)) {
+         return false;
+      }
+
+      const {damage, isCrit} = this.damageCalculator.calculateSinisterStrikeDamage();
+      
+      this.handleComboPointGeneration(damage, isCrit);
+      this.addRogueDamage('Sinister Strike', damage, isCrit, 1);
+      this.triggerGlobalCooldown();
+      return true;
+   }
+
+   private castBackstab(): boolean {
+      if (!this.spendEnergy(60)) {
+         return false;
+      }
+
+      const {damage, isCrit} = this.damageCalculator.calculateBackstabDamage();
+      
+      this.handleComboPointGeneration(damage, isCrit);
+      this.addRogueDamage('Backstab', damage, isCrit, 1);
+      this.triggerGlobalCooldown();
+      return true;
+   }
+
+   private castHemorrhage(): boolean {
+      let energyCost = 45;
+      const improvedSSCostReduction = this.talents.improvedSinisterStrike * 2;
+      energyCost -= improvedSSCostReduction;
+
+      if (!this.spendEnergy(energyCost)) {
+         return false;
+      }
+
+      const {damage, isCrit} = this.damageCalculator.calculateHemorrhageDamage();
+      
+      this.handleComboPointGeneration(damage, isCrit);
+      this.addRogueDamage('Hemorrhage', damage, isCrit, 1);
+      this.triggerGlobalCooldown();
+      return true;
+   }
+
+   private handleComboPointGeneration(damage: number, isCrit: boolean): void {
+      if (damage <= 0) {
+         return;
+      }
+
+      this.addComboPoint();
+
+      // Seal Fate: chance to gain extra combo point on crit
+      if (isCrit && this.talents.sealFate > 0) {
+         if (Math.random() < (this.talents.sealFate * 0.2)) {
+            this.addComboPoint();
+         }
+      }
+
+      // Relentless Strikes: chance to restore energy on 5 combo points
+      if (this.talents.relentlessStrikes > 0 && this.state.comboPoints >= 5) {
+         if (Math.random() < (this.talents.relentlessStrikes * 0.2)) {
+            this.addEnergy(25);
+         }
+      }
+   }
+
    private handleAutoAttacks(): void {
       super.processAutoAttacks(
          (damage, isCrit) => {
@@ -124,81 +221,33 @@ export class RogueSimulator extends MeleeSimulator {
          return;
       }
 
+      // At 5 combo points: spend on finisher
       if (this.state.comboPoints === 5) {
-         if (!this.state.sliceAndDiceActive ||
-            this.state.sliceAndDiceExpiry - this.state.currentTime < this.rotation.refreshSndSecondsBeforeExpiry) {
-            if (this.spendEnergy(25)) {
-               const cp = this.spendComboPoints();
-               const baseDuration = 9 + (cp * 3);
-               const improvedSndBonus = this.talents.improvedSliceAndDice * 0.15;
-               const duration = baseDuration * (1 + improvedSndBonus);
-
-               this.state.sliceAndDiceActive = true;
-               this.state.sliceAndDiceExpiry = this.state.currentTime + duration;
-               this.triggerGlobalCooldown();
-               return;
-            }
+         // Refresh Slice and Dice if needed
+         if (this.shouldRefreshSliceAndDice()) {
+            this.castSliceAndDice();
          } else {
-            if (this.spendEnergy(35)) {
-               const cp = this.spendComboPoints();
-               const damage = this.damageCalculator.calculateEviscerateDamage(cp);
-               const isCrit = damage > 0 && this.damageCalculator.getAttackTable().rollCrit();
-               this.addDamage('Eviscerate', damage, isCrit);
-               this.triggerGlobalCooldown();
-               return;
-            }
+            // Use Eviscerate for damage
+            this.castEviscerate();
+         }
+      } else {
+         // Build combo points
+         if (this.talents.hemorrhage) {
+            this.castHemorrhage();
+         } else if (this.stats.mainHandWeapon.type === WeaponType.Dagger) {
+            this.castBackstab();
+         } else {
+            this.castSinisterStrike();
          }
       }
+   }
 
-      if (this.state.comboPoints < 5) {
-         let energyCost = 45;
-         const improvedSSCostReduction = this.talents.improvedSinisterStrike * 2;
-         energyCost -= improvedSSCostReduction;
-
-         if (this.spendEnergy(energyCost)) {
-            let abilityName = 'Sinister Strike';
-            let damage = 0;
-
-            if (this.talents.hemorrhage &&
-               this.stats.mainHandWeapon.type === WeaponType.Dagger) {
-               abilityName = 'Hemorrhage';
-               damage = this.damageCalculator.calculateHemorrhageDamage();
-            } else if (this.stats.mainHandWeapon.type === WeaponType.Dagger) {
-               abilityName = 'Backstab';
-               energyCost = 60;
-               if (this.state.energy + energyCost >= 60) {
-                  damage = this.damageCalculator.calculateBackstabDamage();
-               } else {
-                  damage = this.damageCalculator.calculateSinisterStrikeDamage();
-                  abilityName = 'Sinister Strike';
-               }
-            } else {
-               damage = this.damageCalculator.calculateSinisterStrikeDamage();
-            }
-
-            const isCrit = damage > 0 && this.damageCalculator.getAttackTable().rollCrit();
-
-            if (damage > 0) {
-               this.addComboPoint();
-
-               if (isCrit && this.talents.sealFate > 0) {
-                  if (Math.random() < (this.talents.sealFate * 0.2)) {
-                     this.addComboPoint();
-                  }
-               }
-
-               if (this.talents.relentlessStrikes > 0 && this.state.comboPoints >= 5) {
-                  if (Math.random() < (this.talents.relentlessStrikes * 0.2)) {
-                     this.addEnergy(25);
-                  }
-               }
-            }
-
-            this.addRogueDamage(abilityName, damage, isCrit, 1);
-            this.triggerGlobalCooldown();
-            return;
-         }
+   private shouldRefreshSliceAndDice(): boolean {
+      if (!this.state.sliceAndDiceActive) {
+         return true;
       }
+      const timeRemaining = this.state.sliceAndDiceExpiry - this.state.currentTime;
+      return timeRemaining < this.rotation.refreshSndSecondsAhead5Combo;
    }
 
    private updateBuffs(): void {

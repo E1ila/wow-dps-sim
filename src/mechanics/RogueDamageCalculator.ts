@@ -14,7 +14,7 @@ export class RogueDamageCalculator extends MeleeDamageCalculator {
       return this.talents.dualWieldSpecialization * 0.05;
    }
 
-   calculateSinisterStrikeDamage(): number {
+   calculateSinisterStrikeDamage(): { damage: number; isCrit: boolean } {
       const weapon = this.stats.mainHandWeapon;
       const weaponDamage = this.getWeaponDamage(weapon);
 
@@ -30,12 +30,23 @@ export class RogueDamageCalculator extends MeleeDamageCalculator {
          damage *= (1 + (this.talents.lethality * 0.06));
       }
 
+      // Roll attack table for miss/dodge/hit/crit
+      const attackResult = this.attackTable.roll(true);
+
+      if (attackResult.damageModifier === 0) {
+         return { damage: 0, isCrit: false };
+      }
+
+      damage *= attackResult.damageModifier;
       damage = this.applyArmorReduction(damage);
 
-      return Math.floor(damage);
+      return {
+         damage: Math.floor(damage),
+         isCrit: attackResult.result === 'Crit'
+      };
    }
 
-   calculateBackstabDamage(): number {
+   calculateBackstabDamage(): { damage: number; isCrit: boolean } {
       const weapon = this.stats.mainHandWeapon;
       const weaponDamage = this.getWeaponDamage(weapon);
 
@@ -55,12 +66,23 @@ export class RogueDamageCalculator extends MeleeDamageCalculator {
          damage *= (1 + (this.talents.daggerSpecialization * 0.01));
       }
 
+      // Roll attack table for miss/dodge/hit/crit
+      const attackResult = this.attackTable.roll(true);
+
+      if (attackResult.damageModifier === 0) {
+         return { damage: 0, isCrit: false };
+      }
+
+      damage *= attackResult.damageModifier;
       damage = this.applyArmorReduction(damage);
 
-      return Math.floor(damage);
+      return {
+         damage: Math.floor(damage),
+         isCrit: attackResult.result === 'Crit'
+      };
    }
 
-   calculateHemorrhageDamage(): number {
+   calculateHemorrhageDamage(): { damage: number; isCrit: boolean } {
       const weapon = this.stats.mainHandWeapon;
       const weaponDamage = this.getWeaponDamage(weapon);
 
@@ -76,12 +98,23 @@ export class RogueDamageCalculator extends MeleeDamageCalculator {
          damage *= (1 + (this.talents.daggerSpecialization * 0.01));
       }
 
+      // Roll attack table for miss/dodge/hit/crit
+      const attackResult = this.attackTable.roll(true);
+
+      if (attackResult.damageModifier === 0) {
+         return { damage: 0, isCrit: false };
+      }
+
+      damage *= attackResult.damageModifier;
       damage = this.applyArmorReduction(damage);
 
-      return Math.floor(damage);
+      return {
+         damage: Math.floor(damage),
+         isCrit: attackResult.result === 'Crit'
+      };
    }
 
-   calculateEviscerateDamage(comboPoints: number): number {
+   calculateEviscerateDamage(comboPoints: number): { damage: number; isCrit: boolean } {
       const damagePerCP = [0, 223, 325, 427, 529, 631];
       const baseDamage = damagePerCP[comboPoints] || 0;
 
@@ -99,8 +132,19 @@ export class RogueDamageCalculator extends MeleeDamageCalculator {
          damage *= (1 + (this.talents.lethality * 0.06));
       }
 
+      // Roll attack table for miss/dodge/hit/crit
+      const attackResult = this.attackTable.roll(true);
+
+      if (attackResult.damageModifier === 0) {
+         return { damage: 0, isCrit: false };
+      }
+
+      damage *= attackResult.damageModifier;
       damage = this.applyArmorReduction(damage);
 
-      return Math.floor(damage);
+      return {
+         damage: Math.floor(damage),
+         isCrit: attackResult.result === 'Crit'
+      };
    }
 }
