@@ -1,5 +1,9 @@
 import {AttackResult, AttackTableResult, CharacterStats, SimulationConfig} from '../types';
 
+/**
+ * WoW Classic (Era) Attack Table Mechanics
+ * based on https://bookdown.org/marrowwar/marrow_compendium/mechanics.html
+ */
 export class AttackTable {
    private readonly missChance: number;
    private readonly dodgeChance: number;

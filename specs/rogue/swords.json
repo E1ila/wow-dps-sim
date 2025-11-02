@@ -2,6 +2,9 @@
     "name": "Combat Swords",
     "class": "rogue",
     "description": "Standard combat swords spec for PvE",
+    "rotation": {
+        "refreshSndSecondsBeforeExpiry": 3
+    },
     "talents": {
         "malice": 5,
         "murder": 2,

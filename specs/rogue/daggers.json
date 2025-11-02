@@ -2,6 +2,9 @@
     "name": "Seal Fate Daggers",
     "class": "rogue",
     "description": "Standard Seal Fate dagger spec for PvE",
+    "rotation": {
+        "refreshSndSecondsBeforeExpiry": 3
+    },
     "talents": {
         "malice": 5,
         "murder": 2,

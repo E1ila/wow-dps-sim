@@ -59,6 +59,14 @@ export interface WarriorTalents {
    protectionTree: Record<string, number>;
 }
 
+export interface RogueRotation {
+   refreshSndSecondsBeforeExpiry: number;
+}
+
+export interface WarriorRotation {
+   // Placeholder for warrior rotation config
+}
+
 export interface SimulationState {
    currentTime: number;
    targetHealth: number;

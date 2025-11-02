@@ -2,6 +2,7 @@
     "name": "Fury DPS",
     "class": "warrior",
     "description": "Standard fury warrior spec for PvE (NOT IMPLEMENTED)",
+    "rotation": {},
     "talents": {
         "armsTree": {
             "deflection": 5,

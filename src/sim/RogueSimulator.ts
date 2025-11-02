@@ -1,6 +1,7 @@
 import {
    CharacterStats,
    RogueTalents,
+   RogueRotation,
    SimulationConfig,
    RogueSimulationState,
    SimulationResult,
@@ -11,20 +12,38 @@ import {
 import {RogueDamageCalculator} from '../mechanics/RogueDamageCalculator';
 import {MeleeSimulator} from './MeleeSimulator';
 
+const DEFAULT_DAGGERS_ROTATION: RogueRotation = {
+   refreshSndSecondsBeforeExpiry: 3,
+};
+
+const DEFAULT_SWORDS_ROTATION: RogueRotation = {
+   refreshSndSecondsBeforeExpiry: 3,
+};
+
 export class RogueSimulator extends MeleeSimulator {
    protected override state: RogueSimulationState;
    protected override damageCalculator: RogueDamageCalculator;
    protected override events: RogueDamageEvent[] = [];
    protected damageBreakdown: Map<string, number> = new Map();
+   protected rotation: RogueRotation;
 
    constructor(
       stats: CharacterStats,
       config: SimulationConfig,
       protected talents: RogueTalents,
+      rotation?: RogueRotation,
    ) {
       super(stats, config);
       this.damageCalculator = new RogueDamageCalculator(stats, config, talents);
       this.state = this.initializeState();
+      
+      if (rotation) {
+         this.rotation = rotation;
+      } else {
+         // Choose default rotation based on weapon type
+         const isDagger = stats.mainHandWeapon.type === WeaponType.Dagger;
+         this.rotation = isDagger ? DEFAULT_DAGGERS_ROTATION : DEFAULT_SWORDS_ROTATION;
+      }
    }
 
    protected initializeState(): RogueSimulationState {
@@ -107,7 +126,7 @@ export class RogueSimulator extends MeleeSimulator {
 
       if (this.state.comboPoints === 5) {
          if (!this.state.sliceAndDiceActive ||
-            this.state.sliceAndDiceExpiry - this.state.currentTime < 3) {
+            this.state.sliceAndDiceExpiry - this.state.currentTime < this.rotation.refreshSndSecondsBeforeExpiry) {
             if (this.spendEnergy(25)) {
                const cp = this.spendComboPoints();
                const baseDuration = 9 + (cp * 3);

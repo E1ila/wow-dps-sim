@@ -1,5 +1,5 @@
 import {Command} from 'commander';
-import {CharacterStats, CharacterClass, RogueTalents, WarriorTalents, SimulationConfig, WeaponType} from './types';
+import {CharacterStats, CharacterClass, RogueTalents, WarriorTalents, RogueRotation, SimulationConfig, WeaponType} from './types';
 import {WarriorSimulator} from './sim/WarriorSimulator';
 import {BaseSimulator} from './sim/BaseSimulator';
 import {SpecLoader} from './SpecLoader';
@@ -121,7 +121,12 @@ let simulator: BaseSimulator;
 
 switch (characterClass) {
    case CharacterClass.Rogue:
-      simulator = new RogueSimulator(stats, config, spec.talents as RogueTalents);
+      simulator = new RogueSimulator(
+         stats, 
+         config, 
+         spec.talents as RogueTalents,
+         spec.rotation as RogueRotation
+      );
       break;
 
    case CharacterClass.Warrior:
