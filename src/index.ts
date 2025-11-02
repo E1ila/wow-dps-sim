@@ -1,9 +1,9 @@
 import {Command} from 'commander';
-import {CharacterStats, CharacterClass, RogueTalents, WarriorTalents, SimulationConfig, WeaponType} from './types.js';
-import {RogueSimulator} from './sim/RogueSimulator';
+import {CharacterStats, CharacterClass, RogueTalents, WarriorTalents, SimulationConfig, WeaponType} from './types';
 import {WarriorSimulator} from './sim/WarriorSimulator';
 import {BaseSimulator} from './sim/BaseSimulator';
 import {SpecLoader} from './SpecLoader';
+import {RogueSimulator} from "./sim/RogueSimulator";
 
 const program = new Command();
 

@@ -2,7 +2,7 @@ import {
    CharacterStats,
    RogueTalents,
    SimulationConfig,
-   SimulationState,
+   RogueSimulationState,
    SimulationResult,
    DamageEvent,
    WeaponType,
@@ -11,7 +11,7 @@ import {DamageCalculator} from '../mechanics/DamageCalculator';
 import {BaseSimulator} from './BaseSimulator';
 
 export class RogueSimulator extends BaseSimulator {
-   private state: SimulationState;
+   private state: RogueSimulationState;
    private damageCalculator: DamageCalculator;
    private events: DamageEvent[] = [];
    private damageBreakdown: Map<string, number> = new Map();
@@ -26,7 +26,7 @@ export class RogueSimulator extends BaseSimulator {
       this.state = this.initializeState();
    }
 
-   private initializeState(): SimulationState {
+   private initializeState(): RogueSimulationState {
       return {
          currentTime: 0,
          energy: 100,

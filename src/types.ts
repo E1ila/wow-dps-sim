@@ -61,18 +61,21 @@ export interface WarriorTalents {
 
 export interface SimulationState {
    currentTime: number;
-   energy: number;
-   comboPoints: number;
    targetHealth: number;
+   globalCooldownExpiry: number;
+}
 
-   sliceAndDiceActive: boolean;
-   sliceAndDiceExpiry: number;
-
+export interface MeleeSimulationState extends SimulationState {
    mainHandNextSwing: number;
    offHandNextSwing: number;
+}
 
-   globalCooldownExpiry: number;
+export interface RogueSimulationState extends MeleeSimulationState {
+   energy: number;
+   comboPoints: number;
    nextEnergyTick: number;
+   sliceAndDiceActive: boolean;
+   sliceAndDiceExpiry: number;
 }
 
 export interface SimulationConfig {
