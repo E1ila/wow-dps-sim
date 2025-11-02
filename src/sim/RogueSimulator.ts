@@ -8,20 +8,20 @@ import {
    WeaponType,
 } from '../types';
 import {DamageCalculator} from '../mechanics/DamageCalculator';
-import {BaseSimulator} from './BaseSimulator';
+import {MeleeSimulator} from './MeleeSimulator';
 
-export class RogueSimulator extends BaseSimulator {
-   private state: RogueSimulationState;
-   private damageCalculator: DamageCalculator;
-   private events: DamageEvent[] = [];
-   private damageBreakdown: Map<string, number> = new Map();
+export class RogueSimulator extends MeleeSimulator {
+   protected override state: RogueSimulationState;
+   protected damageCalculator: DamageCalculator;
+   protected events: DamageEvent[] = [];
+   protected damageBreakdown: Map<string, number> = new Map();
 
    constructor(
-      private stats: CharacterStats,
+      stats: CharacterStats,
       private talents: RogueTalents,
-      private config: SimulationConfig
+      config: SimulationConfig
    ) {
-      super();
+      super(stats, config);
       this.damageCalculator = new DamageCalculator(stats, talents, config);
       this.state = this.initializeState();
    }
@@ -84,38 +84,36 @@ export class RogueSimulator extends BaseSimulator {
       this.state.globalCooldownExpiry = this.state.currentTime + 1.0;
    }
 
+   protected calculateMainHandDamage(): { damage: number; isCrit: boolean } {
+      const damage = this.damageCalculator.calculateAutoAttackDamage(true);
+      const isCrit = damage > 0 && this.damageCalculator.getAttackTable().rollCrit();
+      return {damage, isCrit};
+   }
+
+   protected calculateOffHandDamage(): { damage: number; isCrit: boolean } {
+      const damage = this.damageCalculator.calculateAutoAttackDamage(false);
+      const isCrit = damage > 0 && this.damageCalculator.getAttackTable().rollCrit();
+      return {damage, isCrit};
+   }
+
    private canCastAbility(): boolean {
       return this.state.currentTime >= this.state.globalCooldownExpiry;
    }
 
-   private processAutoAttacks(): void {
-      if (this.state.currentTime >= this.state.mainHandNextSwing) {
-         const damage = this.damageCalculator.calculateAutoAttackDamage(true);
-         const isCrit = damage > 0 && this.damageCalculator.getAttackTable().rollCrit();
-
-         if (damage > 0) {
+   private handleAutoAttacks(): void {
+      super.processAutoAttacks(
+         (damage, isCrit) => {
             if (this.talents.swordSpecialization > 0 &&
                this.stats.mainHandWeapon.type === WeaponType.Sword &&
                Math.random() < (this.talents.swordSpecialization * 0.01)) {
                this.addDamage('Extra Attack (Sword Spec)', damage, isCrit);
             }
-
             this.addDamage('Main Hand', damage, isCrit);
-         }
-
-         this.state.mainHandNextSwing = this.state.currentTime + this.stats.mainHandWeapon.speed;
-      }
-
-      if (this.stats.offHandWeapon && this.state.currentTime >= this.state.offHandNextSwing) {
-         const damage = this.damageCalculator.calculateAutoAttackDamage(false);
-         const isCrit = damage > 0 && this.damageCalculator.getAttackTable().rollCrit();
-
-         if (damage > 0) {
+         },
+         (damage, isCrit) => {
             this.addDamage('Off Hand', damage, isCrit);
          }
-
-         this.state.offHandNextSwing = this.state.currentTime + this.stats.offHandWeapon.speed;
-      }
+      );
    }
 
    private executeRotation(): void {
@@ -219,7 +217,7 @@ export class RogueSimulator extends BaseSimulator {
             this.state.nextEnergyTick += 2.0;
          }
 
-         this.processAutoAttacks();
+         this.handleAutoAttacks();
 
          this.updateBuffs();
 

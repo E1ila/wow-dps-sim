@@ -1,4 +1,4 @@
-import {SimulationResult} from '../types';
+import {RogueSimulationState, SimulationResult, SimulationState} from '../types';
 
 export interface Simulator {
    simulate(): SimulationResult;
@@ -7,6 +7,8 @@ export interface Simulator {
 }
 
 export abstract class BaseSimulator implements Simulator {
+   protected abstract state: SimulationState;
+
    abstract simulate(): SimulationResult;
 
    abstract runMultipleIterations(): SimulationResult[];

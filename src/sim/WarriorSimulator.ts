@@ -1,13 +1,23 @@
-import {CharacterStats, SimulationConfig, SimulationResult, WarriorTalents} from '../types';
-import {BaseSimulator} from './BaseSimulator';
+import {CharacterStats, SimulationConfig, SimulationResult, WarriorTalents, MeleeSimulationState} from '../types';
+import {MeleeSimulator} from './MeleeSimulator';
 
-export class WarriorSimulator extends BaseSimulator {
+export class WarriorSimulator extends MeleeSimulator {
+   protected state!: MeleeSimulationState;
+
    constructor(
-      private stats: CharacterStats,
+      stats: CharacterStats,
       private talents: WarriorTalents,
-      private config: SimulationConfig
+      config: SimulationConfig
    ) {
-      super();
+      super(stats, config);
+   }
+
+   protected calculateMainHandDamage(): { damage: number; isCrit: boolean } {
+      throw new Error('Warrior simulator is not yet implemented.');
+   }
+
+   protected calculateOffHandDamage(): { damage: number; isCrit: boolean } {
+      throw new Error('Warrior simulator is not yet implemented.');
    }
 
    simulate(): SimulationResult {
