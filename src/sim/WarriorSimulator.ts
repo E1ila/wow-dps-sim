@@ -1,4 +1,4 @@
-import { CharacterStats, SimulationConfig, SimulationResult, WarriorTalents } from './types.js';
+import { CharacterStats, SimulationConfig, SimulationResult, WarriorTalents } from '../types';
 import { BaseSimulator } from './BaseSimulator';
 
 export class WarriorSimulator extends BaseSimulator {

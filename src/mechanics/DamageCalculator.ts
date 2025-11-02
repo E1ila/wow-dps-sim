@@ -1,4 +1,4 @@
-import { CharacterStats, RogueTalents, Weapon, SimulationConfig } from './types.js';
+import { CharacterStats, RogueTalents, Weapon, SimulationConfig } from '../types';
 import { AttackTable } from './AttackTable';
 
 export class DamageCalculator {

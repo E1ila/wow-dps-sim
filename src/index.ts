@@ -1,8 +1,8 @@
 import { Command } from 'commander';
 import { CharacterStats, CharacterClass, RogueTalents, WarriorTalents, SimulationConfig, WeaponType } from './types.js';
-import { RogueSimulator } from './RogueSimulator';
-import { WarriorSimulator } from './WarriorSimulator';
-import { BaseSimulator } from './BaseSimulator';
+import { RogueSimulator } from './sim/RogueSimulator';
+import { WarriorSimulator } from './sim/WarriorSimulator';
+import { BaseSimulator } from './sim/BaseSimulator';
 import { SpecLoader } from './SpecLoader';
 
 const program = new Command();

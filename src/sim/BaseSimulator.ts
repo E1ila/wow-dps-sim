@@ -1,4 +1,4 @@
-import { SimulationResult } from './types.js';
+import { SimulationResult } from '../types';
 
 export interface Simulator {
   simulate(): SimulationResult;

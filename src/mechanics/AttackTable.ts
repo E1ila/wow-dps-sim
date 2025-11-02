@@ -1,4 +1,4 @@
-import { AttackResult, AttackTableResult, CharacterStats, SimulationConfig } from './types.js';
+import { AttackResult, AttackTableResult, CharacterStats, SimulationConfig } from '../types';
 
 export class AttackTable {
   private readonly missChance: number;

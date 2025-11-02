@@ -1,5 +1,5 @@
 import { CharacterStats, CharacterClass, SimulationConfig, WeaponType } from './types.js';
-import { AttackTable } from './AttackTable';
+import { AttackTable } from './mechanics/AttackTable';
 
 console.log('=== Attack Table Mechanics Verification ===\n');
 

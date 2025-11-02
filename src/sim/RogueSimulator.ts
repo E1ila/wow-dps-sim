@@ -6,8 +6,8 @@ import {
   SimulationResult,
   DamageEvent,
   WeaponType,
-} from './types.js';
-import { DamageCalculator } from './DamageCalculator';
+} from '../types';
+import { DamageCalculator } from '../mechanics/DamageCalculator';
 import { BaseSimulator } from './BaseSimulator';
 
 export class RogueSimulator extends BaseSimulator {
