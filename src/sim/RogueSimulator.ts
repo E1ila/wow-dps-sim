@@ -93,6 +93,15 @@ export class RogueSimulator extends MeleeSimulator {
       return cp;
    }
 
+   private handleRuthlessness(): void {
+      if (this.talents.ruthlessness > 0) {
+         const chance = this.talents.ruthlessness * 0.2; // 20% per rank
+         if (Math.random() < chance) {
+            this.addComboPoint();
+         }
+      }
+   }
+
    private castSliceAndDice(): boolean {
       if (!this.spendEnergy(25)) {
          return false;
@@ -106,6 +115,7 @@ export class RogueSimulator extends MeleeSimulator {
 
       this.state.sliceAndDiceActive = true;
       this.state.sliceAndDiceExpiry = this.state.currentTime + durationMs;
+      this.handleRuthlessness();
       this.printBuff('SnD', durationMs);
       this.triggerGlobalCooldown();
       return true;
@@ -118,6 +128,7 @@ export class RogueSimulator extends MeleeSimulator {
 
       const cp = this.spendComboPoints();
       const result = this.damageCalculator.calculateEviscerateDamage(cp);
+      this.handleRuthlessness();
       this.addDamage('EVIS', result);
       this.triggerGlobalCooldown();
       return true;
