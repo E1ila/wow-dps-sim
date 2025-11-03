@@ -1,15 +1,15 @@
 import {
    AttackResult,
    AttackType,
+   c,
    CharacterStats,
+   RogueBuffEvent,
+   RogueDamageEvent,
    RogueTalents,
    RogueRotation,
    SimulationConfig,
    RogueSimulationState,
-   SimulationResult,
-   DamageEvent,
-   RogueDamageEvent,
-   WeaponType, c,
+   WeaponType,
 } from '../types';
 import {RogueDamageCalculator} from '../mechanics/RogueDamageCalculator';
 import {MeleeSimulator} from './MeleeSimulator';
@@ -25,7 +25,7 @@ const DEFAULT_SWORDS_ROTATION: RogueRotation = {
 export class RogueSimulator extends MeleeSimulator {
    protected override state: RogueSimulationState;
    protected override damageCalculator: RogueDamageCalculator;
-   protected override events: RogueDamageEvent[] = [];
+   protected override events: (RogueDamageEvent | RogueBuffEvent)[] = [];
    protected damageBreakdown: Map<string, number> = new Map();
    protected rotation: RogueRotation;
 
@@ -70,8 +70,8 @@ export class RogueSimulator extends MeleeSimulator {
       });
    }
 
-   protected printRogueBuff(buffName: string, duration: number, comboPointsUsed: number): void {
-      super.printBuff(buffName, duration, '○'.repeat(comboPointsUsed));
+   protected addRogueBuff(buffName: string, duration: number, comboPointsUsed: number): void {
+      super.addBuff(buffName, duration, { comboPointsUsed });
    }
 
    private addEnergy(amount: number): void {
@@ -121,7 +121,7 @@ export class RogueSimulator extends MeleeSimulator {
       this.state.sliceAndDiceActive = true;
       this.state.sliceAndDiceExpiry = this.state.currentTime + durationMs;
       this.handleRuthlessness();
-      this.printRogueBuff('SnD', durationMs, cp);
+      this.addRogueBuff('SnD', durationMs, cp);
       this.triggerGlobalCooldown();
       return true;
    }
@@ -266,7 +266,7 @@ export class RogueSimulator extends MeleeSimulator {
       }
    }
 
-   protected override getPrintEventExtra(event: RogueDamageEvent): string {
+   protected override getPrintDamageEventExtra(event: RogueDamageEvent): string {
       let extra = '';
       if (event.comboPointsSpent > 0) {
          extra += ` ${'○'.repeat(event.comboPointsSpent)}`;
@@ -275,6 +275,13 @@ export class RogueSimulator extends MeleeSimulator {
          extra += ` ${c.red}${'●'.repeat(event.comboPointsGained)}${c.reset}`;
       }
       return extra;
+   }
+
+   protected override getPrintBuffEventExtra(event: RogueBuffEvent): string {
+      if (event.comboPointsUsed > 0) {
+         return ` ${'○'.repeat(event.comboPointsUsed)}`;
+      }
+      return '';
    }
 
    protected getStateText(): string {

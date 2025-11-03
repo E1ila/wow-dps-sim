@@ -106,6 +106,7 @@ export interface SimulationConfig {
 export interface DamageEvent extends AttackResult {
    timestamp: number;
    ability: string;
+   eventType: 'damage';
 }
 
 export interface RogueDamageEvent extends DamageEvent {
@@ -113,10 +114,23 @@ export interface RogueDamageEvent extends DamageEvent {
    comboPointsSpent: number;
 }
 
+export interface BuffEvent {
+   timestamp: number;
+   buffName: string;
+   duration: number;
+   eventType: 'buff';
+}
+
+export interface RogueBuffEvent extends BuffEvent {
+   comboPointsUsed: number;
+}
+
+export type SimulationEvent = DamageEvent | BuffEvent;
+
 export interface SimulationResult {
    totalDamage: number;
    dps: number;
-   events: DamageEvent[];
+   events: SimulationEvent[];
    damageBreakdown: Map<string, number>;
 }
 

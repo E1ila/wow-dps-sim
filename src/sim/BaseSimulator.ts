@@ -1,11 +1,12 @@
 import {
    AttackResult,
    AttackType,
+   BuffEvent,
    c,
    CharacterStats,
-   DamageEvent, RogueDamageEvent,
-   RogueSimulationState,
+   DamageEvent,
    SimulationConfig,
+   SimulationEvent,
    SimulationResult,
    SimulationState
 } from '../types';
@@ -23,7 +24,7 @@ export interface Simulator {
 export abstract class BaseSimulator implements Simulator {
    protected abstract state: SimulationState;
    protected abstract damageCalculator: DamageCalculator;
-   protected events: DamageEvent[] = [];
+   protected events: SimulationEvent[] = [];
    protected damageBreakdown: Map<string, number> = new Map();
 
    protected constructor(
@@ -48,6 +49,7 @@ export abstract class BaseSimulator implements Simulator {
          ...attackResult,
          timestamp: this.state.currentTime,
          ability,
+         eventType: 'damage' as const,
          whiteDamage: ['MH', 'OH'].includes(ability),
          ...extra,
       });
@@ -56,6 +58,16 @@ export abstract class BaseSimulator implements Simulator {
          const currentDamage = this.damageBreakdown.get(ability) || 0;
          this.damageBreakdown.set(ability, currentDamage + attackResult.amount);
       }
+   }
+
+   protected addBuff(buffName: string, duration: number, extra?: any): void {
+      this.events.push({
+         timestamp: this.state.currentTime,
+         buffName,
+         duration,
+         eventType: 'buff' as const,
+         ...extra,
+      });
    }
 
    protected triggerGlobalCooldown(): void {
@@ -185,32 +197,33 @@ export abstract class BaseSimulator implements Simulator {
       return color + '█'.repeat(filled) + reset + '░'.repeat(empty);
    }
 
-   protected getPrintEventExtra(event: DamageEvent): string {
+   protected getPrintDamageEventExtra(event: DamageEvent): string {
       return '';
    }
 
-   protected printBuff(buffName: string, duration: number, extra?: string): void {
-      const timestampSeconds = this.state.currentTime / 1000;
-      const timestamp = `${c.gray}[${timestampSeconds.toFixed(1)}s]${c.reset}`;
-      const durationStr = duration ? ` (${(duration / 1000).toFixed(1)}s)` : '';
-      const extraStr = extra ? ` ${extra}` : '';
-      console.log(`${timestamp} ${c.yellow}${buffName}${c.reset}${extraStr}${durationStr}`);
+   protected getPrintBuffEventExtra(event: BuffEvent): string {
+      return '';
    }
 
-   protected printEvent(event: DamageEvent): void {
+   protected printEvent(event: SimulationEvent): void {
       const timestampSeconds = event.timestamp / 1000;
-      const extra = this.getPrintEventExtra(event);
-
-      const isWhiteDamage = event.ability === 'MH' || event.ability === 'OH' || event.ability === 'EXTRA';
-      const abilityColor = isWhiteDamage ? c.white : c.yellow;
-
       const timestamp = `${c.gray}[${timestampSeconds.toFixed(1)}s]${c.reset}`;
 
-      if (event.amount === 0) {
-         console.log(`${timestamp} ${event.ability} ${c.red}${event.type.toUpperCase()}${c.reset}${extra}`);
+      if (event.eventType === 'buff') {
+         const extra = this.getPrintBuffEventExtra(event);
+         const durationStr = ` (${(event.duration / 1000).toFixed(1)}s)`;
+         console.log(`${timestamp} ${c.yellow}${event.buffName}${c.reset}${extra}${durationStr}`);
       } else {
-         const critStr = event.type === AttackType.Crit ? ' (crit)' : '';
-         console.log(`${timestamp} ${event.ability} ${abilityColor}${event.amount}${c.reset}${critStr}${extra}`);
+         const extra = this.getPrintDamageEventExtra(event);
+         const isWhiteDamage = event.ability === 'MH' || event.ability === 'OH' || event.ability === 'EXTRA';
+         const abilityColor = isWhiteDamage ? c.white : c.yellow;
+
+         if (event.amount === 0) {
+            console.log(`${timestamp} ${event.ability} ${c.red}${event.type.toUpperCase()}${c.reset}${extra}`);
+         } else {
+            const critStr = event.type === AttackType.Crit ? ' (crit)' : '';
+            console.log(`${timestamp} ${event.ability} ${abilityColor}${event.amount}${c.reset}${critStr}${extra}`);
+         }
       }
    }
 
