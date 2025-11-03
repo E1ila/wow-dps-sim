@@ -55,6 +55,7 @@ const baseTalents: RogueTalents = {
    improvedBackstab: 0,
    hemorrhage: false,
    precision: 0,
+   weaponExpertise: 0,
 };
 
 describe('Rogue Talents', () => {
@@ -595,6 +596,180 @@ describe('Rogue Talents', () => {
 
             expect(observedRate).toBeGreaterThan(expectedRate - 0.05);
             expect(observedRate).toBeLessThan(expectedRate + 0.05);
+         });
+      });
+   });
+
+   describe('Weapon Expertise', () => {
+
+      it('should increase weapon skill by 3 per point for daggers', () => {
+         const testCases = [
+            {weaponExpertise: 0, expectedWeaponSkill: 300},
+            {weaponExpertise: 1, expectedWeaponSkill: 303},
+            {weaponExpertise: 2, expectedWeaponSkill: 305},
+         ];
+
+         testCases.forEach(({weaponExpertise, expectedWeaponSkill}) => {
+            const talents: RogueTalents = {
+               ...baseTalents,
+               weaponExpertise,
+            };
+
+            const simulator = new RogueSimulator(baseStats, config, talents);
+
+            expect(simulator.damageCalculator.weaponSkill).toBe(expectedWeaponSkill);
+         });
+      });
+
+      it('should increase weapon skill by 3 per point for swords', () => {
+         const swordStats: GearStats = {
+            ...baseStats,
+            mainHandWeapon: {
+               minDamage: 76,
+               maxDamage: 142,
+               speed: 1.7,
+               type: WeaponType.Sword,
+            },
+         };
+
+         const testCases = [
+            {weaponExpertise: 0, expectedWeaponSkill: 300},
+            {weaponExpertise: 1, expectedWeaponSkill: 303},
+            {weaponExpertise: 2, expectedWeaponSkill: 305},
+         ];
+
+         testCases.forEach(({weaponExpertise, expectedWeaponSkill}) => {
+            const talents: RogueTalents = {
+               ...baseTalents,
+               weaponExpertise,
+            };
+
+            const simulator = new RogueSimulator(swordStats, config, talents);
+
+            expect(simulator.damageCalculator.weaponSkill).toBe(expectedWeaponSkill);
+         });
+      });
+
+      it('should NOT increase weapon skill for maces', () => {
+         const maceStats: GearStats = {
+            ...baseStats,
+            mainHandWeapon: {
+               minDamage: 76,
+               maxDamage: 142,
+               speed: 1.7,
+               type: WeaponType.Mace,
+            },
+         };
+
+         const talents: RogueTalents = {
+            ...baseTalents,
+            weaponExpertise: 5,
+         };
+
+         const simulator = new RogueSimulator(maceStats, config, talents);
+
+         expect(simulator.damageCalculator.weaponSkill).toBe(300);
+      });
+
+      it('should reduce miss rate with weapon expertise on daggers', () => {
+         const talents0: RogueTalents = {
+            ...baseTalents,
+            weaponExpertise: 0,
+         };
+
+         const talents5: RogueTalents = {
+            ...baseTalents,
+            weaponExpertise: 5,
+         };
+
+         const testStats: GearStats = {
+            ...baseStats,
+            hitChance: 0,
+            weaponSkill: 300,
+         };
+
+         const simulator0 = new RogueSimulator(testStats, config, talents0);
+         const simulator5 = new RogueSimulator(testStats, config, talents5);
+         const attackTable0 = new AttackTable(simulator0.damageCalculator, config);
+         const attackTable5 = new AttackTable(simulator5.damageCalculator, config);
+
+         const numRolls = 100000;
+         let misses0 = 0;
+         let misses5 = 0;
+
+         for (let i = 0; i < numRolls; i++) {
+            const result0 = attackTable0.roll(true, baseStats.mainHandWeapon);
+            if (result0.type === AttackType.Miss) {
+               misses0++;
+            }
+
+            const result5 = attackTable5.roll(true, baseStats.mainHandWeapon);
+            if (result5.type === AttackType.Miss) {
+               misses5++;
+            }
+         }
+
+         const missRate0 = (misses0 / numRolls) * 100;
+         const missRate5 = (misses5 / numRolls) * 100;
+
+         expect(missRate5).toBeLessThan(missRate0);
+         expect(missRate0 - missRate5).toBeGreaterThan(0.5);
+      });
+
+      it('should affect AttackTable calculateMissChance() correctly', () => {
+         const testCases = [
+            {weaponExpertise: 0, expectedWeaponSkill: 300},
+            {weaponExpertise: 1, expectedWeaponSkill: 303},
+            {weaponExpertise: 2, expectedWeaponSkill: 305},
+         ];
+
+         testCases.forEach(({weaponExpertise, expectedWeaponSkill}) => {
+            const talents: RogueTalents = {
+               ...baseTalents,
+               weaponExpertise,
+            };
+
+            const testStats: GearStats = {
+               ...baseStats,
+               hitChance: 0,
+               weaponSkill: 300,
+            };
+
+            const simulator = new RogueSimulator(testStats, config, talents);
+            const attackTable = new AttackTable(simulator.damageCalculator, config);
+
+            expect(simulator.damageCalculator.weaponSkill).toBe(expectedWeaponSkill);
+
+            const targetDefense = config.targetLevel * 5;
+            const defenseSkillDiff = targetDefense - expectedWeaponSkill;
+
+            let expectedBaseMissChance: number;
+            if (defenseSkillDiff >= 11) {
+               expectedBaseMissChance = 0.05 + (defenseSkillDiff * 0.002);
+            } else {
+               expectedBaseMissChance = 0.05 + (defenseSkillDiff * 0.001);
+            }
+
+            let expectedMissChance = expectedBaseMissChance;
+            if (testStats.offHandWeapon !== undefined) {
+               expectedMissChance = (expectedMissChance * 0.8) + 0.2;
+            }
+
+            const numRolls = 100000;
+            let misses = 0;
+
+            for (let i = 0; i < numRolls; i++) {
+               const result = attackTable.roll(true, baseStats.mainHandWeapon);
+               if (result.type === AttackType.Miss) {
+                  misses++;
+               }
+            }
+
+            const observedMissRate = (misses / numRolls);
+            const expectedMissRate = expectedMissChance;
+
+            expect(observedMissRate).toBeGreaterThan(expectedMissRate - 0.01);
+            expect(observedMissRate).toBeLessThan(expectedMissRate + 0.01);
          });
       });
    });

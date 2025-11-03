@@ -18,6 +18,21 @@ export class RogueDamageCalculator extends MeleeDamageCalculator {
       return super.hitChance + (this.talents?.precision || 0);
    }
 
+   get weaponSkill(): number {
+      let baseSkill = super.weaponSkill;
+
+      if ((this.talents?.weaponExpertise || 0) > 0) {
+         const mainHandType = this.stats.mainHandWeapon.type;
+         if (mainHandType === WeaponType.Sword ||
+             mainHandType === WeaponType.Fist ||
+             mainHandType === WeaponType.Dagger) {
+            baseSkill += this.talents.weaponExpertise === 1 ? 3 : 5;
+         }
+      }
+
+      return baseSkill;
+   }
+
    critChance(weapon: Weapon): number {
       let critChance = super.critChance(weapon) + this.talents.malice;
       if (this.talents.daggerSpecialization > 0 && weapon.type === WeaponType.Dagger) {
@@ -60,11 +75,15 @@ export class RogueDamageCalculator extends MeleeDamageCalculator {
          multipliers.push(1 + (this.talents.lethality * 0.06));
       }
 
+      // Improved Backstab: +10% crit per point
+      const bonusCritChance = this.talents.improvedBackstab * 10;
+
       return this.calculateMeleeDamage({
          baseDamage,
          damageMultipliers: multipliers,
          isSpecialAttack: true,
          weapon,
+         bonusCritChance,
       });
    }
 

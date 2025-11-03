@@ -86,6 +86,7 @@ export interface RogueTalents {
    improvedBackstab: number;
    hemorrhage: boolean;
    precision: number;
+   weaponExpertise: number;
 }
 
 export interface WarriorTalents {

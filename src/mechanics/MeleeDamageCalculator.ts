@@ -8,6 +8,7 @@ interface MeleeDamageParams {
    isSpecialAttack: boolean;
    isOffhand?: boolean;
    weapon: Weapon;
+   bonusCritChance?: number;
 }
 
 export abstract class MeleeDamageCalculator extends DamageCalculator {
@@ -43,7 +44,7 @@ export abstract class MeleeDamageCalculator extends DamageCalculator {
    }
 
    protected calculateMeleeDamage(params: MeleeDamageParams): AttackResult {
-      const {baseDamage, damageMultipliers = [], isSpecialAttack, weapon} = params;
+      const {baseDamage, damageMultipliers = [], isSpecialAttack, weapon, bonusCritChance = 0} = params;
 
       let damage = baseDamage;
 
@@ -51,7 +52,7 @@ export abstract class MeleeDamageCalculator extends DamageCalculator {
          damage *= multiplier;
       }
 
-      const attackTableResult = this.attackTable.roll(isSpecialAttack, weapon);
+      const attackTableResult = this.attackTable.roll(isSpecialAttack, weapon, bonusCritChance);
 
       if (attackTableResult.amountModifier === 0) {
          return {
