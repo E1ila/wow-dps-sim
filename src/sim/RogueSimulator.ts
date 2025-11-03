@@ -4,6 +4,7 @@ import {
    Buffs,
    c,
    GearStats,
+   ProcEvent,
    RogueBuffEvent,
    RogueDamageEvent,
    RogueRotation,
@@ -28,7 +29,7 @@ const SLICE_N_DICE_IAS = 0.2; // 20% attack speed increase
 export class RogueSimulator extends MeleeSimulator {
    override state: RogueSimulationState;
    override damageCalculator: RogueDamageCalculator;
-   override events: (RogueDamageEvent | RogueBuffEvent)[] = [];
+   override events: (RogueDamageEvent | RogueBuffEvent | ProcEvent)[] = [];
    damageBreakdown: Map<string, number> = new Map();
    rotation: RogueRotation;
 
@@ -118,6 +119,7 @@ export class RogueSimulator extends MeleeSimulator {
       if (this.talents.ruthlessness > 0) {
          const chance = this.talents.ruthlessness * 0.2; // 20% per rank
          if (Math.random() < chance) {
+            this.addProc(`Ruthlessness ${c.red}●${c.reset}`);
             this.addComboPoint();
          }
       }

@@ -96,6 +96,14 @@ export abstract class BaseSimulator implements Simulator {
       });
    }
 
+   protected addProc(procName: string): void {
+      this.events.push({
+         timestamp: this.state.currentTime,
+         procName,
+         eventType: 'proc' as const,
+      });
+   }
+
    protected triggerGlobalCooldown(): void {
       this.state.globalCooldownExpiry = this.state.currentTime + 1000;
    }
@@ -284,6 +292,8 @@ export abstract class BaseSimulator implements Simulator {
          const extra = this.getPrintBuffEventExtra(event);
          const durationStr = ` (${(event.duration / 1000).toFixed(1)}s)`;
          console.log(`${timestamp} ${c.green}${event.buffName}${c.reset}${extra}${durationStr}`);
+      } else if (event.eventType === 'proc') {
+         console.log(`${timestamp} ${c.cyan}${event.procName}${c.reset}`);
       } else {
          const extra = this.getPrintDamageEventExtra(event);
          const isWhiteDamage = event.ability === 'MH' || event.ability === 'OH' || event.ability === 'EXTRA';

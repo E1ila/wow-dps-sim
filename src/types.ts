@@ -155,7 +155,13 @@ export interface RogueBuffEvent extends BuffEvent {
    comboPointsUsed: number;
 }
 
-export type SimulationEvent = DamageEvent | BuffEvent;
+export interface ProcEvent {
+   timestamp: number;
+   procName: string;
+   eventType: 'proc';
+}
+
+export type SimulationEvent = DamageEvent | BuffEvent | ProcEvent;
 
 export interface SimulationStatistics {
    critCount: number;
