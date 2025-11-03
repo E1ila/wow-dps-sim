@@ -2,6 +2,11 @@ import {BaseSimulator} from './BaseSimulator';
 import {AttackResult, MeleeSimulationState} from '../types';
 import {MeleeDamageCalculator} from "../mechanics/MeleeDamageCalculator";
 
+export enum MeleeAbility {
+   MainHand = 'MH',
+   OffHand = 'OH',
+}
+
 export abstract class MeleeSimulator extends BaseSimulator {
    protected abstract state: MeleeSimulationState;
    protected abstract damageCalculator: MeleeDamageCalculator;
