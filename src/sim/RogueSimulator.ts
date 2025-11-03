@@ -48,7 +48,7 @@ export class RogueSimulator extends MeleeSimulator {
    constructor(
       stats: GearStats,
       config: SimulationConfig,
-      protected talents: RogueTalents,
+      public talents: RogueTalents,
       rotation?: RogueRotation,
    ) {
       super(stats, config);
@@ -64,7 +64,7 @@ export class RogueSimulator extends MeleeSimulator {
       }
    }
 
-   protected initializeState(): RogueSimulationState {
+   initializeState(): RogueSimulationState {
       return {
          currentTime: 0,
          energy: 100,
@@ -78,27 +78,27 @@ export class RogueSimulator extends MeleeSimulator {
       };
    }
 
-   protected override addDamage(ability: string, attackResult: AttackResult, comboPointsGained: number = 0, comboPointsSpent: number = 0): void {
+   override addDamage(ability: string, attackResult: AttackResult, comboPointsGained: number = 0, comboPointsSpent: number = 0): void {
       super.addDamage(ability, attackResult, {
          comboPointsGained,
          comboPointsSpent,
       });
    }
 
-   protected addRogueBuff(buffName: string, duration: number, comboPointsUsed: number): void {
+   addRogueBuff(buffName: string, duration: number, comboPointsUsed: number): void {
       super.addBuff(buffName, duration, { comboPointsUsed });
       this.activateBuff(buffName, duration);
    }
 
-   private addEnergy(amount: number): void {
+   addEnergy(amount: number): void {
       this.state.energy = Math.min(100, this.state.energy + amount);
    }
 
-   protected getHasteMultiplier(): number {
+   getHasteMultiplier(): number {
       return this.isBuffActive(Buffs.SnD) ? 1 + SLICE_N_DICE_IAS : 1;
    }
 
-   private spendEnergy(amount: number): boolean {
+   spendEnergy(amount: number): boolean {
       if (this.state.energy >= amount) {
          this.state.energy -= amount;
          return true;
@@ -106,25 +106,25 @@ export class RogueSimulator extends MeleeSimulator {
       return false;
    }
 
-   private refundIfNeeded(result: AttackResult, energyCost: number): void {
+   refundIfNeeded(result: AttackResult, energyCost: number): void {
       if (result.type === AttackType.Miss || result.type === AttackType.Dodge) {
          this.addEnergy(energyCost * 0.8);
       }
    }
 
-   private addComboPoint(): void {
+   addComboPoint(): void {
       if (this.state.comboPoints < 5) {
          this.state.comboPoints++;
       }
    }
 
-   private spendComboPoints(): number {
+   spendComboPoints(): number {
       const cp = this.state.comboPoints;
       this.state.comboPoints = 0;
       return cp;
    }
 
-   private onFinishingMove(): void {
+   onFinishingMove(): void {
       if (this.talents.ruthlessness > 0) {
          const chance = this.talents.ruthlessness * 0.2; // 20% per rank
          if (Math.random() < chance) {
@@ -140,7 +140,7 @@ export class RogueSimulator extends MeleeSimulator {
       }
    }
 
-   private castSliceAndDice(): boolean {
+   castSliceAndDice(): boolean {
       if (!this.spendEnergy(25)) {
          return false;
       }
@@ -157,7 +157,7 @@ export class RogueSimulator extends MeleeSimulator {
       return true;
    }
 
-   private castEviscerate(): boolean {
+   castEviscerate(): boolean {
       if (!this.spendEnergy(35)) {
          return false;
       }
@@ -170,7 +170,7 @@ export class RogueSimulator extends MeleeSimulator {
       return true;
    }
 
-   private castSinisterStrike(): boolean {
+   castSinisterStrike(): boolean {
       let energyCost = 45;
       const improvedSSCostReduction = this.talents.improvedSinisterStrike * 2;
       energyCost -= improvedSSCostReduction;
@@ -188,7 +188,7 @@ export class RogueSimulator extends MeleeSimulator {
       return true;
    }
 
-   private castBackstab(): boolean {
+   castBackstab(): boolean {
       const energyCost = 60;
 
       if (!this.spendEnergy(energyCost)) {
@@ -204,7 +204,7 @@ export class RogueSimulator extends MeleeSimulator {
       return true;
    }
 
-   private castHemorrhage(): boolean {
+   castHemorrhage(): boolean {
       let energyCost = 45;
       const improvedSSCostReduction = this.talents.improvedSinisterStrike * 2;
       energyCost -= improvedSSCostReduction;
@@ -222,7 +222,7 @@ export class RogueSimulator extends MeleeSimulator {
       return true;
    }
 
-   private handleComboPointGeneration(result: AttackResult): number {
+   handleComboPointGeneration(result: AttackResult): number {
       if (result.amount <= 0) {
          return 0;
       }
@@ -243,7 +243,7 @@ export class RogueSimulator extends MeleeSimulator {
       return comboPointsGained;
    }
 
-   protected onMainHandHit(result: AttackResult): void {
+   onMainHandHit(result: AttackResult): void {
       if (result.amount > 0 &&
          this.talents.swordSpecialization > 0 &&
          this.stats.mainHandWeapon.type === WeaponType.Sword &&
@@ -252,7 +252,7 @@ export class RogueSimulator extends MeleeSimulator {
       }
    }
 
-   protected executeRotation(): void {
+   executeRotation(): void {
       if (!this.canCastAbility()) {
          return;
       }
@@ -276,7 +276,7 @@ export class RogueSimulator extends MeleeSimulator {
       }
    }
 
-   private shouldRefreshSliceAndDice(): boolean {
+   shouldRefreshSliceAndDice(): boolean {
       if (!this.isBuffActive(Buffs.SnD)) {
          return true;
       }
@@ -285,18 +285,18 @@ export class RogueSimulator extends MeleeSimulator {
       return timeRemainingMs < refreshThresholdMs;
    }
 
-   protected updateBuffs(): void {
+   updateBuffs(): void {
       this.removeExpiredBuffs();
    }
 
-   protected handleResourceGeneration(): void {
+   handleResourceGeneration(): void {
       if (this.state.currentTime >= this.state.nextEnergyTick) {
          this.addEnergy(20);
          this.state.nextEnergyTick += 2000;
       }
    }
 
-   protected override getPrintDamageEventExtra(event: RogueDamageEvent): string {
+   override getPrintDamageEventExtra(event: RogueDamageEvent): string {
       let extra = '';
       if (event.comboPointsSpent > 0) {
          extra += ` ${'○'.repeat(event.comboPointsSpent)}`;
@@ -307,14 +307,14 @@ export class RogueSimulator extends MeleeSimulator {
       return extra;
    }
 
-   protected override getPrintBuffEventExtra(event: RogueBuffEvent): string {
+   override getPrintBuffEventExtra(event: RogueBuffEvent): string {
       if (event.comboPointsUsed > 0) {
          return ` ${'○'.repeat(event.comboPointsUsed)}`;
       }
       return '';
    }
 
-   protected getStateText(): string {
+   getStateText(): string {
       const timestampSeconds = this.state.currentTime / 1000;
       const energyBar = this.generateResourceBar(this.state.energy, 100, 20);
       const cpDots = c.red + '●'.repeat(this.state.comboPoints) + c.reset + '○'.repeat(5 - this.state.comboPoints);

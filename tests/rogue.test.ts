@@ -37,7 +37,7 @@ const baseTalents: RogueTalents = {
    murder: 0,
    improvedSinisterStrike: 0,
    improvedEviscerate: 0,
-   relentlessStrikes: 0,
+   relentlessStrikes: false,
    ruthlessness: 0,
    lethality: 0,
    sealFate: 0,
@@ -267,6 +267,78 @@ describe('Rogue Talents', () => {
 
          expect(damageIncrease).toBeGreaterThan(1.18);
          expect(damageIncrease).toBeLessThan(1.22);
+      });
+   });
+
+   describe('Relentless Strikes', () => {
+
+      it('should add energy', () => {
+         const talents: RogueTalents = {
+            ...baseTalents,
+            relentlessStrikes: true,
+         };
+         const simulator = new RogueSimulator(baseStats, config, talents);
+         const originalRandom = Math.random;
+         Math.random = () => 0.99;
+
+         let called = false;
+         simulator.addEnergy = () => {
+            called = true;
+         };
+
+         simulator.state.comboPoints = 5;
+         simulator.onFinishingMove();
+         expect(called).toBe(true);
+
+         Math.random = originalRandom;
+      });
+
+      it('should not add energy', () => {
+         const talents: RogueTalents = {
+            ...baseTalents,
+            relentlessStrikes: false,
+         };
+         const simulator = new RogueSimulator(baseStats, config, talents);
+         const originalRandom = Math.random;
+         Math.random = () => 0.99;
+
+         let called = false;
+         simulator.addEnergy = () => {
+            called = true;
+         };
+
+         simulator.state.comboPoints = 5;
+         simulator.onFinishingMove();
+         expect(called).toBe(false);
+
+         Math.random = originalRandom;
+      });
+
+      it('should have higher proc chance with more combo points', () => {
+         const testCases = [
+            { comboPoints: 1, expectedRate: 0.2 },
+            { comboPoints: 2, expectedRate: 0.4 },
+            { comboPoints: 3, expectedRate: 0.6 },
+            { comboPoints: 4, expectedRate: 0.8 },
+            { comboPoints: 5, expectedRate: 1.0 },
+         ];
+
+         testCases.forEach(({ comboPoints, expectedRate }) => {
+            const numTrials = 10000;
+            let procCount = 0;
+
+            for (let i = 0; i < numTrials; i++) {
+               const procChance = comboPoints * 0.2;
+               if (Math.random() < procChance) {
+                  procCount++;
+               }
+            }
+
+            const observedRate = procCount / numTrials;
+
+            expect(observedRate).toBeGreaterThan(expectedRate - 0.05);
+            expect(observedRate).toBeLessThan(expectedRate + 0.05);
+         });
       });
    });
 
