@@ -1,4 +1,4 @@
-import {AttackResult, CharacterStats, SimulationConfig, SimulationResult, WarriorTalents, MeleeSimulationState} from '../types';
+import {AttackResult, GearStats, MeleeSimulationState, SimulationConfig, WarriorTalents} from '../types';
 import {MeleeSimulator} from './MeleeSimulator';
 import {MeleeDamageCalculator} from '../mechanics/MeleeDamageCalculator';
 
@@ -7,7 +7,7 @@ export class WarriorSimulator extends MeleeSimulator {
    protected damageCalculator!: MeleeDamageCalculator;
 
    constructor(
-      stats: CharacterStats,
+      stats: GearStats,
       config: SimulationConfig,
       protected talents: WarriorTalents,
    ) {

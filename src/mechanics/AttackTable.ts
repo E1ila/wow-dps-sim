@@ -1,4 +1,4 @@
-import {AttackType, AttackTableResult, CharacterStats, SimulationConfig} from '../types';
+import {AttackTableResult, AttackType, GearStats, SimulationConfig} from '../types';
 
 /**
  * WoW Classic (Era) Attack Table Mechanics
@@ -10,7 +10,7 @@ export class AttackTable {
    private readonly glancingChance: number;
 
    constructor(
-      private stats: CharacterStats,
+      private stats: GearStats,
       private config: SimulationConfig
    ) {
       this.missChance = this.calculateMissChance();

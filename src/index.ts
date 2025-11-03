@@ -1,5 +1,13 @@
 import {Command} from 'commander';
-import {CharacterStats, CharacterClass, RogueTalents, WarriorTalents, RogueRotation, SimulationConfig, WeaponType} from './types';
+import {
+   CharacterClass,
+   GearStats,
+   RogueRotation,
+   RogueTalents,
+   SimulationConfig,
+   WarriorTalents,
+   WeaponType
+} from './types';
 import {WarriorSimulator} from './sim/WarriorSimulator';
 import {BaseSimulator} from './sim/BaseSimulator';
 import {SpecLoader} from './SpecLoader';
@@ -9,7 +17,7 @@ const program = new Command();
 
 program
    .name('wow-classic-sim')
-   .description('WoW Classic Era DPS Simulator')
+   .description('WoW Classic Era DPS Simulator. All option stats are base stats, from gear only.')
    .version('1.0.0')
    .argument('<spec-file>', 'Path to spec file (e.g., specs/rogue/daggers.json)')
    .option('--ap, --attack-power <number>', 'Attack power', '1200')
@@ -64,8 +72,7 @@ if (!characterClass) {
    process.exit(1);
 }
 
-const stats: CharacterStats = {
-   class: characterClass,
+const baseStats: GearStats = {
    level: 60,
    attackPower: parseInt(opts.attackPower || opts.ap),
    critChance: parseFloat(opts.crit),
@@ -102,14 +109,14 @@ console.log(`Class: ${characterClass.toUpperCase()}`);
 console.log(`Spec: ${spec.name}`);
 console.log(`Description: ${spec.description}`);
 
-console.log('\nCharacter Stats:');
-console.log(`  Attack Power: ${stats.attackPower}`);
-console.log(`  Crit Chance: ${stats.critChance}%`);
-console.log(`  Hit Chance: ${stats.hitChance}%`);
-console.log(`  Weapon Skill: ${stats.weaponSkill}`);
-console.log(`  Main Hand: ${stats.mainHandWeapon.minDamage}-${stats.mainHandWeapon.maxDamage} (${stats.mainHandWeapon.speed}s) ${stats.mainHandWeapon.type}`);
-if (stats.offHandWeapon) {
-   console.log(`  Off Hand: ${stats.offHandWeapon.minDamage}-${stats.offHandWeapon.maxDamage} (${stats.offHandWeapon.speed}s) ${stats.offHandWeapon.type}`);
+console.log('\nGear Stats:');
+console.log(`  Attack Power: ${baseStats.attackPower}`);
+console.log(`  Crit Chance: ${baseStats.critChance}%`);
+console.log(`  Hit Chance: ${baseStats.hitChance}%`);
+console.log(`  Weapon Skill: ${baseStats.weaponSkill}`);
+console.log(`  Main Hand: ${baseStats.mainHandWeapon.minDamage}-${baseStats.mainHandWeapon.maxDamage} (${baseStats.mainHandWeapon.speed}s) ${baseStats.mainHandWeapon.type}`);
+if (baseStats.offHandWeapon) {
+   console.log(`  Off Hand: ${baseStats.offHandWeapon.minDamage}-${baseStats.offHandWeapon.maxDamage} (${baseStats.offHandWeapon.speed}s) ${baseStats.offHandWeapon.type}`);
 }
 
 console.log(`\nSimulation Config:`);
@@ -124,15 +131,15 @@ let simulator: BaseSimulator;
 switch (characterClass) {
    case CharacterClass.Rogue:
       simulator = new RogueSimulator(
-         stats, 
-         config, 
+         baseStats,
+         config,
          spec.talents as RogueTalents,
          spec.rotation as RogueRotation
       );
       break;
 
    case CharacterClass.Warrior:
-      simulator = new WarriorSimulator(stats, config, spec.talents as WarriorTalents);
+      simulator = new WarriorSimulator(baseStats, config, spec.talents as WarriorTalents);
       break;
 
    default:

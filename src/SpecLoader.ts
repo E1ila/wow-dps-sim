@@ -1,9 +1,9 @@
 import {readFileSync} from 'fs';
-import {CharacterClass, RogueTalents, WarriorTalents, RogueRotation, WarriorRotation} from './types.js';
+import {CharacterClass, RogueRotation, RogueTalents, WarriorRotation, WarriorTalents} from './types.js';
 
 export interface SpecFile {
    name: string;
-   class: string;
+   class: CharacterClass;
    description: string;
    rotation?: RogueRotation | WarriorRotation;
    talents: RogueTalents | WarriorTalents;

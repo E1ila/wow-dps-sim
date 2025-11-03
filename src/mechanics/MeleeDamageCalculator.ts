@@ -1,4 +1,4 @@
-import {AttackType, AttackResult, CharacterStats, Weapon, SimulationConfig} from '../types';
+import {AttackResult, AttackType, GearStats, SimulationConfig, Weapon} from '../types';
 import {AttackTable} from './AttackTable';
 import {DamageCalculator} from './DamageCalculator';
 
@@ -12,8 +12,8 @@ export abstract class MeleeDamageCalculator extends DamageCalculator {
    protected readonly attackTable: AttackTable;
    protected readonly targetArmorReduction: number;
 
-   constructor(
-      stats: CharacterStats,
+   protected constructor(
+      stats: GearStats,
       config: SimulationConfig
    ) {
       super(stats, config);

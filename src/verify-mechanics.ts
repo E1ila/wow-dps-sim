@@ -1,10 +1,9 @@
-import {CharacterStats, CharacterClass, SimulationConfig, WeaponType} from './types.js';
+import {GearStats, SimulationConfig, WeaponType} from './types.js';
 import {AttackTable} from './mechanics/AttackTable';
 
 console.log('=== Attack Table Mechanics Verification ===\n');
 
-const createTestStats = (weaponSkill: number, hasOffHand: boolean = true): CharacterStats => ({
-   class: CharacterClass.Rogue,
+const createTestStats = (weaponSkill: number, hasOffHand: boolean = true): GearStats => ({
    level: 60,
    attackPower: 1000,
    critChance: 30,

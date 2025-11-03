@@ -3,8 +3,8 @@ import {
    AttackType,
    BuffEvent,
    c,
-   CharacterStats,
    DamageEvent,
+   GearStats,
    SimulationConfig,
    SimulationEvent,
    SimulationResult,
@@ -28,7 +28,7 @@ export abstract class BaseSimulator implements Simulator {
    protected lastAbilityTimestamp: Map<string, number> = new Map();
 
    protected constructor(
-      protected stats: CharacterStats,
+      protected stats: GearStats,
       protected config: SimulationConfig
    ) { }
 

@@ -27,8 +27,7 @@ export enum CharacterClass {
    Warrior = 'warrior',
 }
 
-export interface CharacterStats {
-   class: CharacterClass;
+export interface GearStats {
    level: number;
    attackPower: number;
    critChance: number;
@@ -71,11 +70,13 @@ export interface RogueTalents {
    maceSpecialization: number;
    fistWeaponSpecialization: number;
    bladeFurry: boolean;
+   adrenalineRush: boolean;
    aggression: number;
    dualWieldSpecialization: number;
    opportunity: number;
    improvedBackstab: number;
    hemorrhage: boolean;
+   precision: number;
 }
 
 export interface WarriorTalents {

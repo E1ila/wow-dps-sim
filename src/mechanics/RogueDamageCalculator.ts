@@ -1,9 +1,9 @@
-import {AttackResult, AttackType, CharacterStats, SimulationConfig, RogueTalents} from '../types';
+import {AttackResult, GearStats, RogueTalents, SimulationConfig} from '../types';
 import {MeleeDamageCalculator} from './MeleeDamageCalculator';
 
 export class RogueDamageCalculator extends MeleeDamageCalculator {
    constructor(
-      stats: CharacterStats,
+      stats: GearStats,
       config: SimulationConfig,
       protected talents: RogueTalents,
    ) {

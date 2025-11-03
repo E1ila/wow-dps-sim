@@ -3,7 +3,7 @@ import {
    AttackType,
    Buffs,
    c,
-   CharacterStats,
+   GearStats,
    RogueBuffEvent,
    RogueDamageEvent,
    RogueRotation,
@@ -33,7 +33,7 @@ export class RogueSimulator extends MeleeSimulator {
    protected rotation: RogueRotation;
 
    constructor(
-      stats: CharacterStats,
+      stats: GearStats,
       config: SimulationConfig,
       protected talents: RogueTalents,
       rotation?: RogueRotation,
@@ -41,7 +41,7 @@ export class RogueSimulator extends MeleeSimulator {
       super(stats, config);
       this.damageCalculator = new RogueDamageCalculator(stats, config, talents);
       this.state = this.initializeState();
-      
+
       if (rotation) {
          this.rotation = rotation;
       } else {

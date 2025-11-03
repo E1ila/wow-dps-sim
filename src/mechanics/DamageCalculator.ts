@@ -1,8 +1,8 @@
-import {CharacterStats, SimulationConfig} from '../types';
+import {GearStats, SimulationConfig} from '../types';
 
 export abstract class DamageCalculator {
    constructor(
-      protected stats: CharacterStats,
+      protected stats: GearStats,
       protected config: SimulationConfig
    ) {}
 }
