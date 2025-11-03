@@ -464,6 +464,69 @@ describe('Rogue Talents', () => {
    //    });
    // });
 
+   describe('Precision', () => {
+
+      it('should increase hit chance by 1% per point in precision', () => {
+         const testCases = [
+            {precision: 0, expectedHitChance: 9},
+            {precision: 1, expectedHitChance: 10},
+            {precision: 2, expectedHitChance: 11},
+            {precision: 3, expectedHitChance: 12},
+            {precision: 4, expectedHitChance: 13},
+            {precision: 5, expectedHitChance: 14},
+         ];
+
+         testCases.forEach(({precision, expectedHitChance}) => {
+            const talents: RogueTalents = {
+               ...baseTalents,
+               precision,
+            };
+
+            const simulator = new RogueSimulator(baseStats, config, talents);
+
+            expect(simulator.damageCalculator.hitChance).toBe(expectedHitChance);
+         });
+      });
+
+      it('should apply precision to actual attack table rolls', () => {
+         const testCases = [
+            {precision: 0, baseHitChance: 0, expectedMissRate: 26.4},
+            {precision: 3, baseHitChance: 0, expectedMissRate: 24},
+            {precision: 5, baseHitChance: 0, expectedMissRate: 22},
+         ];
+
+         testCases.forEach(({precision, baseHitChance, expectedMissRate}) => {
+            const talents: RogueTalents = {
+               ...baseTalents,
+               precision,
+            };
+
+            const testStats: GearStats = {
+               ...baseStats,
+               hitChance: baseHitChance,
+            };
+
+            const simulator = new RogueSimulator(testStats, config, talents);
+            const attackTable = new AttackTable(simulator.damageCalculator, config);
+
+            const numRolls = 100000;
+            let misses = 0;
+
+            for (let i = 0; i < numRolls; i++) {
+               const result = attackTable.roll(true, baseStats.mainHandWeapon);
+               if (result.type === AttackType.Miss) {
+                  misses++;
+               }
+            }
+
+            const observedMissRate = (misses / numRolls) * 100;
+
+            expect(observedMissRate).toBeGreaterThan(expectedMissRate - 1);
+            expect(observedMissRate).toBeLessThan(expectedMissRate + 1);
+         });
+      });
+   });
+
    describe('Relentless Strikes', () => {
 
       it('should add energy', () => {

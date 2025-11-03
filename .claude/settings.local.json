@@ -1,7 +1,8 @@
 {
   "permissions": {
     "allow": [
-      "WebFetch(domain:bookdown.org)"
+      "WebFetch(domain:bookdown.org)",
+      "Bash(npm test:*)"
     ],
     "deny": [],
     "ask": []
