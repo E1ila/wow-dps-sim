@@ -1,6 +1,7 @@
 import {AttackType, GearStats, RogueTalents, SimulationConfig, WeaponType} from '../src/types';
 import {AttackTable} from '../src/mechanics/AttackTable';
 import {RogueDamageCalculator} from '../src/mechanics/RogueDamageCalculator';
+import {RogueSimulator} from '../src/sim/RogueSimulator';
 
 const baseStats: GearStats = {
    level: 60,
@@ -57,31 +58,48 @@ const baseTalents: RogueTalents = {
 };
 
 describe('Rogue Talents', () => {
+
    describe('Malice', () => {
-      it('should increase crit chance by 1% per point in malice', () => {
+
+      it('should increase simulator.critChance by 1% per point in malice', () => {
          const testCases = [
-            {malice: 0, expectedCritBonus: 0},
-            {malice: 1, expectedCritBonus: 1},
-            {malice: 2, expectedCritBonus: 2},
-            {malice: 3, expectedCritBonus: 3},
-            {malice: 4, expectedCritBonus: 4},
-            {malice: 5, expectedCritBonus: 5},
+            {malice: 0, expectedCritChance: 30},
+            {malice: 1, expectedCritChance: 31},
+            {malice: 2, expectedCritChance: 32},
+            {malice: 3, expectedCritChance: 33},
+            {malice: 4, expectedCritChance: 34},
+            {malice: 5, expectedCritChance: 35},
          ];
 
-         testCases.forEach(({malice, expectedCritBonus}) => {
+         testCases.forEach(({malice, expectedCritChance}) => {
             const talents: RogueTalents = {
                ...baseTalents,
                malice,
             };
 
-            const statsWithMalice: GearStats = {
-               ...baseStats,
-               critChance: baseStats.critChance + expectedCritBonus,
+            const simulator = new RogueSimulator(baseStats, config, talents);
+
+            expect(simulator.critChance).toBe(expectedCritChance);
+         });
+      });
+
+      it('should apply malice to actual attack table rolls', () => {
+         const testCases = [
+            {malice: 0, expectedCritRate: 30},
+            {malice: 3, expectedCritRate: 33},
+            {malice: 5, expectedCritRate: 35},
+         ];
+
+         testCases.forEach(({malice, expectedCritRate}) => {
+            const talents: RogueTalents = {
+               ...baseTalents,
+               malice,
             };
 
-            const attackTable = new AttackTable(statsWithMalice, config);
+            const simulator = new RogueSimulator(baseStats, config, talents);
+            const attackTable = new AttackTable(simulator.damageCalculator, config);
 
-            const numRolls = 10000;
+            const numRolls = 100000;
             let crits = 0;
 
             for (let i = 0; i < numRolls; i++) {
@@ -92,77 +110,10 @@ describe('Rogue Talents', () => {
             }
 
             const observedCritRate = (crits / numRolls) * 100;
-            const expectedCritRate = baseStats.critChance + expectedCritBonus;
 
             expect(observedCritRate).toBeGreaterThan(expectedCritRate - 1);
             expect(observedCritRate).toBeLessThan(expectedCritRate + 1);
          });
-      });
-
-      it('should apply malice talent bonus to base crit chance', () => {
-         const baseCrit = 30;
-         const malicePoints = 5;
-         const expectedTotalCrit = baseCrit + (malicePoints * 1);
-
-         const talents: RogueTalents = {
-            ...baseTalents,
-            malice: malicePoints,
-         };
-
-         const statsWithMalice: GearStats = {
-            ...baseStats,
-            critChance: expectedTotalCrit,
-         };
-
-         const attackTable = new AttackTable(statsWithMalice, config);
-
-         const numRolls = 10000;
-         let crits = 0;
-
-         for (let i = 0; i < numRolls; i++) {
-            const result = attackTable.roll(true);
-            if (result.type === 'Crit') {
-               crits++;
-            }
-         }
-
-         const observedCritRate = (crits / numRolls) * 100;
-
-         expect(observedCritRate).toBeGreaterThanOrEqual(expectedTotalCrit - 1.5);
-         expect(observedCritRate).toBeLessThanOrEqual(expectedTotalCrit + 1.5);
-      });
-
-      it('should handle maximum malice (5 points) correctly', () => {
-         const baseCrit = 25;
-         const malicePoints = 5;
-         const expectedTotalCrit = baseCrit + 5;
-
-         const talents: RogueTalents = {
-            ...baseTalents,
-            malice: malicePoints,
-         };
-
-         const statsWithMalice: GearStats = {
-            ...baseStats,
-            critChance: expectedTotalCrit,
-         };
-
-         const attackTable = new AttackTable(statsWithMalice, config);
-
-         const numRolls = 20000;
-         let crits = 0;
-
-         for (let i = 0; i < numRolls; i++) {
-            const result = attackTable.roll(true);
-            if (result.type === 'Crit') {
-               crits++;
-            }
-         }
-
-         const observedCritRate = (crits / numRolls) * 100;
-
-         expect(observedCritRate).toBeGreaterThan(expectedTotalCrit - 1.5);
-         expect(observedCritRate).toBeLessThan(expectedTotalCrit + 1.5);
       });
    });
 

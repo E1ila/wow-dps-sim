@@ -26,11 +26,15 @@ const DEFAULT_SWORDS_ROTATION: RogueRotation = {
 const SLICE_N_DICE_IAS = 0.2; // 20% attack speed increase
 
 export class RogueSimulator extends MeleeSimulator {
-   protected override state: RogueSimulationState;
-   protected override damageCalculator: RogueDamageCalculator;
-   protected override events: (RogueDamageEvent | RogueBuffEvent)[] = [];
-   protected damageBreakdown: Map<string, number> = new Map();
-   protected rotation: RogueRotation;
+   override state: RogueSimulationState;
+   override damageCalculator: RogueDamageCalculator;
+   override events: (RogueDamageEvent | RogueBuffEvent)[] = [];
+   damageBreakdown: Map<string, number> = new Map();
+   rotation: RogueRotation;
+
+   get critChance(): number {
+      return this.damageCalculator.critChance;
+   }
 
    constructor(
       stats: GearStats,
