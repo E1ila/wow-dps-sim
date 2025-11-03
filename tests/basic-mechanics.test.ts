@@ -44,7 +44,7 @@ describe('Attack Table Mechanics', () => {
       const stats = createTestStats(300, false);
       const attackTable = new AttackTable(wrapStats(stats), raidBossConfig);
 
-      const missChance = (attackTable as any).mhMissChance;
+      const missChance = (attackTable as any).missChance;
       const glancingChance = (attackTable as any).glancingChance;
       const glancingDamage = (attackTable as any).calculateGlancingDamageModifier();
 
@@ -57,7 +57,7 @@ describe('Attack Table Mechanics', () => {
       const stats = createTestStats(305, false);
       const attackTable = new AttackTable(wrapStats(stats), raidBossConfig);
 
-      const missChance = (attackTable as any).mhMissChance;
+      const missChance = (attackTable as any).missChance;
       const glancingChance = (attackTable as any).glancingChance;
       const glancingDamage = (attackTable as any).calculateGlancingDamageModifier();
 
@@ -70,7 +70,7 @@ describe('Attack Table Mechanics', () => {
       const stats = createTestStats(308, false);
       const attackTable = new AttackTable(wrapStats(stats), raidBossConfig);
 
-      const missChance = (attackTable as any).mhMissChance;
+      const missChance = (attackTable as any).missChance;
       const glancingChance = (attackTable as any).glancingChance;
       const glancingDamage = (attackTable as any).calculateGlancingDamageModifier();
 
@@ -85,7 +85,7 @@ describe('Attack Table Mechanics', () => {
       const stats = createTestStats(300, true);
       const attackTable = new AttackTable(wrapStats(stats), raidBossConfig);
 
-      const missChance = (attackTable as any).mhMissChance;
+      const missChance = (attackTable as any).missChance;
       const targetDefense = 315;
       const defenseSkillDiff = targetDefense - 300;
 
@@ -100,7 +100,7 @@ describe('Attack Table Mechanics', () => {
       const stats = createTestStats(305, true);
       const attackTable = new AttackTable(wrapStats(stats), raidBossConfig);
 
-      const missChance = (attackTable as any).mhMissChance;
+      const missChance = (attackTable as any).missChance;
       const targetDefense = 315;
       const defenseSkillDiff = targetDefense - 305;
 
@@ -115,7 +115,7 @@ describe('Attack Table Mechanics', () => {
       const stats = createTestStats(308, true);
       const attackTable = new AttackTable(wrapStats(stats), raidBossConfig);
 
-      const missChance = (attackTable as any).mhMissChance;
+      const missChance = (attackTable as any).missChance;
       const targetDefense = 315;
       const defenseSkillDiff = targetDefense - 308;
 
@@ -142,7 +142,7 @@ describe('Attack Table Mechanics', () => {
           const stats = createTestStats(skill, true);
           stats.hitChance = hitPercent;
           const attackTable = new AttackTable(wrapStats(stats), raidBossConfig);
-          const missChance = (attackTable as any).mhMissChance;
+          const missChance = (attackTable as any).missChance;
 
           expect(missChance * 100).toBeGreaterThanOrEqual(expectedMissMin);
           expect(missChance * 100).toBeLessThanOrEqual(expectedMissMax);
@@ -164,7 +164,7 @@ describe('Attack Table Mechanics', () => {
           const stats = createTestStats(skill, true);
           stats.hitChance = hitPercent;
           const attackTable = new AttackTable(wrapStats(stats), raidBossConfig);
-          const missChance = (attackTable as any).mhMissChance;
+          const missChance = (attackTable as any).missChance;
 
           expect(missChance * 100).toBeGreaterThanOrEqual(expectedMissMin);
           expect(missChance * 100).toBeLessThanOrEqual(expectedMissMax);
@@ -186,7 +186,7 @@ describe('Attack Table Mechanics', () => {
           const stats = createTestStats(skill, true);
           stats.hitChance = hitPercent;
           const attackTable = new AttackTable(wrapStats(stats), raidBossConfig);
-          const missChance = (attackTable as any).mhMissChance;
+          const missChance = (attackTable as any).missChance;
 
           expect(missChance * 100).toBeGreaterThanOrEqual(expectedMissMin);
           expect(missChance * 100).toBeLessThanOrEqual(expectedMissMax);

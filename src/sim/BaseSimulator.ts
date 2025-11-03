@@ -325,9 +325,7 @@ export abstract class BaseSimulator implements Simulator {
 
    static printStatistics(stats: SimulationStatistics, expectedCritChance: number): void {
       const totalAttacks = stats.critCount + stats.hitCount + stats.glancingCount + stats.missCount + stats.dodgeCount;
-      const totalLanded = stats.critCount + stats.hitCount + stats.glancingCount;
       const critRate = totalAttacks > 0 ? (stats.critCount / totalAttacks * 100) : 0;
-      const critRateOfLanded = totalLanded > 0 ? (stats.critCount / totalLanded * 100) : 0;
 
       console.log('\n=== Statistics ===');
       console.log(`Total Attacks: ${totalAttacks}`);
