@@ -160,6 +160,9 @@ export type SimulationEvent = DamageEvent | BuffEvent;
 export interface SimulationStatistics {
    critCount: number;
    hitCount: number;
+   glancingCount: number;
+   missCount: number;
+   dodgeCount: number;
 }
 
 export interface SimulationResult {

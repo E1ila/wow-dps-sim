@@ -30,6 +30,9 @@ export abstract class BaseSimulator implements Simulator {
    statistics: SimulationStatistics = {
       critCount: 0,
       hitCount: 0,
+      glancingCount: 0,
+      missCount: 0,
+      dodgeCount: 0,
    };
 
    protected constructor(
@@ -64,10 +67,22 @@ export abstract class BaseSimulator implements Simulator {
          this.damageBreakdown.set(ability, currentDamage + attackResult.amount);
       }
 
-      if (attackResult.type === AttackType.Crit) {
-         this.statistics.critCount++;
-      } else if (attackResult.type === AttackType.Hit || attackResult.type === AttackType.Glancing) {
-         this.statistics.hitCount++;
+      switch (attackResult.type) {
+         case AttackType.Crit:
+            this.statistics.critCount++;
+            break;
+         case AttackType.Hit:
+            this.statistics.hitCount++;
+            break;
+         case AttackType.Glancing:
+            this.statistics.glancingCount++;
+            break;
+         case AttackType.Miss:
+            this.statistics.missCount++;
+            break;
+         case AttackType.Dodge:
+            this.statistics.dodgeCount++;
+            break;
       }
    }
 
@@ -124,6 +139,9 @@ export abstract class BaseSimulator implements Simulator {
       this.statistics = {
          critCount: 0,
          hitCount: 0,
+         glancingCount: 0,
+         missCount: 0,
+         dodgeCount: 0,
       };
    }
 
@@ -209,14 +227,7 @@ export abstract class BaseSimulator implements Simulator {
          console.log(`${ability}: ${damage.toFixed(0)} (${percentage.toFixed(1)}%)`);
       }
 
-      console.log('\n=== Statistics ===');
-      const stats = result.statistics;
-      const totalHits = stats.critCount + stats.hitCount;
-      const critRate = totalHits > 0 ? (stats.critCount / totalHits * 100) : 0;
-      console.log(`Crits: ${stats.critCount}`);
-      console.log(`Hits: ${stats.hitCount}`);
-      console.log(`Total: ${totalHits}`);
-      console.log(`Crit Rate: ${critRate.toFixed(2)}%`);
+      BaseSimulator.printStatistics(result.statistics, this.damageCalculator.critChance);
    }
 
    protected abstract getStateText(): string;
@@ -312,6 +323,23 @@ export abstract class BaseSimulator implements Simulator {
       return totalDPS / results.length;
    }
 
+   static printStatistics(stats: SimulationStatistics, expectedCritChance: number): void {
+      const totalAttacks = stats.critCount + stats.hitCount + stats.glancingCount + stats.missCount + stats.dodgeCount;
+      const totalLanded = stats.critCount + stats.hitCount + stats.glancingCount;
+      const critRate = totalAttacks > 0 ? (stats.critCount / totalAttacks * 100) : 0;
+      const critRateOfLanded = totalLanded > 0 ? (stats.critCount / totalLanded * 100) : 0;
+
+      console.log('\n=== Statistics ===');
+      console.log(`Total Attacks: ${totalAttacks}`);
+      console.log(`  Crits: ${stats.critCount} (${(stats.critCount / totalAttacks * 100).toFixed(2)}%)`);
+      console.log(`  Hits: ${stats.hitCount} (${(stats.hitCount / totalAttacks * 100).toFixed(2)}%)`);
+      console.log(`  Glancing: ${stats.glancingCount} (${(stats.glancingCount / totalAttacks * 100).toFixed(2)}%)`);
+      console.log(`  Miss: ${stats.missCount} (${(stats.missCount / totalAttacks * 100).toFixed(2)}%)`);
+      console.log(`  Dodge: ${stats.dodgeCount} (${(stats.dodgeCount / totalAttacks * 100).toFixed(2)}%)`);
+      console.log(`Crit Rate (of all attacks): ${critRate.toFixed(2)}%`);
+      console.log(`Expected Crit Rate (from stats): ${expectedCritChance.toFixed(2)}%`);
+   }
+
    static printResults(results: SimulationResult[], simulator: BaseSimulator): void {
       const avgDPS = this.calculateAverageDPS(results);
       const minDPS = Math.min(...results.map(r => r.dps));
@@ -336,15 +364,7 @@ export abstract class BaseSimulator implements Simulator {
             console.log(`${ability}: ${damage.toFixed(0)} (${percentage.toFixed(1)}%)`);
          }
 
-         console.log('\n=== Statistics ===');
-         const stats = results[0].statistics;
-         const totalHits = stats.critCount + stats.hitCount;
-         const critRate = totalHits > 0 ? (stats.critCount / totalHits * 100) : 0;
-         console.log(`Crits: ${stats.critCount}`);
-         console.log(`Hits: ${stats.hitCount}`);
-         console.log(`Total: ${totalHits}`);
-         console.log(`Actual Crit Rate: ${critRate.toFixed(2)}%`);
-         console.log(`Stats Crit Rate: ${simulator.damageCalculator.critChance.toFixed(2)}%`);
+         this.printStatistics(results[0].statistics, simulator.damageCalculator.critChance);
       }
    }
 }
