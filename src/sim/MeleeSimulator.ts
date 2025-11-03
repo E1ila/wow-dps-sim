@@ -1,5 +1,5 @@
 import {BaseSimulator} from './BaseSimulator';
-import {MeleeSimulationState} from '../types';
+import {AttackResult, AttackType, MeleeSimulationState} from '../types';
 import {MeleeDamageCalculator} from "../mechanics/MeleeDamageCalculator";
 
 export abstract class MeleeSimulator extends BaseSimulator {
@@ -8,22 +8,22 @@ export abstract class MeleeSimulator extends BaseSimulator {
 
    protected handleAutoAttacks(): void {
       this.processAutoAttacks(
-         (damage, isCrit) => {
-            this.onMainHandHit(damage, isCrit);
-            this.addDamage('Main Hand', damage, isCrit);
+         (result) => {
+            this.onMainHandHit(result);
+            this.addDamage('Main Hand', result);
          },
-         (damage, isCrit) => {
-            this.onOffHandHit(damage, isCrit);
-            this.addDamage('Off Hand', damage, isCrit);
+         (result) => {
+            this.onOffHandHit(result);
+            this.addDamage('Off Hand', result);
          }
       );
    }
 
-   protected onMainHandHit(damage: number, isCrit: boolean): void {
+   protected onMainHandHit(result: AttackResult): void {
       // Override in subclasses for class-specific logic (e.g., Sword Specialization)
    }
 
-   protected onOffHandHit(damage: number, isCrit: boolean): void {
+   protected onOffHandHit(result: AttackResult): void {
       // Override in subclasses for class-specific logic
    }
 
@@ -42,31 +42,31 @@ export abstract class MeleeSimulator extends BaseSimulator {
    protected abstract handleResourceGeneration(): void;
 
    protected processAutoAttacks(
-      onMainHandHit: (damage: number, isCrit: boolean) => void,
-      onOffHandHit?: (damage: number, isCrit: boolean) => void
+      onMainHandHit: (result: AttackResult) => void,
+      onOffHandHit?: (result: AttackResult) => void
    ): void {
       if (this.state.currentTime >= this.state.mainHandNextSwing) {
-         const {damage, isCrit} = this.calculateMainHandDamage();
-         if (damage > 0) {
-            onMainHandHit(damage, isCrit);
+         const result = this.calculateMainHandDamage();
+         if (result.amount > 0) {
+            onMainHandHit(result);
          }
          this.state.mainHandNextSwing = this.state.currentTime + (this.stats.mainHandWeapon.speed * 1000);
       }
 
       if (this.stats.offHandWeapon && onOffHandHit && this.state.currentTime >= this.state.offHandNextSwing) {
-         const {damage, isCrit} = this.calculateOffHandDamage();
-         if (damage > 0) {
-            onOffHandHit(damage, isCrit);
+         const result = this.calculateOffHandDamage();
+         if (result.amount > 0) {
+            onOffHandHit(result);
          }
          this.state.offHandNextSwing = this.state.currentTime + (this.stats.offHandWeapon.speed * 1000);
       }
    }
 
-   protected calculateMainHandDamage(): { damage: number; isCrit: boolean } {
+   protected calculateMainHandDamage(): AttackResult {
       return this.damageCalculator.calculateAutoAttackDamage(true);
    }
 
-   protected calculateOffHandDamage(): { damage: number; isCrit: boolean } {
+   protected calculateOffHandDamage(): AttackResult {
       return this.damageCalculator.calculateAutoAttackDamage(false);
    }
 }

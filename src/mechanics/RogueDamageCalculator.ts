@@ -1,4 +1,4 @@
-import {CharacterStats, SimulationConfig, RogueTalents} from '../types';
+import {AttackResult, AttackType, CharacterStats, SimulationConfig, RogueTalents} from '../types';
 import {MeleeDamageCalculator} from './MeleeDamageCalculator';
 
 export class RogueDamageCalculator extends MeleeDamageCalculator {
@@ -14,7 +14,7 @@ export class RogueDamageCalculator extends MeleeDamageCalculator {
       return this.talents.dualWieldSpecialization * 0.05;
    }
 
-   calculateSinisterStrikeDamage(): { damage: number; isCrit: boolean } {
+   calculateSinisterStrikeDamage(): AttackResult {
       const weapon = this.stats.mainHandWeapon;
       const weaponDamage = this.getWeaponDamage(weapon);
 
@@ -30,23 +30,29 @@ export class RogueDamageCalculator extends MeleeDamageCalculator {
          damage *= (1 + (this.talents.lethality * 0.06));
       }
 
-      // Roll attack table for miss/dodge/hit/crit
-      const attackResult = this.attackTable.roll(true);
+      const attackTableResult = this.attackTable.roll(true);
 
-      if (attackResult.damageModifier === 0) {
-         return { damage: 0, isCrit: false };
+      if (attackTableResult.amountModifier === 0) {
+         return {
+            type: attackTableResult.type,
+            amountModifier: attackTableResult.amountModifier,
+            baseAmount: baseDamage,
+            amount: 0
+         };
       }
 
-      damage *= attackResult.damageModifier;
-      damage = this.applyArmorReduction(damage);
+      damage *= attackTableResult.amountModifier;
+      damage = Math.floor(this.applyArmorReduction(damage));
 
       return {
-         damage: Math.floor(damage),
-         isCrit: attackResult.result === 'Crit'
+         type: attackTableResult.type,
+         amountModifier: attackTableResult.amountModifier,
+         baseAmount: baseDamage,
+         amount: damage
       };
    }
 
-   calculateBackstabDamage(): { damage: number; isCrit: boolean } {
+   calculateBackstabDamage(): AttackResult {
       const weapon = this.stats.mainHandWeapon;
       const weaponDamage = this.getWeaponDamage(weapon);
 
@@ -66,23 +72,29 @@ export class RogueDamageCalculator extends MeleeDamageCalculator {
          damage *= (1 + (this.talents.daggerSpecialization * 0.01));
       }
 
-      // Roll attack table for miss/dodge/hit/crit
-      const attackResult = this.attackTable.roll(true);
+      const attackTableResult = this.attackTable.roll(true);
 
-      if (attackResult.damageModifier === 0) {
-         return { damage: 0, isCrit: false };
+      if (attackTableResult.amountModifier === 0) {
+         return {
+            type: attackTableResult.type,
+            amountModifier: attackTableResult.amountModifier,
+            baseAmount: baseDamage * 1.5,
+            amount: 0
+         };
       }
 
-      damage *= attackResult.damageModifier;
-      damage = this.applyArmorReduction(damage);
+      damage *= attackTableResult.amountModifier;
+      damage = Math.floor(this.applyArmorReduction(damage));
 
       return {
-         damage: Math.floor(damage),
-         isCrit: attackResult.result === 'Crit'
+         type: attackTableResult.type,
+         amountModifier: attackTableResult.amountModifier,
+         baseAmount: baseDamage * 1.5,
+         amount: damage
       };
    }
 
-   calculateHemorrhageDamage(): { damage: number; isCrit: boolean } {
+   calculateHemorrhageDamage(): AttackResult {
       const weapon = this.stats.mainHandWeapon;
       const weaponDamage = this.getWeaponDamage(weapon);
 
@@ -98,27 +110,35 @@ export class RogueDamageCalculator extends MeleeDamageCalculator {
          damage *= (1 + (this.talents.daggerSpecialization * 0.01));
       }
 
-      // Roll attack table for miss/dodge/hit/crit
-      const attackResult = this.attackTable.roll(true);
+      const attackTableResult = this.attackTable.roll(true);
 
-      if (attackResult.damageModifier === 0) {
-         return { damage: 0, isCrit: false };
+      if (attackTableResult.amountModifier === 0) {
+         return {
+            type: attackTableResult.type,
+            amountModifier: attackTableResult.amountModifier,
+            baseAmount: baseDamage * 1.1,
+            amount: 0
+         };
       }
 
-      damage *= attackResult.damageModifier;
-      damage = this.applyArmorReduction(damage);
+      damage *= attackTableResult.amountModifier;
+      damage = Math.floor(this.applyArmorReduction(damage));
 
       return {
-         damage: Math.floor(damage),
-         isCrit: attackResult.result === 'Crit'
+         type: attackTableResult.type,
+         amountModifier: attackTableResult.amountModifier,
+         baseAmount: baseDamage * 1.1,
+         amount: damage
       };
    }
 
-   calculateEviscerateDamage(comboPoints: number): { damage: number; isCrit: boolean } {
+   calculateEviscerateDamage(comboPoints: number): AttackResult {
       const damagePerCP = [0, 223, 325, 427, 529, 631];
-      const baseDamage = damagePerCP[comboPoints] || 0;
+      let baseDamage = damagePerCP[comboPoints] || 0;
 
-      let damage = baseDamage + (this.stats.attackPower * 0.03 * comboPoints);
+      baseDamage = baseDamage + (this.stats.attackPower * 0.03 * comboPoints);
+
+      let damage = baseDamage;
 
       if (this.talents.improvedEviscerate > 0) {
          damage *= (1 + (this.talents.improvedEviscerate * 0.05));
@@ -132,19 +152,25 @@ export class RogueDamageCalculator extends MeleeDamageCalculator {
          damage *= (1 + (this.talents.lethality * 0.06));
       }
 
-      // Roll attack table for miss/dodge/hit/crit
-      const attackResult = this.attackTable.roll(true);
+      const attackTableResult = this.attackTable.roll(true);
 
-      if (attackResult.damageModifier === 0) {
-         return { damage: 0, isCrit: false };
+      if (attackTableResult.amountModifier === 0) {
+         return {
+            type: attackTableResult.type,
+            amountModifier: attackTableResult.amountModifier,
+            baseAmount: baseDamage,
+            amount: 0
+         };
       }
 
-      damage *= attackResult.damageModifier;
-      damage = this.applyArmorReduction(damage);
+      damage *= attackTableResult.amountModifier;
+      damage = Math.floor(this.applyArmorReduction(damage));
 
       return {
-         damage: Math.floor(damage),
-         isCrit: attackResult.result === 'Crit'
+         type: attackTableResult.type,
+         amountModifier: attackTableResult.amountModifier,
+         baseAmount: baseDamage,
+         amount: damage
       };
    }
 }

@@ -1,4 +1,4 @@
-import {AttackResult, CharacterStats, Weapon, SimulationConfig} from '../types';
+import {AttackType, AttackResult, CharacterStats, Weapon, SimulationConfig} from '../types';
 import {AttackTable} from './AttackTable';
 import {DamageCalculator} from './DamageCalculator';
 
@@ -32,9 +32,16 @@ export abstract class MeleeDamageCalculator extends DamageCalculator {
 
    protected abstract getDualWieldSpecBonus(): number;
 
-   calculateAutoAttackDamage(isMainHand: boolean = true): { damage: number; isCrit: boolean } {
+   calculateAutoAttackDamage(isMainHand: boolean = true): AttackResult {
       const weapon = isMainHand ? this.stats.mainHandWeapon : this.stats.offHandWeapon;
-      if (!weapon) return { damage: 0, isCrit: false };
+      if (!weapon) {
+         return {
+            type: AttackType.NoWeapon,
+            amountModifier: 0,
+            baseAmount: 0,
+            amount: 0
+         };
+      }
 
       const weaponDamage = this.getWeaponDamage(weapon);
       const apBonus = (this.stats.attackPower / 14) * weapon.speed;
@@ -47,22 +54,15 @@ export abstract class MeleeDamageCalculator extends DamageCalculator {
          baseDamage *= (dualWieldPenalty + dualWieldSpecBonus);
       }
 
-      const attackResult = this.attackTable.roll(false);
+      const attackTableResult = this.attackTable.roll(false);
 
-      if (attackResult.damageModifier === 0) {
-         return { damage: 0, isCrit: false };
-      }
-
-      let damage = baseDamage * attackResult.damageModifier;
-      damage = this.applyArmorReduction(damage);
+      let damage = baseDamage * attackTableResult.amountModifier;
+      damage = Math.floor(this.applyArmorReduction(damage));
 
       return {
-         damage: Math.floor(damage),
-         isCrit: attackResult.result === 'Crit'
+         ...attackTableResult,
+         baseAmount: baseDamage,
+         amount: damage,
       };
-   }
-
-   getAttackTable(): AttackTable {
-      return this.attackTable;
    }
 }

@@ -1,6 +1,8 @@
 import {
+   AttackResult,
+   AttackType,
    CharacterStats,
-   DamageEvent,
+   DamageEvent, RogueDamageEvent,
    RogueSimulationState,
    SimulationConfig,
    SimulationResult,
@@ -40,17 +42,16 @@ export abstract class BaseSimulator implements Simulator {
       this.state.currentTime += 100;
    }
 
-   protected addDamage(ability: string, damage: number, isCrit: boolean): void {
-      if (damage > 0) {
+   protected addDamage(ability: string, attackResult: AttackResult): void {
+      if (attackResult.amount > 0) {
          this.events.push({
+            ...attackResult,
             timestamp: this.state.currentTime,
             ability,
-            damage,
-            isCrit,
          });
 
          const currentDamage = this.damageBreakdown.get(ability) || 0;
-         this.damageBreakdown.set(ability, currentDamage + damage);
+         this.damageBreakdown.set(ability, currentDamage + attackResult.amount);
       }
    }
 
@@ -181,10 +182,15 @@ export abstract class BaseSimulator implements Simulator {
       return color + '█'.repeat(filled) + reset + '░'.repeat(empty);
    }
 
+   protected getPrintEventExtra(event: DamageEvent): string {
+      return '';
+   }
+
    protected printEvent(event: DamageEvent): void {
-      const critStr = event.isCrit ? ' (CRIT!)' : '';
+      const critStr = event.type === AttackType.Crit ? ' (CRIT!)' : '';
       const timestampSeconds = event.timestamp / 1000;
-      console.log(`[${timestampSeconds.toFixed(1)}s] ${event.ability}: ${event.damage}${critStr}`);
+      const extra = this.getPrintEventExtra(event);
+      console.log(`[${timestampSeconds.toFixed(1)}s] ${event.ability}: ${event.amount}${critStr}${extra}`);
    }
 
    runMultipleIterations(): SimulationResult[] {

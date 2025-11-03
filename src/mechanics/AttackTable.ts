@@ -1,4 +1,4 @@
-import {AttackResult, AttackTableResult, CharacterStats, SimulationConfig} from '../types';
+import {AttackType, AttackTableResult, CharacterStats, SimulationConfig} from '../types';
 
 /**
  * WoW Classic (Era) Attack Table Mechanics
@@ -96,20 +96,20 @@ export class AttackTable {
 
       cumulative += this.missChance;
       if (roll < cumulative) {
-         return {result: AttackResult.Miss, damageModifier: 0};
+         return {type: AttackType.Miss, amountModifier: 0};
       }
 
       cumulative += this.dodgeChance;
       if (roll < cumulative) {
-         return {result: AttackResult.Dodge, damageModifier: 0};
+         return {type: AttackType.Dodge, amountModifier: 0};
       }
 
       if (!isSpecialAttack) {
          cumulative += this.glancingChance;
          if (roll < cumulative) {
             return {
-               result: AttackResult.Glancing,
-               damageModifier: this.calculateGlancingDamageModifier()
+               type: AttackType.Glancing,
+               amountModifier: this.calculateGlancingDamageModifier()
             };
          }
       }
@@ -117,10 +117,10 @@ export class AttackTable {
       const critChance = this.stats.critChance / 100;
       cumulative += critChance;
       if (roll < cumulative) {
-         return {result: AttackResult.Crit, damageModifier: 2.0};
+         return {type: AttackType.Crit, amountModifier: 2.0};
       }
 
-      return {result: AttackResult.Hit, damageModifier: 1.0};
+      return {type: AttackType.Hit, amountModifier: 1.0};
    }
 
    rollCrit(): boolean {

@@ -1,4 +1,6 @@
 import {
+   AttackResult,
+   AttackType,
    CharacterStats,
    RogueTalents,
    RogueRotation,
@@ -61,18 +63,17 @@ export class RogueSimulator extends MeleeSimulator {
       };
    }
 
-   private addRogueDamage(ability: string, damage: number, isCrit: boolean, comboPointsGained: number = 0): void {
-      if (damage > 0) {
+   private addRogueDamage(ability: string, attackResult: AttackResult, comboPointsGained: number = 0): void {
+      if (attackResult.amount > 0) {
          this.events.push({
+            ...attackResult,
             timestamp: this.state.currentTime,
             ability,
-            damage,
-            isCrit,
             comboPointsGained,
          });
 
          const currentDamage = this.damageBreakdown.get(ability) || 0;
-         this.damageBreakdown.set(ability, currentDamage + damage);
+         this.damageBreakdown.set(ability, currentDamage + attackResult.amount);
       }
    }
 
@@ -123,8 +124,8 @@ export class RogueSimulator extends MeleeSimulator {
       }
 
       const cp = this.spendComboPoints();
-      const {damage, isCrit} = this.damageCalculator.calculateEviscerateDamage(cp);
-      this.addDamage('Eviscerate', damage, isCrit);
+      const result = this.damageCalculator.calculateEviscerateDamage(cp);
+      this.addDamage('Eviscerate', result);
       this.triggerGlobalCooldown();
       return true;
    }
@@ -138,10 +139,10 @@ export class RogueSimulator extends MeleeSimulator {
          return false;
       }
 
-      const {damage, isCrit} = this.damageCalculator.calculateSinisterStrikeDamage();
-      
-      this.handleComboPointGeneration(damage, isCrit);
-      this.addRogueDamage('Sinister Strike', damage, isCrit, 1);
+      const result = this.damageCalculator.calculateSinisterStrikeDamage();
+
+      this.handleComboPointGeneration(result);
+      this.addRogueDamage('Sinister Strike', result, 1);
       this.triggerGlobalCooldown();
       return true;
    }
@@ -151,10 +152,10 @@ export class RogueSimulator extends MeleeSimulator {
          return false;
       }
 
-      const {damage, isCrit} = this.damageCalculator.calculateBackstabDamage();
-      
-      this.handleComboPointGeneration(damage, isCrit);
-      this.addRogueDamage('Backstab', damage, isCrit, 1);
+      const result = this.damageCalculator.calculateBackstabDamage();
+
+      this.handleComboPointGeneration(result);
+      this.addRogueDamage('Backstab', result, 1);
       this.triggerGlobalCooldown();
       return true;
    }
@@ -168,23 +169,23 @@ export class RogueSimulator extends MeleeSimulator {
          return false;
       }
 
-      const {damage, isCrit} = this.damageCalculator.calculateHemorrhageDamage();
-      
-      this.handleComboPointGeneration(damage, isCrit);
-      this.addRogueDamage('Hemorrhage', damage, isCrit, 1);
+      const result = this.damageCalculator.calculateHemorrhageDamage();
+
+      this.handleComboPointGeneration(result);
+      this.addRogueDamage('Hemorrhage', result, 1);
       this.triggerGlobalCooldown();
       return true;
    }
 
-   private handleComboPointGeneration(damage: number, isCrit: boolean): void {
-      if (damage <= 0) {
+   private handleComboPointGeneration(result: AttackResult): void {
+      if (result.amount <= 0) {
          return;
       }
 
       this.addComboPoint();
 
       // Seal Fate: chance to gain extra combo point on crit
-      if (isCrit && this.talents.sealFate > 0) {
+      if (result.type === AttackType.Crit && this.talents.sealFate > 0) {
          if (Math.random() < (this.talents.sealFate * 0.2)) {
             this.addComboPoint();
          }
@@ -198,11 +199,11 @@ export class RogueSimulator extends MeleeSimulator {
       }
    }
 
-   protected onMainHandHit(damage: number, isCrit: boolean): void {
+   protected onMainHandHit(result: AttackResult): void {
       if (this.talents.swordSpecialization > 0 &&
          this.stats.mainHandWeapon.type === WeaponType.Sword &&
          Math.random() < (this.talents.swordSpecialization * 0.01)) {
-         this.addDamage('Extra Attack (Sword Spec)', damage, isCrit);
+         this.addDamage('Extra Attack (Sword Spec)', result);
       }
    }
 
@@ -250,11 +251,8 @@ export class RogueSimulator extends MeleeSimulator {
       }
    }
 
-   protected override printEvent(event: RogueDamageEvent): void {
-      const critStr = event.isCrit ? ' (CRIT!)' : '';
-      const cpStr = event.comboPointsGained > 0 ? ` [+${event.comboPointsGained} CP]` : '';
-      const timestampSeconds = event.timestamp / 1000;
-      console.log(`[${timestampSeconds.toFixed(1)}s] ${event.ability}: ${event.damage}${critStr}${cpStr}`);
+   protected override getPrintEventExtra(event: RogueDamageEvent): string {
+      return event.comboPointsGained > 0 ? ` [+${event.comboPointsGained} CP]` : '';
    }
 
    protected getStateText(): string {

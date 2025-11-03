@@ -1,4 +1,4 @@
-import {CharacterStats, SimulationConfig, SimulationResult, WarriorTalents, MeleeSimulationState} from '../types';
+import {AttackResult, CharacterStats, SimulationConfig, SimulationResult, WarriorTalents, MeleeSimulationState} from '../types';
 import {MeleeSimulator} from './MeleeSimulator';
 import {MeleeDamageCalculator} from '../mechanics/MeleeDamageCalculator';
 
@@ -34,11 +34,11 @@ export class WarriorSimulator extends MeleeSimulator {
       throw new Error('Warrior simulator is not yet implemented.');
    }
 
-   protected calculateMainHandDamage(): { damage: number; isCrit: boolean } {
+   protected calculateMainHandDamage(): AttackResult {
       throw new Error('Warrior simulator is not yet implemented.');
    }
 
-   protected calculateOffHandDamage(): { damage: number; isCrit: boolean } {
+   protected calculateOffHandDamage(): AttackResult {
       throw new Error('Warrior simulator is not yet implemented.');
    }
 }

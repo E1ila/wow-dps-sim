@@ -94,11 +94,9 @@ export interface SimulationConfig {
    postResGen?: boolean;
 }
 
-export interface DamageEvent {
+export interface DamageEvent extends AttackResult {
    timestamp: number;
    ability: string;
-   damage: number;
-   isCrit: boolean;
 }
 
 export interface RogueDamageEvent extends DamageEvent {
@@ -112,7 +110,8 @@ export interface SimulationResult {
    damageBreakdown: Map<string, number>;
 }
 
-export enum AttackResult {
+export enum AttackType {
+   NoWeapon = 'Fists',
    Miss = 'Miss',
    Dodge = 'Dodge',
    Glancing = 'Glancing',
@@ -122,6 +121,11 @@ export enum AttackResult {
 }
 
 export interface AttackTableResult {
-   result: AttackResult;
-   damageModifier: number;
+   type: AttackType;
+   amountModifier: number;
+}
+
+export interface AttackResult extends AttackTableResult {
+   baseAmount: number;
+   amount: number;
 }
