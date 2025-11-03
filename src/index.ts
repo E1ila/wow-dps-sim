@@ -27,8 +27,9 @@ program
    .option('--no-offhand', 'Disable off hand weapon')
    .option('--target-level <number>', 'Target level', '63')
    .option('--armor <number>', 'Target armor', '3731')
-   .option('--length <number>', 'Fight length in seconds', '60')
+   .option('--length <number>', 'Fight length in seconds', '300')
    .option('--iterations <number>', 'Number of iterations', '100')
+   .option('--post-res-gen <number>', 'Generate resource AFTER cycle, simulates a more realistic latency', '1')
    .option('--speed <number>', 'Playback speed (0 = instant, 1 = real-time, 0.5 = half speed, etc.)')
    .parse(process.argv);
 
@@ -91,6 +92,7 @@ const config: SimulationConfig = {
    targetLevel: parseInt(opts.targetLevel),
    targetArmor: parseInt(opts.armor),
    iterations: parseInt(opts.iterations),
+   postResGen: opts.postResGen ? opts.postResGen != '0' : false,
 };
 
 console.log('WoW Classic Era - DPS Simulator');

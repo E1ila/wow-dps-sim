@@ -82,38 +82,13 @@ export abstract class BaseSimulator implements Simulator {
 
    simulate(): SimulationResult {
       this.prepareSimulation();
-
       const fightLengthMs = this.config.fightLength * 1000;
       while (this.state.currentTime < fightLengthMs) {
          this.processTimeStep();
+         this.advanceTime();
       }
-
       return this.getSimulationResult();
    }
-
-   private async waitForGameTime(timeDiffMs: number, speed: number): Promise<void> {
-      if (speed > 0 && timeDiffMs > 0) {
-         const delayMs = timeDiffMs / speed;
-         await new Promise(resolve => setTimeout(resolve, delayMs));
-      }
-   }
-
-   private clearFloatingBar(): void {
-      process.stdout.write('\x1b[s'); // Save cursor position
-      process.stdout.write('\x1b[999;0H'); // Move to bottom of screen (row 999 will go to last available row)
-      process.stdout.write('\x1b[2K'); // Clear the line
-      process.stdout.write('\x1b[u'); // Restore cursor position
-   }
-
-   private updateFloatingBar(): void {
-      process.stdout.write('\x1b[s'); // Save cursor position
-      process.stdout.write('\x1b[999;0H'); // Move to bottom of screen
-      process.stdout.write('\x1b[2K'); // Clear the line
-      process.stdout.write(this.getStateText());
-      process.stdout.write('\x1b[u'); // Restore cursor position
-   }
-
-   protected abstract getStateText(): string;
 
    /** @param speed Playback speed multiplier (0 = instant, 1 = real-time, 0.5 = half speed, etc.) */
    async simulateWithPlayback(speed: number): Promise<void> {
@@ -135,8 +110,7 @@ export abstract class BaseSimulator implements Simulator {
 
          this.processTimeStep();
 
-         const timeDiff = this.state.currentTime - timeBefore;
-
+         // do prints
          if (this.events.length > eventsBefore) {
             this.clearFloatingBar();
 
@@ -151,6 +125,8 @@ export abstract class BaseSimulator implements Simulator {
             this.updateFloatingBar();
             lastUpdateTime = this.state.currentTime;
          }
+         this.advanceTime();
+         const timeDiff = this.state.currentTime - timeBefore;
          await this.waitForGameTime(timeDiff, speed);
       }
 
@@ -172,6 +148,30 @@ export abstract class BaseSimulator implements Simulator {
          const percentage = (damage / result.totalDamage) * 100;
          console.log(`${ability}: ${damage.toFixed(0)} (${percentage.toFixed(1)}%)`);
       }
+   }
+
+   protected abstract getStateText(): string;
+
+   private async waitForGameTime(timeDiffMs: number, speed: number): Promise<void> {
+      if (speed > 0 && timeDiffMs > 0) {
+         const delayMs = timeDiffMs / speed;
+         await new Promise(resolve => setTimeout(resolve, delayMs));
+      }
+   }
+
+   private clearFloatingBar(): void {
+      process.stdout.write('\x1b[s'); // Save cursor position
+      process.stdout.write('\x1b[999;0H'); // Move to bottom of screen (row 999 will go to last available row)
+      process.stdout.write('\x1b[2K'); // Clear the line
+      process.stdout.write('\x1b[u'); // Restore cursor position
+   }
+
+   private updateFloatingBar(): void {
+      process.stdout.write('\x1b[s'); // Save cursor position
+      process.stdout.write('\x1b[999;0H'); // Move to bottom of screen
+      process.stdout.write('\x1b[2K'); // Clear the line
+      process.stdout.write(this.getStateText());
+      process.stdout.write('\x1b[u'); // Restore cursor position
    }
 
    protected generateResourceBar(current: number, max: number, barLength: number = 20, color: string = '\x1b[33m'): string {

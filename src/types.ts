@@ -91,6 +91,7 @@ export interface SimulationConfig {
    targetLevel: number;
    targetArmor: number;
    iterations: number;
+   postResGen?: boolean;
 }
 
 export interface DamageEvent {

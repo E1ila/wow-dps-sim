@@ -28,11 +28,15 @@ export abstract class MeleeSimulator extends BaseSimulator {
    }
 
    protected processTimeStep(): void {
-      this.handleResourceGeneration();
+      if (!this.config.postResGen) {
+         this.handleResourceGeneration();
+      }
       this.handleAutoAttacks();
       this.updateBuffs();
       this.executeRotation();
-      this.advanceTime();
+      if (this.config.postResGen) {
+         this.handleResourceGeneration();
+      }
    }
 
    protected abstract handleResourceGeneration(): void;
