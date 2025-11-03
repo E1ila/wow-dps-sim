@@ -157,11 +157,17 @@ export interface RogueBuffEvent extends BuffEvent {
 
 export type SimulationEvent = DamageEvent | BuffEvent;
 
+export interface SimulationStatistics {
+   critCount: number;
+   hitCount: number;
+}
+
 export interface SimulationResult {
    totalDamage: number;
    dps: number;
    events: SimulationEvent[];
    damageBreakdown: Map<string, number>;
+   statistics: SimulationStatistics;
 }
 
 export enum AttackType {

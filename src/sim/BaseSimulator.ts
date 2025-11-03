@@ -8,7 +8,8 @@ import {
    SimulationConfig,
    SimulationEvent,
    SimulationResult,
-   SimulationState
+   SimulationState,
+   SimulationStatistics
 } from '../types';
 import {DamageCalculator} from "../mechanics/DamageCalculator";
 
@@ -26,6 +27,10 @@ export abstract class BaseSimulator implements Simulator {
    protected events: SimulationEvent[] = [];
    protected damageBreakdown: Map<string, number> = new Map();
    protected lastAbilityTimestamp: Map<string, number> = new Map();
+   statistics: SimulationStatistics = {
+      critCount: 0,
+      hitCount: 0,
+   };
 
    protected constructor(
       protected stats: GearStats,
@@ -57,6 +62,12 @@ export abstract class BaseSimulator implements Simulator {
       if (attackResult.amount > 0) {
          const currentDamage = this.damageBreakdown.get(ability) || 0;
          this.damageBreakdown.set(ability, currentDamage + attackResult.amount);
+      }
+
+      if (attackResult.type === AttackType.Crit) {
+         this.statistics.critCount++;
+      } else if (attackResult.type === AttackType.Hit || attackResult.type === AttackType.Glancing) {
+         this.statistics.hitCount++;
       }
    }
 
@@ -110,6 +121,10 @@ export abstract class BaseSimulator implements Simulator {
       this.events = [];
       this.damageBreakdown = new Map();
       this.lastAbilityTimestamp = new Map();
+      this.statistics = {
+         critCount: 0,
+         hitCount: 0,
+      };
    }
 
    protected getSimulationResult(): SimulationResult {
@@ -121,6 +136,7 @@ export abstract class BaseSimulator implements Simulator {
          dps,
          events: this.events,
          damageBreakdown: this.damageBreakdown,
+         statistics: this.statistics,
       };
    }
 
@@ -192,6 +208,15 @@ export abstract class BaseSimulator implements Simulator {
          const percentage = (damage / result.totalDamage) * 100;
          console.log(`${ability}: ${damage.toFixed(0)} (${percentage.toFixed(1)}%)`);
       }
+
+      console.log('\n=== Statistics ===');
+      const stats = result.statistics;
+      const totalHits = stats.critCount + stats.hitCount;
+      const critRate = totalHits > 0 ? (stats.critCount / totalHits * 100) : 0;
+      console.log(`Crits: ${stats.critCount}`);
+      console.log(`Hits: ${stats.hitCount}`);
+      console.log(`Total: ${totalHits}`);
+      console.log(`Crit Rate: ${critRate.toFixed(2)}%`);
    }
 
    protected abstract getStateText(): string;
@@ -287,7 +312,7 @@ export abstract class BaseSimulator implements Simulator {
       return totalDPS / results.length;
    }
 
-   static printResults(results: SimulationResult[]): void {
+   static printResults(results: SimulationResult[], simulator: BaseSimulator): void {
       const avgDPS = this.calculateAverageDPS(results);
       const minDPS = Math.min(...results.map(r => r.dps));
       const maxDPS = Math.max(...results.map(r => r.dps));
@@ -310,6 +335,16 @@ export abstract class BaseSimulator implements Simulator {
             const percentage = (damage / totalDamage) * 100;
             console.log(`${ability}: ${damage.toFixed(0)} (${percentage.toFixed(1)}%)`);
          }
+
+         console.log('\n=== Statistics ===');
+         const stats = results[0].statistics;
+         const totalHits = stats.critCount + stats.hitCount;
+         const critRate = totalHits > 0 ? (stats.critCount / totalHits * 100) : 0;
+         console.log(`Crits: ${stats.critCount}`);
+         console.log(`Hits: ${stats.hitCount}`);
+         console.log(`Total: ${totalHits}`);
+         console.log(`Actual Crit Rate: ${critRate.toFixed(2)}%`);
+         console.log(`Stats Crit Rate: ${simulator.damageCalculator.critChance.toFixed(2)}%`);
       }
    }
 }
