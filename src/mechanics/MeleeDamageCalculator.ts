@@ -5,19 +5,22 @@ import {DamageCalculator} from './DamageCalculator';
 interface MeleeDamageParams {
    baseDamage: number;
    damageMultipliers?: number[];
-   isSpecialAttack?: boolean;
+   isSpecialAttack: boolean;
+   isOffhand?: boolean;
 }
 
 export abstract class MeleeDamageCalculator extends DamageCalculator {
    protected readonly attackTable: AttackTable;
    protected readonly targetArmorReduction: number;
 
+   abstract get dualWieldSpecBonus(): number;
+
    protected constructor(
       stats: GearStats,
       config: SimulationConfig
    ) {
       super(stats, config);
-      this.attackTable = new AttackTable(stats, config);
+      this.attackTable = new AttackTable(this, config);
       this.targetArmorReduction = this.calculateArmorReduction();
    }
 
@@ -30,16 +33,16 @@ export abstract class MeleeDamageCalculator extends DamageCalculator {
       return 1 - reduction;
    }
 
-   protected getWeaponDamage(weapon: Weapon): number {
-      return weapon.minDamage + Math.random() * (weapon.maxDamage - weapon.minDamage);
-   }
-
    protected applyArmorReduction(damage: number): number {
       return damage * this.targetArmorReduction;
    }
 
+   protected getWeaponDamage(weapon: Weapon): number {
+      return weapon.minDamage + Math.random() * (weapon.maxDamage - weapon.minDamage);
+   }
+
    protected calculateMeleeDamage(params: MeleeDamageParams): AttackResult {
-      const {baseDamage, damageMultipliers = [], isSpecialAttack = true} = params;
+      const {baseDamage, damageMultipliers = [], isSpecialAttack, isOffhand} = params;
 
       let damage = baseDamage;
 
@@ -47,7 +50,7 @@ export abstract class MeleeDamageCalculator extends DamageCalculator {
          damage *= multiplier;
       }
 
-      const attackTableResult = this.attackTable.roll(isSpecialAttack);
+      const attackTableResult = this.attackTable.roll(isSpecialAttack, isOffhand);
 
       if (attackTableResult.amountModifier === 0) {
          return {
@@ -69,10 +72,8 @@ export abstract class MeleeDamageCalculator extends DamageCalculator {
       };
    }
 
-   protected abstract getDualWieldSpecBonus(): number;
-
-   calculateAutoAttackDamage(isMainHand: boolean = true): AttackResult {
-      const weapon = isMainHand ? this.stats.mainHandWeapon : this.stats.offHandWeapon;
+   calculateAutoAttackDamage(isOffhand: boolean = false): AttackResult {
+      const weapon = isOffhand ? this.stats.offHandWeapon : this.stats.mainHandWeapon;
       if (!weapon) {
          return {
             type: AttackType.NoWeapon,
@@ -87,16 +88,16 @@ export abstract class MeleeDamageCalculator extends DamageCalculator {
       let baseDamage = weaponDamage + apBonus;
 
       const multipliers = [];
-      if (!isMainHand) {
+      if (!isOffhand) {
          const dualWieldPenalty = 0.5;
-         const dualWieldSpecBonus = this.getDualWieldSpecBonus();
-         multipliers.push(dualWieldPenalty + dualWieldSpecBonus);
+         multipliers.push(dualWieldPenalty + this.dualWieldSpecBonus);
       }
 
       return this.calculateMeleeDamage({
          baseDamage,
          damageMultipliers: multipliers,
-         isSpecialAttack: false
+         isSpecialAttack: false,
+         isOffhand,
       });
    }
 }

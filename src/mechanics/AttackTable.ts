@@ -1,24 +1,33 @@
-import {AttackTableResult, AttackType, GearStats, SimulationConfig} from '../types';
+import {AttackTableResult, AttackType, SimulationConfig} from '../types';
+
+export interface AttackTableStatsProvider {
+   get critChance(): number;
+   get weaponSkill(): number;
+   get hitChance(): number;
+   get playerLevel(): number;
+}
 
 /**
  * WoW Classic (Era) Attack Table Mechanics
  * based on https://bookdown.org/marrowwar/marrow_compendium/mechanics.html
  */
 export class AttackTable {
-   private readonly missChance: number;
+   private readonly mhMissChance: number;
+   private readonly ohMissChance: number;
    private readonly dodgeChance: number;
    private readonly glancingChance: number;
 
    constructor(
-      private stats: GearStats,
+      private stats: AttackTableStatsProvider,
       private config: SimulationConfig
    ) {
-      this.missChance = this.calculateMissChance();
+      this.mhMissChance = this.calculateMissChance();
+      this.ohMissChance = this.calculateMissChance(true);
       this.dodgeChance = this.calculateDodgeChance();
       this.glancingChance = this.calculateGlancingChance();
    }
 
-   private calculateMissChance(): number {
+   private calculateMissChance(offhand?: boolean): number {
       const targetDefense = this.config.targetLevel * 5;
       const weaponSkill = this.stats.weaponSkill;
       const defenseSkillDiff = targetDefense - weaponSkill;
@@ -33,7 +42,7 @@ export class AttackTable {
       const missReduction = this.stats.hitChance / 100;
       let missChance = baseMissChance - missReduction;
 
-      if (this.stats.offHandWeapon) {
+      if (offhand) {
          missChance = (missChance * 0.8) + 0.2;
       }
 
@@ -50,7 +59,7 @@ export class AttackTable {
 
    private calculateGlancingChance(): number {
       const targetLevel = this.config.targetLevel;
-      const playerLevel = this.stats.level;
+      const playerLevel = this.stats.playerLevel;
       const weaponSkill = this.stats.weaponSkill;
 
       if (targetLevel < playerLevel) {
@@ -70,7 +79,7 @@ export class AttackTable {
       const targetLevel = this.config.targetLevel;
       const targetDefense = targetLevel * 5;
 
-      if (targetLevel <= this.stats.level) {
+      if (targetLevel <= this.stats.playerLevel) {
          return 0.95;
       }
 
@@ -90,11 +99,11 @@ export class AttackTable {
       return Math.max(lowEnd, highEnd + 0.6 - penalty);
    }
 
-   roll(isSpecialAttack: boolean = false): AttackTableResult {
+   roll(isSpecialAttack: boolean = false, isOffhand?: boolean): AttackTableResult {
       const roll = Math.random();
       let cumulative = 0;
 
-      cumulative += this.missChance;
+      cumulative += (isOffhand ? this.ohMissChance : this.mhMissChance);
       if (roll < cumulative) {
          return {type: AttackType.Miss, amountModifier: 0};
       }
@@ -121,9 +130,5 @@ export class AttackTable {
       }
 
       return {type: AttackType.Hit, amountModifier: 1.0};
-   }
-
-   rollCrit(): boolean {
-      return Math.random() < (this.stats.critChance / 100);
    }
 }

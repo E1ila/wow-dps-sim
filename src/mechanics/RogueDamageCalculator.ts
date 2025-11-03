@@ -10,8 +10,12 @@ export class RogueDamageCalculator extends MeleeDamageCalculator {
       super(stats, config);
    }
 
-   protected getDualWieldSpecBonus(): number {
+   get dualWieldSpecBonus(): number {
       return this.talents.dualWieldSpecialization * 0.05;
+   }
+
+   get critChance(): number {
+      return super.critChance + this.talents.malice;
    }
 
    calculateSinisterStrikeDamage(): AttackResult {
@@ -26,7 +30,11 @@ export class RogueDamageCalculator extends MeleeDamageCalculator {
          multipliers.push(1 + (this.talents.lethality * 0.06));
       }
 
-      return this.calculateMeleeDamage({baseDamage, damageMultipliers: multipliers});
+      return this.calculateMeleeDamage({
+         baseDamage,
+         damageMultipliers: multipliers,
+         isSpecialAttack: true,
+      });
    }
 
    calculateBackstabDamage(): AttackResult {
@@ -44,7 +52,11 @@ export class RogueDamageCalculator extends MeleeDamageCalculator {
          multipliers.push(1 + (this.talents.daggerSpecialization * 0.01));
       }
 
-      return this.calculateMeleeDamage({baseDamage, damageMultipliers: multipliers});
+      return this.calculateMeleeDamage({
+         baseDamage,
+         damageMultipliers: multipliers,
+         isSpecialAttack: true,
+      });
    }
 
    calculateHemorrhageDamage(): AttackResult {
@@ -60,7 +72,11 @@ export class RogueDamageCalculator extends MeleeDamageCalculator {
          multipliers.push(1 + (this.talents.daggerSpecialization * 0.01));
       }
 
-      return this.calculateMeleeDamage({baseDamage, damageMultipliers: multipliers});
+      return this.calculateMeleeDamage({
+         baseDamage,
+         damageMultipliers: multipliers,
+         isSpecialAttack: true,
+      });
    }
 
    calculateEviscerateDamage(comboPoints: number): AttackResult {
@@ -78,6 +94,10 @@ export class RogueDamageCalculator extends MeleeDamageCalculator {
          multipliers.push(1 + (this.talents.lethality * 0.06));
       }
 
-      return this.calculateMeleeDamage({baseDamage, damageMultipliers: multipliers});
+      return this.calculateMeleeDamage({
+         baseDamage,
+         damageMultipliers: multipliers,
+         isSpecialAttack: true,
+      });
    }
 }

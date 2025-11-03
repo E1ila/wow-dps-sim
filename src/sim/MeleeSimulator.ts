@@ -1,5 +1,5 @@
 import {BaseSimulator} from './BaseSimulator';
-import {AttackResult, AttackType, MeleeSimulationState} from '../types';
+import {AttackResult, MeleeSimulationState} from '../types';
 import {MeleeDamageCalculator} from "../mechanics/MeleeDamageCalculator";
 
 export abstract class MeleeSimulator extends BaseSimulator {
@@ -63,10 +63,10 @@ export abstract class MeleeSimulator extends BaseSimulator {
    }
 
    protected calculateMainHandDamage(): AttackResult {
-      return this.damageCalculator.calculateAutoAttackDamage(true);
+      return this.damageCalculator.calculateAutoAttackDamage(false);
    }
 
    protected calculateOffHandDamage(): AttackResult {
-      return this.damageCalculator.calculateAutoAttackDamage(false);
+      return this.damageCalculator.calculateAutoAttackDamage(true);
    }
 }
