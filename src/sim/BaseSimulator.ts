@@ -225,6 +225,13 @@ export abstract class BaseSimulator implements Simulator {
       return color + '█'.repeat(filled) + reset + '░'.repeat(empty);
    }
 
+   protected getBuffsStatusText(): string {
+      return this.state.activeBuffs
+         .filter(buff => buff.expiry > this.state.currentTime)
+         .map(buff => ` | ${buff.name}: ${((buff.expiry - this.state.currentTime) / 1000).toFixed(1)}s`)
+         .join('');
+   }
+
    protected getPrintDamageEventExtra(event: DamageEvent): string {
       return '';
    }

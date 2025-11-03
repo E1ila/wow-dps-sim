@@ -305,9 +305,7 @@ export class RogueSimulator extends MeleeSimulator {
       const timestampSeconds = this.state.currentTime / 1000;
       const energyBar = this.generateResourceBar(this.state.energy, 100, 20);
       const cpDots = c.red + '●'.repeat(this.state.comboPoints) + c.reset + '○'.repeat(5 - this.state.comboPoints);
-      const sndStatus = this.isBuffActive(Buffs.SnD)
-         ? ` | SnD: ${(this.getBuffTimeRemaining(Buffs.SnD) / 1000).toFixed(1)}s`
-         : '';
-      return `[${timestampSeconds.toFixed(1)}s] [${energyBar}] ${this.state.energy} ${cpDots}${sndStatus}`;
+      const buffsStatus = this.getBuffsStatusText();
+      return `[${timestampSeconds.toFixed(1)}s] [${energyBar}] ${this.state.energy} ${cpDots}${buffsStatus}`;
    }
 }
