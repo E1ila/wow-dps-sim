@@ -5,6 +5,7 @@ export interface AttackTableStatsProvider {
    get weaponSkill(): number;
    get hitChance(): number;
    get playerLevel(): number;
+   get isDualWielding(): boolean;
 }
 
 /**
@@ -12,8 +13,7 @@ export interface AttackTableStatsProvider {
  * based on https://bookdown.org/marrowwar/marrow_compendium/mechanics.html
  */
 export class AttackTable {
-   private readonly mhMissChance: number;
-   private readonly ohMissChance: number;
+   private readonly missChance: number;
    private readonly dodgeChance: number;
    private readonly glancingChance: number;
 
@@ -21,13 +21,12 @@ export class AttackTable {
       private stats: AttackTableStatsProvider,
       private config: SimulationConfig
    ) {
-      this.mhMissChance = this.calculateMissChance();
-      this.ohMissChance = this.calculateMissChance(true);
+      this.missChance = this.calculateMissChance();
       this.dodgeChance = this.calculateDodgeChance();
       this.glancingChance = this.calculateGlancingChance();
    }
 
-   private calculateMissChance(offhand?: boolean): number {
+   private calculateMissChance(): number {
       const targetDefense = this.config.targetLevel * 5;
       const weaponSkill = this.stats.weaponSkill;
       const defenseSkillDiff = targetDefense - weaponSkill;
@@ -42,7 +41,9 @@ export class AttackTable {
       const missReduction = this.stats.hitChance / 100;
       let missChance = baseMissChance - missReduction;
 
-      if (offhand) {
+      if (this.stats.isDualWielding) {
+         // Dual wielding adds a 19% miss penalty to both main and offhand weapons.
+         // https://wowpedia.fandom.com/wiki/Dual_wield
          missChance = (missChance * 0.8) + 0.2;
       }
 
@@ -99,11 +100,11 @@ export class AttackTable {
       return Math.max(lowEnd, highEnd + 0.6 - penalty);
    }
 
-   roll(isSpecialAttack: boolean = false, isOffhand?: boolean): AttackTableResult {
+   roll(isSpecialAttack: boolean = false): AttackTableResult {
       const roll = Math.random();
       let cumulative = 0;
 
-      cumulative += (isOffhand ? this.ohMissChance : this.mhMissChance);
+      cumulative += this.missChance;
       if (roll < cumulative) {
          return {type: AttackType.Miss, amountModifier: 0};
       }

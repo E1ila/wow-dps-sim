@@ -22,4 +22,8 @@ export abstract class DamageCalculator implements AttackTableStatsProvider {
    get playerLevel(): number {
       return this.stats.level;
    }
+
+   get isDualWielding(): boolean {
+      return this.stats.offHandWeapon !== undefined;
+   }
 }

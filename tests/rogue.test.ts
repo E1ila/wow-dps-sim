@@ -181,8 +181,14 @@ describe('Rogue Talents', () => {
          const calculator = new RogueDamageCalculator(baseStats, config, talentsWithOpportunity);
          const calculatorNoOpportunity = new RogueDamageCalculator(baseStats, config, baseTalents);
 
+         const originalRandom = Math.random;
+         const fixedRandomValue = 0.5;
+         Math.random = () => fixedRandomValue;
+
          const ssResult = calculator.calculateSinisterStrikeDamage();
          const ssResultNoOpportunity = calculatorNoOpportunity.calculateSinisterStrikeDamage();
+
+         Math.random = originalRandom;
 
          expect(ssResult.baseAmount).toBe(ssResultNoOpportunity.baseAmount);
       });

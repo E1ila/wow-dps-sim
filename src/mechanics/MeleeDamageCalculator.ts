@@ -42,7 +42,7 @@ export abstract class MeleeDamageCalculator extends DamageCalculator {
    }
 
    protected calculateMeleeDamage(params: MeleeDamageParams): AttackResult {
-      const {baseDamage, damageMultipliers = [], isSpecialAttack, isOffhand} = params;
+      const {baseDamage, damageMultipliers = [], isSpecialAttack} = params;
 
       let damage = baseDamage;
 
@@ -50,7 +50,7 @@ export abstract class MeleeDamageCalculator extends DamageCalculator {
          damage *= multiplier;
       }
 
-      const attackTableResult = this.attackTable.roll(isSpecialAttack, isOffhand);
+      const attackTableResult = this.attackTable.roll(isSpecialAttack);
 
       if (attackTableResult.amountModifier === 0) {
          return {
