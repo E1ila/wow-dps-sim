@@ -41,10 +41,6 @@ export class RogueSimulator extends MeleeSimulator {
    damageBreakdown: Map<string, number> = new Map();
    rotation: RogueRotation;
 
-   get critChance(): number {
-      return this.damageCalculator.critChance(this.stats.mainHandWeapon);
-   }
-
    constructor(
       stats: GearStats,
       config: SimulationConfig,

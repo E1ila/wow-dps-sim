@@ -17,7 +17,7 @@ export class RogueDamageCalculator extends MeleeDamageCalculator {
    critChance(weapon: Weapon): number {
       let critChance = super.critChance(weapon) + this.talents.malice;
       if (this.talents.daggerSpecialization > 0 && weapon.type === WeaponType.Dagger) {
-         critChance += this.talents.daggerSpecialization * 0.01;
+         critChance += this.talents.daggerSpecialization;
       }
       return critChance;
    }

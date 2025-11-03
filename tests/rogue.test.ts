@@ -79,7 +79,7 @@ describe('Rogue Talents', () => {
 
             const simulator = new RogueSimulator(baseStats, config, talents);
 
-            expect(simulator.critChance).toBe(expectedCritChance);
+            expect(simulator.damageCalculator.critChance(baseStats.mainHandWeapon)).toBe(expectedCritChance);
          });
       });
 
@@ -153,6 +153,160 @@ describe('Rogue Talents', () => {
             expect(observedCritRate).toBeGreaterThan(expectedCritRate - 1);
             expect(observedCritRate).toBeLessThan(expectedCritRate + 1);
          });
+      });
+   });
+
+   describe('Dagger Specialization', () => {
+
+      it('should increase crit chance by 1% per point when using daggers', () => {
+         const testCases = [
+            {daggerSpecialization: 0, expectedCritChance: 30},
+            {daggerSpecialization: 1, expectedCritChance: 31},
+            {daggerSpecialization: 2, expectedCritChance: 32},
+            {daggerSpecialization: 3, expectedCritChance: 33},
+            {daggerSpecialization: 4, expectedCritChance: 34},
+            {daggerSpecialization: 5, expectedCritChance: 35},
+         ];
+
+         testCases.forEach(({daggerSpecialization, expectedCritChance}) => {
+            const talents: RogueTalents = {
+               ...baseTalents,
+               daggerSpecialization,
+            };
+
+            const simulator = new RogueSimulator(baseStats, config, talents);
+
+            expect(simulator.damageCalculator.critChance(baseStats.mainHandWeapon)).toBe(expectedCritChance);
+         });
+      });
+
+      it('should NOT increase crit chance when using non-dagger weapons', () => {
+         const swordStats: GearStats = {
+            ...baseStats,
+            mainHandWeapon: {
+               minDamage: 76,
+               maxDamage: 142,
+               speed: 1.7,
+               type: WeaponType.Sword,
+            },
+         };
+
+         const talents: RogueTalents = {
+            ...baseTalents,
+            daggerSpecialization: 5,
+         };
+
+         const simulator = new RogueSimulator(swordStats, config, talents);
+
+         expect(simulator.damageCalculator.critChance(swordStats.mainHandWeapon)).toBe(30);
+      });
+
+      it('should apply dagger specialization to actual attack table rolls with daggers', () => {
+         const testCases = [
+            {daggerSpecialization: 0, expectedCritRate: 30},
+            {daggerSpecialization: 3, expectedCritRate: 33},
+            {daggerSpecialization: 5, expectedCritRate: 35},
+         ];
+
+         testCases.forEach(({daggerSpecialization, expectedCritRate}) => {
+            const talents: RogueTalents = {
+               ...baseTalents,
+               daggerSpecialization,
+            };
+
+            const simulator = new RogueSimulator(baseStats, config, talents);
+            const attackTable = new AttackTable(simulator.damageCalculator, config);
+
+            const numRolls = 100000;
+            let crits = 0;
+
+            for (let i = 0; i < numRolls; i++) {
+               const result = attackTable.roll(true, baseStats.mainHandWeapon);
+               if (result.type === AttackType.Crit) {
+                  crits++;
+               }
+            }
+
+            const observedCritRate = (crits / numRolls) * 100;
+
+            expect(observedCritRate).toBeGreaterThan(expectedCritRate - 1);
+            expect(observedCritRate).toBeLessThan(expectedCritRate + 1);
+         });
+      });
+
+      it('should NOT apply dagger specialization to attack table rolls with swords', () => {
+         const swordWeapon = {
+            minDamage: 76,
+            maxDamage: 142,
+            speed: 1.7,
+            type: WeaponType.Sword,
+         };
+
+         const swordStats: GearStats = {
+            ...baseStats,
+            mainHandWeapon: swordWeapon,
+         };
+
+         const talents: RogueTalents = {
+            ...baseTalents,
+            daggerSpecialization: 5,
+         };
+
+         const simulator = new RogueSimulator(swordStats, config, talents);
+         const attackTable = new AttackTable(simulator.damageCalculator, config);
+
+         const numRolls = 100000;
+         let crits = 0;
+
+         for (let i = 0; i < numRolls; i++) {
+            const result = attackTable.roll(true, swordWeapon);
+            if (result.type === AttackType.Crit) {
+               crits++;
+            }
+         }
+
+         const observedCritRate = (crits / numRolls) * 100;
+
+         expect(observedCritRate).toBeGreaterThan(29);
+         expect(observedCritRate).toBeLessThan(31);
+      });
+
+      it('should stack with malice talent', () => {
+         const talents: RogueTalents = {
+            ...baseTalents,
+            malice: 5,
+            daggerSpecialization: 5,
+         };
+
+         const simulator = new RogueSimulator(baseStats, config, talents);
+
+         expect(simulator.damageCalculator.critChance(baseStats.mainHandWeapon)).toBe(40);
+      });
+
+      it('should stack with malice talent in actual attack table rolls', () => {
+         const talents: RogueTalents = {
+            ...baseTalents,
+            malice: 5,
+            daggerSpecialization: 5,
+         };
+
+         const simulator = new RogueSimulator(baseStats, config, talents);
+         const attackTable = new AttackTable(simulator.damageCalculator, config);
+
+         const numRolls = 100000;
+         let crits = 0;
+
+         for (let i = 0; i < numRolls; i++) {
+            const result = attackTable.roll(true, baseStats.mainHandWeapon);
+            if (result.type === AttackType.Crit) {
+               crits++;
+            }
+         }
+
+         const observedCritRate = (crits / numRolls) * 100;
+
+         expect(observedCritRate).toBeGreaterThan(39);
+         expect(observedCritRate).toBeLessThan(41);
       });
    });
 
