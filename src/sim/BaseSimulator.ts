@@ -42,7 +42,7 @@ export abstract class BaseSimulator implements Simulator {
    protected abstract updateBuffs(): void;
 
    protected advanceTime() {
-      this.state.currentTime += 100;
+      this.state.currentTime += 10;
    }
 
    protected addDamage(ability: string, attackResult: AttackResult, extra?: any): void {
@@ -225,7 +225,7 @@ export abstract class BaseSimulator implements Simulator {
             const lastTimestamp = this.lastAbilityTimestamp.get(event.ability);
             if (lastTimestamp !== undefined) {
                const timeSinceLast = (event.timestamp - lastTimestamp) / 1000;
-               timeSinceLastStr = ` ${c.gray}(+${timeSinceLast.toFixed(1)}s)${c.reset}`;
+               timeSinceLastStr = ` ${c.gray}(+${timeSinceLast.toFixed(2)}s)${c.reset}`;
             }
             this.lastAbilityTimestamp.set(event.ability, event.timestamp);
          }

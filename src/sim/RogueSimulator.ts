@@ -22,6 +22,8 @@ const DEFAULT_SWORDS_ROTATION: RogueRotation = {
    refreshSndSecondsAhead5Combo: 3,
 };
 
+const SLICE_N_DICE_IAS = 0.2; // 20% attack speed increase
+
 export class RogueSimulator extends MeleeSimulator {
    protected override state: RogueSimulationState;
    protected override damageCalculator: RogueDamageCalculator;
@@ -78,12 +80,22 @@ export class RogueSimulator extends MeleeSimulator {
       this.state.energy = Math.min(100, this.state.energy + amount);
    }
 
+   protected getHasteMultiplier(): number {
+      return this.state.sliceAndDiceActive ? 1 + SLICE_N_DICE_IAS : 1;
+   }
+
    private spendEnergy(amount: number): boolean {
       if (this.state.energy >= amount) {
          this.state.energy -= amount;
          return true;
       }
       return false;
+   }
+
+   private refundIfNeeded(result: AttackResult, energyCost: number): void {
+      if (result.type === AttackType.Miss || result.type === AttackType.Dodge) {
+         this.addEnergy(energyCost * 0.8);
+      }
    }
 
    private addComboPoint(): void {
@@ -113,7 +125,7 @@ export class RogueSimulator extends MeleeSimulator {
       }
 
       const cp = this.spendComboPoints();
-      const baseDuration = 9 + (cp * 3);
+      const baseDuration = 6 + (cp * 3);
       const improvedSndBonus = this.talents.improvedSliceAndDice * 0.15;
       const durationSeconds = baseDuration * (1 + improvedSndBonus);
       const durationMs = durationSeconds * 1000;
@@ -149,6 +161,8 @@ export class RogueSimulator extends MeleeSimulator {
       }
 
       const result = this.damageCalculator.calculateSinisterStrikeDamage();
+      this.refundIfNeeded(result, energyCost);
+
       const comboPointsGained = this.handleComboPointGeneration(result);
       this.addDamage('SS', result, comboPointsGained);
       this.triggerGlobalCooldown();
@@ -156,11 +170,15 @@ export class RogueSimulator extends MeleeSimulator {
    }
 
    private castBackstab(): boolean {
-      if (!this.spendEnergy(60)) {
+      const energyCost = 60;
+
+      if (!this.spendEnergy(energyCost)) {
          return false;
       }
 
       const result = this.damageCalculator.calculateBackstabDamage();
+      this.refundIfNeeded(result, energyCost);
+
       const comboPointsGained = this.handleComboPointGeneration(result);
       this.addDamage('BS', result, comboPointsGained);
       this.triggerGlobalCooldown();
@@ -177,6 +195,8 @@ export class RogueSimulator extends MeleeSimulator {
       }
 
       const result = this.damageCalculator.calculateHemorrhageDamage();
+      this.refundIfNeeded(result, energyCost);
+
       const comboPointsGained = this.handleComboPointGeneration(result);
       this.addDamage('HEMO', result, comboPointsGained);
       this.triggerGlobalCooldown();

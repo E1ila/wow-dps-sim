@@ -41,6 +41,10 @@ export abstract class MeleeSimulator extends BaseSimulator {
 
    protected abstract handleResourceGeneration(): void;
 
+   protected getHasteMultiplier(): number {
+      return 1;
+   }
+
    protected processAutoAttacks(
       onMainHandHit: (result: AttackResult) => void,
       onOffHandHit?: (result: AttackResult) => void
@@ -48,13 +52,13 @@ export abstract class MeleeSimulator extends BaseSimulator {
       if (this.state.currentTime >= this.state.mainHandNextSwing) {
          const result = this.calculateMainHandDamage();
          onMainHandHit(result);
-         this.state.mainHandNextSwing = this.state.currentTime + (this.stats.mainHandWeapon.speed * 1000);
+         this.state.mainHandNextSwing = this.state.currentTime + (this.stats.mainHandWeapon.speed * 1000 / this.getHasteMultiplier());
       }
 
       if (this.stats.offHandWeapon && onOffHandHit && this.state.currentTime >= this.state.offHandNextSwing) {
          const result = this.calculateOffHandDamage();
          onOffHandHit(result);
-         this.state.offHandNextSwing = this.state.currentTime + (this.stats.offHandWeapon.speed * 1000);
+         this.state.offHandNextSwing = this.state.currentTime + (this.stats.offHandWeapon.speed * 1000 / this.getHasteMultiplier());
       }
    }
 
