@@ -18,6 +18,15 @@ export const c = {
    reset: '\x1b[0m',
 } as const;
 
+export function colorByClass(characterClass: CharacterClass): string {
+   switch (characterClass) {
+      case CharacterClass.Rogue:
+         return c.yellow;
+      case CharacterClass.Warrior:
+         return c.red;
+   }
+}
+
 export enum Buffs {
    SnD = 'SnD',
 }

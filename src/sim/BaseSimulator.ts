@@ -247,7 +247,7 @@ export abstract class BaseSimulator implements Simulator {
       if (event.eventType === 'buff') {
          const extra = this.getPrintBuffEventExtra(event);
          const durationStr = ` (${(event.duration / 1000).toFixed(1)}s)`;
-         console.log(`${timestamp} ${c.yellow}${event.buffName}${c.reset}${extra}${durationStr}`);
+         console.log(`${timestamp} ${c.green}${event.buffName}${c.reset}${extra}${durationStr}`);
       } else {
          const extra = this.getPrintDamageEventExtra(event);
          const isWhiteDamage = event.ability === 'MH' || event.ability === 'OH' || event.ability === 'EXTRA';
@@ -264,10 +264,10 @@ export abstract class BaseSimulator implements Simulator {
          }
 
          if (event.amount === 0) {
-            console.log(`${timestamp} ${event.ability} ${c.red}${event.type.toUpperCase()}${c.reset}${extra}${timeSinceLastStr}`);
+            console.log(`${timestamp} ${c.blue}${event.ability} ${c.red}${event.type.toUpperCase()}${c.reset}${extra}${timeSinceLastStr}`);
          } else {
             const critStr = event.type === AttackType.Crit ? ' (crit)' : '';
-            console.log(`${timestamp} ${c.yellow}${event.ability} ${abilityColor}${event.amount}${c.reset}${critStr}${extra}${timeSinceLastStr}`);
+            console.log(`${timestamp} ${c.blue}${event.ability} ${abilityColor}${event.amount}${c.reset}${critStr}${extra}${timeSinceLastStr}`);
          }
       }
    }

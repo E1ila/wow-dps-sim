@@ -1,6 +1,8 @@
 import {Command} from 'commander';
 import {
+   c,
    CharacterClass,
+   colorByClass,
    GearStats,
    RogueRotation,
    RogueTalents,
@@ -102,29 +104,13 @@ const config: SimulationConfig = {
    postResGen: opts.postResGen ? opts.postResGen != '0' : false,
 };
 
-console.log('WoW Classic Era - DPS Simulator');
-console.log('================================\n');
-
-console.log(`Class: ${characterClass.toUpperCase()}`);
-console.log(`Spec: ${spec.name}`);
-console.log(`Description: ${spec.description}`);
-
-console.log('\nGear Stats:');
-console.log(`  Attack Power: ${baseStats.attackPower}`);
-console.log(`  Crit Chance: ${baseStats.critChance}%`);
-console.log(`  Hit Chance: ${baseStats.hitChance}%`);
-console.log(`  Weapon Skill: ${baseStats.weaponSkill}`);
-console.log(`  Main Hand: ${baseStats.mainHandWeapon.minDamage}-${baseStats.mainHandWeapon.maxDamage} (${baseStats.mainHandWeapon.speed}s) ${baseStats.mainHandWeapon.type}`);
-if (baseStats.offHandWeapon) {
-   console.log(`  Off Hand: ${baseStats.offHandWeapon.minDamage}-${baseStats.offHandWeapon.maxDamage} (${baseStats.offHandWeapon.speed}s) ${baseStats.offHandWeapon.type}`);
-}
-
-console.log(`\nSimulation Config:`);
-console.log(`  Fight Length: ${config.fightLength}s`);
-console.log(`  Target: Level ${config.targetLevel} (${config.targetArmor} armor)`);
-console.log(`  Iterations: ${config.iterations}\n`);
-
-console.log('Running simulation...\n');
+console.log(`${c.brightMagenta}WoW Classic Era - DPS Simulator${c.reset}`);
+console.log(` ## ${colorByClass(characterClass)}${characterClass.toUpperCase()}${c.reset} ##`);
+console.log(`${c.cyan}Config: ${c.reset}${JSON.stringify(baseStats)}`);
+console.log(`${c.cyan}Base stats (inc. gear): ${c.reset}${JSON.stringify(config)}`);
+console.log(`${c.cyan}Talents: ${c.reset}${JSON.stringify(spec.talents)}`);
+console.log(`${c.cyan}Rotation: ${c.reset}${JSON.stringify(spec.rotation)}`);
+console.log(`${c.brightCyan}Running simulation...${c.reset}`);
 
 let simulator: BaseSimulator;
 
