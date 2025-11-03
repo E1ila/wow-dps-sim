@@ -26,6 +26,7 @@ export abstract class BaseSimulator implements Simulator {
    protected abstract damageCalculator: DamageCalculator;
    protected events: SimulationEvent[] = [];
    protected damageBreakdown: Map<string, number> = new Map();
+   protected lastAbilityTimestamp: Map<string, number> = new Map();
 
    protected constructor(
       protected stats: CharacterStats,
@@ -82,6 +83,7 @@ export abstract class BaseSimulator implements Simulator {
       this.state = this.initializeState();
       this.events = [];
       this.damageBreakdown = new Map();
+      this.lastAbilityTimestamp = new Map();
    }
 
    protected getSimulationResult(): SimulationResult {
@@ -216,13 +218,23 @@ export abstract class BaseSimulator implements Simulator {
       } else {
          const extra = this.getPrintDamageEventExtra(event);
          const isWhiteDamage = event.ability === 'MH' || event.ability === 'OH' || event.ability === 'EXTRA';
-         const abilityColor = isWhiteDamage ? c.white : c.yellow;
+         const abilityColor = isWhiteDamage ? c.white : c.brightYellow;
+
+         let timeSinceLastStr = '';
+         if (isWhiteDamage) {
+            const lastTimestamp = this.lastAbilityTimestamp.get(event.ability);
+            if (lastTimestamp !== undefined) {
+               const timeSinceLast = (event.timestamp - lastTimestamp) / 1000;
+               timeSinceLastStr = ` ${c.gray}(+${timeSinceLast.toFixed(1)}s)${c.reset}`;
+            }
+            this.lastAbilityTimestamp.set(event.ability, event.timestamp);
+         }
 
          if (event.amount === 0) {
-            console.log(`${timestamp} ${event.ability} ${c.red}${event.type.toUpperCase()}${c.reset}${extra}`);
+            console.log(`${timestamp} ${event.ability} ${c.red}${event.type.toUpperCase()}${c.reset}${extra}${timeSinceLastStr}`);
          } else {
             const critStr = event.type === AttackType.Crit ? ' (crit)' : '';
-            console.log(`${timestamp} ${event.ability} ${abilityColor}${event.amount}${c.reset}${critStr}${extra}`);
+            console.log(`${timestamp} ${c.yellow}${event.ability} ${abilityColor}${event.amount}${c.reset}${critStr}${extra}${timeSinceLastStr}`);
          }
       }
    }
