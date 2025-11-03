@@ -18,11 +18,19 @@ export class WarriorSimulator extends MeleeSimulator {
       throw new Error('Warrior simulator is not yet implemented.');
    }
 
-   protected processTimeStep(): void {
+   protected handleResourceGeneration(): void {
       throw new Error('Warrior simulator is not yet implemented.');
    }
 
-   protected printState(): void {
+   protected executeRotation(): void {
+      throw new Error('Warrior simulator is not yet implemented.');
+   }
+
+   protected updateBuffs(): void {
+      throw new Error('Warrior simulator is not yet implemented.');
+   }
+
+   protected getStateText(): string {
       throw new Error('Warrior simulator is not yet implemented.');
    }
 

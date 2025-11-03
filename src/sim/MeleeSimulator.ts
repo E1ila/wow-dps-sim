@@ -6,6 +6,37 @@ export abstract class MeleeSimulator extends BaseSimulator {
    protected abstract state: MeleeSimulationState;
    protected abstract damageCalculator: MeleeDamageCalculator;
 
+   protected handleAutoAttacks(): void {
+      this.processAutoAttacks(
+         (damage, isCrit) => {
+            this.onMainHandHit(damage, isCrit);
+            this.addDamage('Main Hand', damage, isCrit);
+         },
+         (damage, isCrit) => {
+            this.onOffHandHit(damage, isCrit);
+            this.addDamage('Off Hand', damage, isCrit);
+         }
+      );
+   }
+
+   protected onMainHandHit(damage: number, isCrit: boolean): void {
+      // Override in subclasses for class-specific logic (e.g., Sword Specialization)
+   }
+
+   protected onOffHandHit(damage: number, isCrit: boolean): void {
+      // Override in subclasses for class-specific logic
+   }
+
+   protected processTimeStep(): void {
+      this.handleResourceGeneration();
+      this.handleAutoAttacks();
+      this.updateBuffs();
+      this.executeRotation();
+      this.advanceTime();
+   }
+
+   protected abstract handleResourceGeneration(): void;
+
    protected processAutoAttacks(
       onMainHandHit: (damage: number, isCrit: boolean) => void,
       onOffHandHit?: (damage: number, isCrit: boolean) => void
@@ -15,7 +46,7 @@ export abstract class MeleeSimulator extends BaseSimulator {
          if (damage > 0) {
             onMainHandHit(damage, isCrit);
          }
-         this.state.mainHandNextSwing = this.state.currentTime + this.stats.mainHandWeapon.speed;
+         this.state.mainHandNextSwing = this.state.currentTime + (this.stats.mainHandWeapon.speed * 1000);
       }
 
       if (this.stats.offHandWeapon && onOffHandHit && this.state.currentTime >= this.state.offHandNextSwing) {
@@ -23,7 +54,7 @@ export abstract class MeleeSimulator extends BaseSimulator {
          if (damage > 0) {
             onOffHandHit(damage, isCrit);
          }
-         this.state.offHandNextSwing = this.state.currentTime + this.stats.offHandWeapon.speed;
+         this.state.offHandNextSwing = this.state.currentTime + (this.stats.offHandWeapon.speed * 1000);
       }
    }
 

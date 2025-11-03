@@ -28,19 +28,18 @@ export abstract class BaseSimulator implements Simulator {
       protected config: SimulationConfig
    ) { }
 
-   /**
-    * Initialize the simulation state. Must be implemented by subclasses.
-    */
    protected abstract initializeState(): SimulationState;
 
-   /**
-    * Process a single time step in the simulation. Must be implemented by subclasses.
-    */
    protected abstract processTimeStep(): void;
 
-   /**
-    * Add a damage event to the simulation.
-    */
+   protected abstract executeRotation(): void;
+
+   protected abstract updateBuffs(): void;
+
+   protected advanceTime() {
+      this.state.currentTime += 100;
+   }
+
    protected addDamage(ability: string, damage: number, isCrit: boolean): void {
       if (damage > 0) {
          this.events.push({
@@ -55,32 +54,20 @@ export abstract class BaseSimulator implements Simulator {
       }
    }
 
-   /**
-    * Trigger the global cooldown.
-    */
    protected triggerGlobalCooldown(): void {
-      this.state.globalCooldownExpiry = this.state.currentTime + 1.0;
+      this.state.globalCooldownExpiry = this.state.currentTime + 1000;
    }
 
-   /**
-    * Check if an ability can be cast (GCD is not active).
-    */
    protected canCastAbility(): boolean {
       return this.state.currentTime >= this.state.globalCooldownExpiry;
    }
 
-   /**
-    * Reset simulation state and prepare for a new simulation run.
-    */
    protected prepareSimulation(): void {
       this.state = this.initializeState();
       this.events = [];
       this.damageBreakdown = new Map();
    }
 
-   /**
-    * Get the simulation result from the current state.
-    */
    protected getSimulationResult(): SimulationResult {
       const totalDamage = Array.from(this.damageBreakdown.values()).reduce((a, b) => a + b, 0);
       const dps = totalDamage / this.config.fightLength;
@@ -93,56 +80,83 @@ export abstract class BaseSimulator implements Simulator {
       };
    }
 
-   /**
-    * Run a single simulation without playback.
-    */
    simulate(): SimulationResult {
       this.prepareSimulation();
 
-      while (this.state.currentTime < this.config.fightLength) {
+      const fightLengthMs = this.config.fightLength * 1000;
+      while (this.state.currentTime < fightLengthMs) {
          this.processTimeStep();
       }
 
       return this.getSimulationResult();
    }
 
-   /**
-    * Run a single simulation with playback (printing events in real-time).
-    * @param speed Playback speed multiplier (0 = instant, 1 = real-time, 0.5 = half speed, etc.)
-    */
+   private async waitForGameTime(timeDiffMs: number, speed: number): Promise<void> {
+      if (speed > 0 && timeDiffMs > 0) {
+         const delayMs = timeDiffMs / speed;
+         await new Promise(resolve => setTimeout(resolve, delayMs));
+      }
+   }
+
+   private clearFloatingBar(): void {
+      process.stdout.write('\x1b[s'); // Save cursor position
+      process.stdout.write('\x1b[999;0H'); // Move to bottom of screen (row 999 will go to last available row)
+      process.stdout.write('\x1b[2K'); // Clear the line
+      process.stdout.write('\x1b[u'); // Restore cursor position
+   }
+
+   private updateFloatingBar(): void {
+      process.stdout.write('\x1b[s'); // Save cursor position
+      process.stdout.write('\x1b[999;0H'); // Move to bottom of screen
+      process.stdout.write('\x1b[2K'); // Clear the line
+      process.stdout.write(this.getStateText());
+      process.stdout.write('\x1b[u'); // Restore cursor position
+   }
+
+   protected abstract getStateText(): string;
+
+   /** @param speed Playback speed multiplier (0 = instant, 1 = real-time, 0.5 = half speed, etc.) */
    async simulateWithPlayback(speed: number): Promise<void> {
       this.prepareSimulation();
 
-      let lastEventTime = 0;
-      const sleep = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
+      let lastUpdateTime = 0;
+      const stateUpdateInterval = 100;
 
       console.log('=== Starting Playback ===\n');
+      console.log('\n'); // Reserve space for the floating bar
 
-      while (this.state.currentTime < this.config.fightLength) {
+      await this.waitForGameTime(1000, speed);
+      this.updateFloatingBar();
+
+      const fightLengthMs = this.config.fightLength * 1000;
+      while (this.state.currentTime < fightLengthMs) {
          const eventsBefore = this.events.length;
+         const timeBefore = this.state.currentTime;
 
          this.processTimeStep();
 
-         // Check if new events were added
+         const timeDiff = this.state.currentTime - timeBefore;
+
          if (this.events.length > eventsBefore) {
-            for (let i = eventsBefore; i < this.events.length; i++) {
-               const event = this.events[i];
+            this.clearFloatingBar();
 
-               // Add delay based on time difference and speed
-               if (speed > 0) {
-                  const timeDiff = event.timestamp - lastEventTime;
-                  const delayMs = (timeDiff * 1000) / speed;
-                  if (delayMs > 0) {
-                     await sleep(delayMs);
-                  }
-               }
-
+            const newEvents = this.events.slice(eventsBefore);
+            for (const event of newEvents) {
                this.printEvent(event);
-               lastEventTime = event.timestamp;
             }
-            this.printState();
+
+            this.updateFloatingBar();
+            lastUpdateTime = this.state.currentTime;
+         } else if (this.state.currentTime - lastUpdateTime >= stateUpdateInterval) {
+            this.updateFloatingBar();
+            lastUpdateTime = this.state.currentTime;
          }
+         await this.waitForGameTime(timeDiff, speed);
       }
+
+      process.stdout.write('\x1b[999;0H');
+      process.stdout.write('\x1b[2K');
+      process.stdout.write('\n');
 
       const result = this.getSimulationResult();
 
@@ -160,22 +174,19 @@ export abstract class BaseSimulator implements Simulator {
       }
    }
 
-   /**
-    * Print a damage event during playback. Can be overridden by subclasses for custom formatting.
-    */
-   protected printEvent(event: DamageEvent): void {
-      const critStr = event.isCrit ? ' (CRIT!)' : '';
-      console.log(`[${event.timestamp.toFixed(1)}s] ${event.ability}: ${event.damage}${critStr}`);
+   protected generateResourceBar(current: number, max: number, barLength: number = 20, color: string = '\x1b[33m'): string {
+      const filled = Math.floor((current / max) * barLength);
+      const empty = barLength - filled;
+      const reset = '\x1b[0m';
+      return color + '█'.repeat(filled) + reset + '░'.repeat(empty);
    }
 
-   /**
-    * Print the current simulation state during playback. Must be implemented by subclasses.
-    */
-   protected abstract printState(): void;
+   protected printEvent(event: DamageEvent): void {
+      const critStr = event.isCrit ? ' (CRIT!)' : '';
+      const timestampSeconds = event.timestamp / 1000;
+      console.log(`[${timestampSeconds.toFixed(1)}s] ${event.ability}: ${event.damage}${critStr}`);
+   }
 
-   /**
-    * Run multiple simulation iterations.
-    */
    runMultipleIterations(): SimulationResult[] {
       const results: SimulationResult[] = [];
 

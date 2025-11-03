@@ -57,13 +57,10 @@ export class RogueSimulator extends MeleeSimulator {
          mainHandNextSwing: 0,
          offHandNextSwing: 0,
          globalCooldownExpiry: 0,
-         nextEnergyTick: 2.0,
+         nextEnergyTick: 2000,
       };
    }
 
-   /**
-    * Add damage with rogue-specific combo point tracking.
-    */
    private addRogueDamage(ability: string, damage: number, isCrit: boolean, comboPointsGained: number = 0): void {
       if (damage > 0) {
          this.events.push({
@@ -111,10 +108,11 @@ export class RogueSimulator extends MeleeSimulator {
       const cp = this.spendComboPoints();
       const baseDuration = 9 + (cp * 3);
       const improvedSndBonus = this.talents.improvedSliceAndDice * 0.15;
-      const duration = baseDuration * (1 + improvedSndBonus);
+      const durationSeconds = baseDuration * (1 + improvedSndBonus);
+      const durationMs = durationSeconds * 1000;
 
       this.state.sliceAndDiceActive = true;
-      this.state.sliceAndDiceExpiry = this.state.currentTime + duration;
+      this.state.sliceAndDiceExpiry = this.state.currentTime + durationMs;
       this.triggerGlobalCooldown();
       return true;
    }
@@ -200,38 +198,26 @@ export class RogueSimulator extends MeleeSimulator {
       }
    }
 
-   private handleAutoAttacks(): void {
-      super.processAutoAttacks(
-         (damage, isCrit) => {
-            if (this.talents.swordSpecialization > 0 &&
-               this.stats.mainHandWeapon.type === WeaponType.Sword &&
-               Math.random() < (this.talents.swordSpecialization * 0.01)) {
-               this.addDamage('Extra Attack (Sword Spec)', damage, isCrit);
-            }
-            this.addDamage('Main Hand', damage, isCrit);
-         },
-         (damage, isCrit) => {
-            this.addDamage('Off Hand', damage, isCrit);
-         }
-      );
+   protected onMainHandHit(damage: number, isCrit: boolean): void {
+      if (this.talents.swordSpecialization > 0 &&
+         this.stats.mainHandWeapon.type === WeaponType.Sword &&
+         Math.random() < (this.talents.swordSpecialization * 0.01)) {
+         this.addDamage('Extra Attack (Sword Spec)', damage, isCrit);
+      }
    }
 
-   private executeRotation(): void {
+   protected executeRotation(): void {
       if (!this.canCastAbility()) {
          return;
       }
 
-      // At 5 combo points: spend on finisher
       if (this.state.comboPoints === 5) {
-         // Refresh Slice and Dice if needed
          if (this.shouldRefreshSliceAndDice()) {
             this.castSliceAndDice();
          } else {
-            // Use Eviscerate for damage
             this.castEviscerate();
          }
       } else {
-         // Build combo points
          if (this.talents.hemorrhage) {
             this.castHemorrhage();
          } else if (this.stats.mainHandWeapon.type === WeaponType.Dagger) {
@@ -246,45 +232,38 @@ export class RogueSimulator extends MeleeSimulator {
       if (!this.state.sliceAndDiceActive) {
          return true;
       }
-      const timeRemaining = this.state.sliceAndDiceExpiry - this.state.currentTime;
-      return timeRemaining < this.rotation.refreshSndSecondsAhead5Combo;
+      const timeRemainingMs = this.state.sliceAndDiceExpiry - this.state.currentTime;
+      const refreshThresholdMs = this.rotation.refreshSndSecondsAhead5Combo * 1000;
+      return timeRemainingMs < refreshThresholdMs;
    }
 
-   private updateBuffs(): void {
+   protected updateBuffs(): void {
       if (this.state.sliceAndDiceActive && this.state.currentTime >= this.state.sliceAndDiceExpiry) {
          this.state.sliceAndDiceActive = false;
       }
    }
 
-   protected processTimeStep(): void {
+   protected handleResourceGeneration(): void {
       if (this.state.currentTime >= this.state.nextEnergyTick) {
          this.addEnergy(20);
-         this.state.nextEnergyTick += 2.0;
+         this.state.nextEnergyTick += 2000;
       }
-
-      this.handleAutoAttacks();
-      this.updateBuffs();
-      this.executeRotation();
-
-      this.state.currentTime += 0.1;
    }
 
-   /**
-    * Override printEvent to show combo points for rogue damage events.
-    */
    protected override printEvent(event: RogueDamageEvent): void {
       const critStr = event.isCrit ? ' (CRIT!)' : '';
       const cpStr = event.comboPointsGained > 0 ? ` [+${event.comboPointsGained} CP]` : '';
-      console.log(`[${event.timestamp.toFixed(1)}s] ${event.ability}: ${event.damage}${critStr}${cpStr}`);
+      const timestampSeconds = event.timestamp / 1000;
+      console.log(`[${timestampSeconds.toFixed(1)}s] ${event.ability}: ${event.damage}${critStr}${cpStr}`);
    }
 
-   /**
-    * Print the current rogue state during playback.
-    */
-   protected printState(): void {
+   protected getStateText(): string {
+      const timestampSeconds = this.state.currentTime / 1000;
+      const energyBar = this.generateResourceBar(this.state.energy, 100, 20);
+      const cpDots = '●'.repeat(this.state.comboPoints) + '○'.repeat(5 - this.state.comboPoints);
       const sndStatus = this.state.sliceAndDiceActive
-         ? ` | SnD: ${(this.state.sliceAndDiceExpiry - this.state.currentTime).toFixed(1)}s`
+         ? ` | SnD: ${((this.state.sliceAndDiceExpiry - this.state.currentTime) / 1000).toFixed(1)}s`
          : '';
-      console.log(`  → Energy: ${this.state.energy} | CP: ${this.state.comboPoints}${sndStatus}`);
+      return `[${timestampSeconds.toFixed(1)}s] [${energyBar}] ${cpDots}${sndStatus}`;
    }
 }

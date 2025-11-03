@@ -6,11 +6,18 @@
   "scripts": {
     "build": "tsc",
     "start": "node dist/index.js",
-    "dev": "tsc && node dist/index.js",
+    "dev": "ts-node src/index.ts",
     "verify": "tsc && node dist/verifyMechanics.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
-  "keywords": ["wow", "classic", "rogue", "warrior", "simulator", "dps"],
+  "keywords": [
+    "wow",
+    "classic",
+    "rogue",
+    "warrior",
+    "simulator",
+    "dps"
+  ],
   "author": "",
   "license": "ISC",
   "description": "WoW Classic Era DPS Simulator (Rogue, Warrior)",
@@ -19,6 +26,7 @@
   },
   "devDependencies": {
     "@types/node": "^20.0.0",
+    "ts-node": "^10.9.2",
     "typescript": "^5.0.0"
   }
 }
