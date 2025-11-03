@@ -189,6 +189,13 @@ export abstract class BaseSimulator implements Simulator {
       return '';
    }
 
+   protected printBuff(buffName: string, duration?: number): void {
+      const timestampSeconds = this.state.currentTime / 1000;
+      const timestamp = `${c.gray}[${timestampSeconds.toFixed(1)}s]${c.reset}`;
+      const durationStr = duration ? ` (${(duration / 1000).toFixed(1)}s)` : '';
+      console.log(`${timestamp} ${c.yellow}${buffName}${c.reset} activated${durationStr}`);
+   }
+
    protected printEvent(event: DamageEvent): void {
       const timestampSeconds = event.timestamp / 1000;
       const extra = this.getPrintEventExtra(event);

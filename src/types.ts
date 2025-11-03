@@ -56,7 +56,7 @@ export interface RogueTalents {
    bladeFurry: boolean;
    aggression: number;
    dualWieldSpecialization: number;
-   opportunism: number;
+   opportunity: number;
    improvedBackstab: number;
    hemorrhage: boolean;
 }

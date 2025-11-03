@@ -9,7 +9,7 @@ import {
    SimulationResult,
    DamageEvent,
    RogueDamageEvent,
-   WeaponType,
+   WeaponType, c,
 } from '../types';
 import {RogueDamageCalculator} from '../mechanics/RogueDamageCalculator';
 import {MeleeSimulator} from './MeleeSimulator';
@@ -106,6 +106,7 @@ export class RogueSimulator extends MeleeSimulator {
 
       this.state.sliceAndDiceActive = true;
       this.state.sliceAndDiceExpiry = this.state.currentTime + durationMs;
+      this.printBuff('SnD', durationMs);
       this.triggerGlobalCooldown();
       return true;
    }
@@ -254,10 +255,10 @@ export class RogueSimulator extends MeleeSimulator {
    protected getStateText(): string {
       const timestampSeconds = this.state.currentTime / 1000;
       const energyBar = this.generateResourceBar(this.state.energy, 100, 20);
-      const cpDots = '●'.repeat(this.state.comboPoints) + '○'.repeat(5 - this.state.comboPoints);
+      const cpDots = c.red + '●'.repeat(this.state.comboPoints) + c.reset + '○'.repeat(5 - this.state.comboPoints);
       const sndStatus = this.state.sliceAndDiceActive
          ? ` | SnD: ${((this.state.sliceAndDiceExpiry - this.state.currentTime) / 1000).toFixed(1)}s`
          : '';
-      return `[${timestampSeconds.toFixed(1)}s] [${energyBar}] ${cpDots}${sndStatus}`;
+      return `[${timestampSeconds.toFixed(1)}s] [${energyBar}] ${this.state.energy} ${cpDots}${sndStatus}`;
    }
 }

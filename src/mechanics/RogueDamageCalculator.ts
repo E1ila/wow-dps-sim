@@ -60,8 +60,8 @@ export class RogueDamageCalculator extends MeleeDamageCalculator {
 
       let damage = baseDamage * 1.5;
 
-      if (this.talents.opportunism > 0) {
-         damage *= (1 + (this.talents.opportunism * 0.04));
+      if (this.talents.opportunity > 0) {
+         damage *= (1 + (this.talents.opportunity * 0.04));
       }
 
       if (this.talents.lethality > 0) {
