@@ -358,8 +358,8 @@ export abstract class BaseSimulator implements Simulator {
 
    static printResults(results: SimulationResult[], simulator: BaseSimulator, executionTimeMs?: number): void {
       const avgDPS = this.calculateAverageDPS(results);
-      const minDPS = Math.min(...results.map(r => r.dps));
-      const maxDPS = Math.max(...results.map(r => r.dps));
+      // const minDPS = Math.min(...results.map(r => r.dps));
+      // const maxDPS = Math.max(...results.map(r => r.dps));
 
       console.log('\n=== Simulation Results ===');
       console.log(`Iterations: ${results.length}`);
@@ -367,13 +367,13 @@ export abstract class BaseSimulator implements Simulator {
          const executionTimeSec = executionTimeMs / 1000;
          console.log(`Execution Time: ${executionTimeSec.toFixed(2)}s`);
       }
-      console.log(`Average DPS: ${avgDPS.toFixed(2)}`);
-      console.log(`Min DPS: ${minDPS.toFixed(2)}`);
-      console.log(`Max DPS: ${maxDPS.toFixed(2)}`);
+      // console.log(`Min DPS: ${minDPS.toFixed(2)}`);
+      // console.log(`Max DPS: ${maxDPS.toFixed(2)}`);
 
       if (results.length > 0) {
          // Aggregate damage breakdown across all iterations
          const aggregatedBreakdown = new Map<string, number>();
+         const aggregatedHitCount = new Map<string, number>();
          let totalDamageSum = 0;
          
          for (const result of results) {
@@ -381,6 +381,14 @@ export abstract class BaseSimulator implements Simulator {
             for (const [ability, damage] of result.damageBreakdown.entries()) {
                const currentDamage = aggregatedBreakdown.get(ability) || 0;
                aggregatedBreakdown.set(ability, currentDamage + damage);
+            }
+            
+            // Count hits for each ability
+            for (const event of result.events) {
+               if (event.eventType === 'damage' && event.amount > 0) {
+                  const currentCount = aggregatedHitCount.get(event.ability) || 0;
+                  aggregatedHitCount.set(event.ability, currentCount + 1);
+               }
             }
          }
 
@@ -393,8 +401,14 @@ export abstract class BaseSimulator implements Simulator {
          for (const [ability, totalDamage] of sortedBreakdown) {
             const avgDamage = totalDamage / results.length;
             const percentage = (avgDamage / avgTotalDamage) * 100;
-            console.log(`${ability}: ${avgDamage.toFixed(0)} (${percentage.toFixed(1)}%)`);
+            const hitCount = aggregatedHitCount.get(ability) || 0;
+            const avgHitDamage = hitCount > 0 ? totalDamage / hitCount : 0;
+            console.log(`${ability}: ${percentage.toFixed(1)}% - Avg Hit: ${avgHitDamage.toFixed(1)}`);
          }
+
+         // Print average DPS as final row
+         console.log(`${'─'.repeat(50)}`);
+         console.log(`Average DPS: ${avgDPS.toFixed(2)}`);
 
          // Aggregate statistics across all iterations
          const aggregatedStats: SimulationStatistics = {
@@ -418,6 +432,11 @@ export abstract class BaseSimulator implements Simulator {
             isSpecialAttack: false,
             weapon: simulator.stats.mainHandWeapon
          }));
+
+         console.log(`\n`);
+         console.log(`=======================`);
+         console.log(`|  DPS: ${avgDPS.toFixed(2).padEnd('=============='.length)}|`);
+         console.log(`=======================`);
       }
    }
 }
