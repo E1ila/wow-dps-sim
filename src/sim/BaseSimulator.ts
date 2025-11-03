@@ -17,7 +17,7 @@ import {DamageCalculator} from "../mechanics/DamageCalculator";
 export interface Simulator {
    simulate(): SimulationResult;
 
-   runMultipleIterations(): SimulationResult[];
+   runMultipleIterations(): { results: SimulationResult[], executionTimeMs: number };
 
    simulateWithPlayback(speed: number): Promise<void>;
 }
@@ -323,14 +323,17 @@ export abstract class BaseSimulator implements Simulator {
       }
    }
 
-   runMultipleIterations(): SimulationResult[] {
+   runMultipleIterations(): { results: SimulationResult[], executionTimeMs: number } {
+      const startTime = Date.now();
       const results: SimulationResult[] = [];
 
       for (let i = 0; i < this.config.iterations; i++) {
          results.push(this.simulate());
       }
 
-      return results;
+      const executionTimeMs = Date.now() - startTime;
+
+      return { results, executionTimeMs };
    }
 
    static calculateAverageDPS(results: SimulationResult[]): number {
@@ -353,31 +356,64 @@ export abstract class BaseSimulator implements Simulator {
       console.log(`Expected Crit Rate (from stats): ${expectedCritChance.toFixed(2)}%`);
    }
 
-   static printResults(results: SimulationResult[], simulator: BaseSimulator): void {
+   static printResults(results: SimulationResult[], simulator: BaseSimulator, executionTimeMs?: number): void {
       const avgDPS = this.calculateAverageDPS(results);
       const minDPS = Math.min(...results.map(r => r.dps));
       const maxDPS = Math.max(...results.map(r => r.dps));
 
       console.log('\n=== Simulation Results ===');
       console.log(`Iterations: ${results.length}`);
+      if (executionTimeMs !== undefined) {
+         const executionTimeSec = executionTimeMs / 1000;
+         console.log(`Execution Time: ${executionTimeSec.toFixed(2)}s`);
+      }
       console.log(`Average DPS: ${avgDPS.toFixed(2)}`);
       console.log(`Min DPS: ${minDPS.toFixed(2)}`);
       console.log(`Max DPS: ${maxDPS.toFixed(2)}`);
 
       if (results.length > 0) {
-         console.log('\n=== Damage Breakdown (First Iteration) ===');
-         const breakdown = results[0].damageBreakdown;
-         const totalDamage = results[0].totalDamage;
-
-         const sortedBreakdown = Array.from(breakdown.entries())
-            .sort((a, b) => b[1] - a[1]);
-
-         for (const [ability, damage] of sortedBreakdown) {
-            const percentage = (damage / totalDamage) * 100;
-            console.log(`${ability}: ${damage.toFixed(0)} (${percentage.toFixed(1)}%)`);
+         // Aggregate damage breakdown across all iterations
+         const aggregatedBreakdown = new Map<string, number>();
+         let totalDamageSum = 0;
+         
+         for (const result of results) {
+            totalDamageSum += result.totalDamage;
+            for (const [ability, damage] of result.damageBreakdown.entries()) {
+               const currentDamage = aggregatedBreakdown.get(ability) || 0;
+               aggregatedBreakdown.set(ability, currentDamage + damage);
+            }
          }
 
-         this.printStatistics(results[0].statistics, simulator.damageCalculator.critChance({
+         const avgTotalDamage = totalDamageSum / results.length;
+
+         console.log('\n=== Damage Breakdown (Average across all iterations) ===');
+         const sortedBreakdown = Array.from(aggregatedBreakdown.entries())
+            .sort((a, b) => b[1] - a[1]);
+
+         for (const [ability, totalDamage] of sortedBreakdown) {
+            const avgDamage = totalDamage / results.length;
+            const percentage = (avgDamage / avgTotalDamage) * 100;
+            console.log(`${ability}: ${avgDamage.toFixed(0)} (${percentage.toFixed(1)}%)`);
+         }
+
+         // Aggregate statistics across all iterations
+         const aggregatedStats: SimulationStatistics = {
+            critCount: 0,
+            hitCount: 0,
+            glancingCount: 0,
+            missCount: 0,
+            dodgeCount: 0,
+         };
+
+         for (const result of results) {
+            aggregatedStats.critCount += result.statistics.critCount;
+            aggregatedStats.hitCount += result.statistics.hitCount;
+            aggregatedStats.glancingCount += result.statistics.glancingCount;
+            aggregatedStats.missCount += result.statistics.missCount;
+            aggregatedStats.dodgeCount += result.statistics.dodgeCount;
+         }
+
+         this.printStatistics(aggregatedStats, simulator.damageCalculator.critChance({
             ability: Ability.MainHand,
             isSpecialAttack: false,
             weapon: simulator.stats.mainHandWeapon
