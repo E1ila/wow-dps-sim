@@ -68,7 +68,7 @@ export interface RogueTalents {
    murder: number;
    improvedSinisterStrike: number;
    improvedEviscerate: number;
-   relentlessStrikes: number;
+   relentlessStrikes: boolean;
    ruthlessness: number;
    lethality: number;
    sealFate: number;

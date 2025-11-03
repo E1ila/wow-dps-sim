@@ -124,12 +124,18 @@ export class RogueSimulator extends MeleeSimulator {
       return cp;
    }
 
-   private handleRuthlessness(): void {
+   private onFinishingMove(): void {
       if (this.talents.ruthlessness > 0) {
          const chance = this.talents.ruthlessness * 0.2; // 20% per rank
          if (Math.random() < chance) {
             this.addProc(`Ruthlessness ${c.red}●${c.reset}`);
             this.addComboPoint();
+         }
+      }
+      if (this.talents.relentlessStrikes) {
+         if (Math.random() < (this.state.comboPoints * 0.2)) {
+            this.addProc(`Relentless strike ${c.yellow}█████${c.reset}`)
+            this.addEnergy(25);
          }
       }
    }
@@ -146,7 +152,7 @@ export class RogueSimulator extends MeleeSimulator {
       const durationMs = durationSeconds * 1000;
 
       this.addRogueBuff(Buffs.SnD, durationMs, cp);
-      this.handleRuthlessness();
+      this.onFinishingMove();
       this.triggerGlobalCooldown();
       return true;
    }
@@ -159,7 +165,7 @@ export class RogueSimulator extends MeleeSimulator {
       const cp = this.spendComboPoints();
       const result = this.damageCalculator.calculateEviscerateDamage(cp);
       this.addDamage(RogueAbility.Eviscerate, result, 0, cp);
-      this.handleRuthlessness();
+      this.onFinishingMove();
       this.triggerGlobalCooldown();
       return true;
    }
@@ -231,13 +237,6 @@ export class RogueSimulator extends MeleeSimulator {
          if (Math.random() < (this.talents.sealFate * 0.2)) {
             this.addComboPoint();
             comboPointsGained++;
-         }
-      }
-
-      // Relentless Strikes: chance to restore energy on 5 combo points
-      if (this.talents.relentlessStrikes > 0 && this.state.comboPoints >= 5) {
-         if (Math.random() < (this.talents.relentlessStrikes * 0.2)) {
-            this.addEnergy(25);
          }
       }
 
