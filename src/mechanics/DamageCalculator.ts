@@ -1,4 +1,4 @@
-import {GearStats, SimulationConfig, Weapon} from '../types';
+import {Attack, GearStats, SimulationConfig, Weapon} from '../types';
 import {AttackTableStatsProvider} from "./AttackTable";
 
 export abstract class DamageCalculator implements AttackTableStatsProvider {
@@ -7,7 +7,7 @@ export abstract class DamageCalculator implements AttackTableStatsProvider {
       protected config: SimulationConfig
    ) {}
 
-   critChance(weapon: Weapon): number {
+   critChance(attack: Attack): number {
       return this.stats.critChance;
    }
 

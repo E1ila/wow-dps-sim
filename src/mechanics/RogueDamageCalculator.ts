@@ -1,4 +1,4 @@
-import {AttackResult, GearStats, RogueTalents, SimulationConfig, Weapon, WeaponType} from '../types';
+import {Ability, Attack, AttackResult, GearStats, RogueTalents, SimulationConfig, Weapon, WeaponType} from '../types';
 import {MeleeDamageCalculator} from './MeleeDamageCalculator';
 
 export class RogueDamageCalculator extends MeleeDamageCalculator {
@@ -33,11 +33,17 @@ export class RogueDamageCalculator extends MeleeDamageCalculator {
       return baseSkill;
    }
 
-   critChance(weapon: Weapon): number {
-      let critChance = super.critChance(weapon) + this.talents.malice;
-      if (this.talents.daggerSpecialization > 0 && weapon.type === WeaponType.Dagger) {
+   critChance(attack: Attack): number {
+      let critChance = super.critChance(attack) + this.talents.malice;
+      if (this.talents.daggerSpecialization > 0 && attack.weapon.type === WeaponType.Dagger) {
          critChance += this.talents.daggerSpecialization;
       }
+      
+      // Add ability-specific crit bonuses
+      if (attack.ability === Ability.Backstab && this.talents.improvedBackstab > 0) {
+         critChance += this.talents.improvedBackstab * 10;
+      }
+      
       return critChance;
    }
 
@@ -57,6 +63,7 @@ export class RogueDamageCalculator extends MeleeDamageCalculator {
       return this.calculateMeleeDamage({
          baseDamage,
          damageMultipliers: multipliers,
+         ability: Ability.SinisterStrike,
          isSpecialAttack: true,
          weapon,
       });
@@ -75,15 +82,12 @@ export class RogueDamageCalculator extends MeleeDamageCalculator {
          multipliers.push(1 + (this.talents.lethality * 0.06));
       }
 
-      // Improved Backstab: +10% crit per point
-      const bonusCritChance = this.talents.improvedBackstab * 10;
-
       return this.calculateMeleeDamage({
          baseDamage,
          damageMultipliers: multipliers,
+         ability: Ability.Backstab,
          isSpecialAttack: true,
          weapon,
-         bonusCritChance,
       });
    }
 
@@ -100,6 +104,7 @@ export class RogueDamageCalculator extends MeleeDamageCalculator {
       return this.calculateMeleeDamage({
          baseDamage,
          damageMultipliers: multipliers,
+         ability: Ability.Hemorrhage,
          isSpecialAttack: true,
          weapon,
       });
@@ -124,6 +129,7 @@ export class RogueDamageCalculator extends MeleeDamageCalculator {
       return this.calculateMeleeDamage({
          baseDamage,
          damageMultipliers: multipliers,
+         ability: Ability.Eviscerate,
          isSpecialAttack: true,
          weapon,
       });

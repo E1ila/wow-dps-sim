@@ -1,14 +1,14 @@
-import {AttackResult, AttackType, GearStats, SimulationConfig, Weapon} from '../types';
+import {Ability, Attack, AttackResult, AttackType, GearStats, SimulationConfig, Weapon} from '../types';
 import {AttackTable} from './AttackTable';
 import {DamageCalculator} from './DamageCalculator';
 
 interface MeleeDamageParams {
    baseDamage: number;
    damageMultipliers?: number[];
+   ability: Ability;
    isSpecialAttack: boolean;
    isOffhand?: boolean;
    weapon: Weapon;
-   bonusCritChance?: number;
 }
 
 export abstract class MeleeDamageCalculator extends DamageCalculator {
@@ -44,7 +44,7 @@ export abstract class MeleeDamageCalculator extends DamageCalculator {
    }
 
    protected calculateMeleeDamage(params: MeleeDamageParams): AttackResult {
-      const {baseDamage, damageMultipliers = [], isSpecialAttack, weapon, bonusCritChance = 0} = params;
+      const {baseDamage, damageMultipliers = [], ability, isSpecialAttack, weapon} = params;
 
       let damage = baseDamage;
 
@@ -52,7 +52,13 @@ export abstract class MeleeDamageCalculator extends DamageCalculator {
          damage *= multiplier;
       }
 
-      const attackTableResult = this.attackTable.roll(isSpecialAttack, weapon, bonusCritChance);
+      const attack: Attack = {
+         ability,
+         isSpecialAttack,
+         weapon
+      };
+
+      const attackTableResult = this.attackTable.roll(attack);
 
       if (attackTableResult.amountModifier === 0) {
          return {
@@ -98,6 +104,7 @@ export abstract class MeleeDamageCalculator extends DamageCalculator {
       return this.calculateMeleeDamage({
          baseDamage,
          damageMultipliers: multipliers,
+         ability: isOffhand ? Ability.OffHand : Ability.MainHand,
          isSpecialAttack: false,
          isOffhand,
          weapon,

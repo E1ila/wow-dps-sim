@@ -63,6 +63,22 @@ export enum WeaponType {
    Fist = 'Fist',
 }
 
+export enum Ability {
+   MainHand = 'MH',
+   OffHand = 'OH',
+   SinisterStrike = 'SS',
+   Backstab = 'BS',
+   Hemorrhage = 'HEMO',
+   Eviscerate = 'EVIS',
+   Test = 'Test',
+}
+
+export interface Attack {
+   ability: Ability;
+   isSpecialAttack: boolean;
+   weapon: Weapon;
+}
+
 export interface RogueTalents {
    malice: number;
    murder: number;

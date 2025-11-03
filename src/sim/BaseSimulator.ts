@@ -1,4 +1,5 @@
 import {
+   Ability,
    AttackResult,
    AttackType,
    BuffEvent,
@@ -235,7 +236,11 @@ export abstract class BaseSimulator implements Simulator {
          console.log(`${ability}: ${damage.toFixed(0)} (${percentage.toFixed(1)}%)`);
       }
 
-      BaseSimulator.printStatistics(result.statistics, this.damageCalculator.critChance(this.stats.mainHandWeapon));
+      BaseSimulator.printStatistics(result.statistics, this.damageCalculator.critChance({
+         ability: Ability.MainHand,
+         isSpecialAttack: false,
+         weapon: this.stats.mainHandWeapon
+      }));
    }
 
    protected abstract getStateText(): string;
@@ -372,7 +377,11 @@ export abstract class BaseSimulator implements Simulator {
             console.log(`${ability}: ${damage.toFixed(0)} (${percentage.toFixed(1)}%)`);
          }
 
-         this.printStatistics(results[0].statistics, simulator.damageCalculator.critChance(simulator.stats.mainHandWeapon));
+         this.printStatistics(results[0].statistics, simulator.damageCalculator.critChance({
+            ability: Ability.MainHand,
+            isSpecialAttack: false,
+            weapon: simulator.stats.mainHandWeapon
+         }));
       }
    }
 }

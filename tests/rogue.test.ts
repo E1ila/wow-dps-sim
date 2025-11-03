@@ -1,4 +1,4 @@
-import {AttackType, GearStats, RogueTalents, SimulationConfig, WeaponType} from '../src/types';
+import {Ability, AttackType, GearStats, RogueTalents, SimulationConfig, WeaponType} from '../src/types';
 import {AttackTable} from '../src/mechanics/AttackTable';
 import {RogueDamageCalculator} from '../src/mechanics/RogueDamageCalculator';
 import {RogueSimulator} from '../src/sim/RogueSimulator';
@@ -80,7 +80,11 @@ describe('Rogue Talents', () => {
 
             const simulator = new RogueSimulator(baseStats, config, talents);
 
-            expect(simulator.damageCalculator.critChance(baseStats.mainHandWeapon)).toBe(expectedCritChance);
+            expect(simulator.damageCalculator.critChance({
+               ability: Ability.MainHand,
+               isSpecialAttack: false,
+               weapon: baseStats.mainHandWeapon
+            })).toBe(expectedCritChance);
          });
       });
 
@@ -104,7 +108,11 @@ describe('Rogue Talents', () => {
             let crits = 0;
 
             for (let i = 0; i < numRolls; i++) {
-               const result = attackTable.roll(true, baseStats.mainHandWeapon);
+               const result = attackTable.roll({
+                  ability: Ability.Test,
+                  isSpecialAttack: true,
+                  weapon: baseStats.mainHandWeapon
+               });
                if (result.type === AttackType.Crit) {
                   crits++;
                }
@@ -143,7 +151,11 @@ describe('Rogue Talents', () => {
             let crits = 0;
 
             for (let i = 0; i < numRolls; i++) {
-               const result = attackTable.roll(false, baseStats.mainHandWeapon);
+               const result = attackTable.roll({
+                  ability: Ability.MainHand,
+                  isSpecialAttack: false,
+                  weapon: baseStats.mainHandWeapon
+               });
                if (result.type === AttackType.Crit) {
                   crits++;
                }
@@ -177,7 +189,11 @@ describe('Rogue Talents', () => {
 
             const simulator = new RogueSimulator(baseStats, config, talents);
 
-            expect(simulator.damageCalculator.critChance(baseStats.mainHandWeapon)).toBe(expectedCritChance);
+            expect(simulator.damageCalculator.critChance({
+               ability: Ability.MainHand,
+               isSpecialAttack: false,
+               weapon: baseStats.mainHandWeapon
+            })).toBe(expectedCritChance);
          });
       });
 
@@ -199,7 +215,11 @@ describe('Rogue Talents', () => {
 
          const simulator = new RogueSimulator(swordStats, config, talents);
 
-         expect(simulator.damageCalculator.critChance(swordStats.mainHandWeapon)).toBe(30);
+         expect(simulator.damageCalculator.critChance({
+            ability: Ability.MainHand,
+            isSpecialAttack: false,
+            weapon: swordStats.mainHandWeapon
+         })).toBe(30);
       });
 
       it('should apply dagger specialization to actual attack table rolls with daggers', () => {
@@ -222,7 +242,11 @@ describe('Rogue Talents', () => {
             let crits = 0;
 
             for (let i = 0; i < numRolls; i++) {
-               const result = attackTable.roll(true, baseStats.mainHandWeapon);
+               const result = attackTable.roll({
+                  ability: Ability.Test,
+                  isSpecialAttack: true,
+                  weapon: baseStats.mainHandWeapon
+               });
                if (result.type === AttackType.Crit) {
                   crits++;
                }
@@ -260,7 +284,11 @@ describe('Rogue Talents', () => {
          let crits = 0;
 
          for (let i = 0; i < numRolls; i++) {
-            const result = attackTable.roll(true, swordWeapon);
+            const result = attackTable.roll({
+               ability: Ability.Test,
+               isSpecialAttack: true,
+               weapon: swordWeapon
+            });
             if (result.type === AttackType.Crit) {
                crits++;
             }
@@ -281,7 +309,11 @@ describe('Rogue Talents', () => {
 
          const simulator = new RogueSimulator(baseStats, config, talents);
 
-         expect(simulator.damageCalculator.critChance(baseStats.mainHandWeapon)).toBe(40);
+         expect(simulator.damageCalculator.critChance({
+            ability: Ability.Backstab,
+            isSpecialAttack: true,
+            weapon: baseStats.mainHandWeapon
+         })).toBe(40);
       });
 
       it('should stack with malice talent in actual attack table rolls', () => {
@@ -298,7 +330,11 @@ describe('Rogue Talents', () => {
          let crits = 0;
 
          for (let i = 0; i < numRolls; i++) {
-            const result = attackTable.roll(true, baseStats.mainHandWeapon);
+            const result = attackTable.roll({
+               ability: Ability.Test,
+               isSpecialAttack: true,
+               weapon: baseStats.mainHandWeapon
+            });
             if (result.type === AttackType.Crit) {
                crits++;
             }
@@ -514,7 +550,11 @@ describe('Rogue Talents', () => {
             let misses = 0;
 
             for (let i = 0; i < numRolls; i++) {
-               const result = attackTable.roll(true, baseStats.mainHandWeapon);
+               const result = attackTable.roll({
+                  ability: Ability.Test,
+                  isSpecialAttack: true,
+                  weapon: baseStats.mainHandWeapon
+               });
                if (result.type === AttackType.Miss) {
                   misses++;
                }
@@ -698,12 +738,20 @@ describe('Rogue Talents', () => {
          let misses5 = 0;
 
          for (let i = 0; i < numRolls; i++) {
-            const result0 = attackTable0.roll(true, baseStats.mainHandWeapon);
+            const result0 = attackTable0.roll({
+               ability: Ability.Test,
+               isSpecialAttack: true,
+               weapon: baseStats.mainHandWeapon
+            });
             if (result0.type === AttackType.Miss) {
                misses0++;
             }
 
-            const result5 = attackTable5.roll(true, baseStats.mainHandWeapon);
+            const result5 = attackTable5.roll({
+               ability: Ability.Test,
+               isSpecialAttack: true,
+               weapon: baseStats.mainHandWeapon
+            });
             if (result5.type === AttackType.Miss) {
                misses5++;
             }
@@ -759,7 +807,11 @@ describe('Rogue Talents', () => {
             let misses = 0;
 
             for (let i = 0; i < numRolls; i++) {
-               const result = attackTable.roll(true, baseStats.mainHandWeapon);
+               const result = attackTable.roll({
+                  ability: Ability.Test,
+                  isSpecialAttack: true,
+                  weapon: baseStats.mainHandWeapon
+               });
                if (result.type === AttackType.Miss) {
                   misses++;
                }
