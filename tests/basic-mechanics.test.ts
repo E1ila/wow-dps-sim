@@ -25,7 +25,7 @@ describe('Attack Table Mechanics', () => {
   });
 
   const wrapStats = (stats: GearStats): AttackTableStatsProvider => ({
-    get critChance() { return stats.critChance; },
+    critChance: () => stats.critChance,
     get weaponSkill() { return stats.weaponSkill; },
     get hitChance() { return stats.hitChance; },
     get playerLevel() { return stats.level; },

@@ -1,7 +1,7 @@
-import {AttackTableResult, AttackType, SimulationConfig} from '../types';
+import {AttackTableResult, AttackType, SimulationConfig, Weapon} from '../types';
 
 export interface AttackTableStatsProvider {
-   get critChance(): number;
+   critChance(weapon: Weapon): number;
    get weaponSkill(): number;
    get hitChance(): number;
    get playerLevel(): number;
@@ -100,7 +100,7 @@ export class AttackTable {
       return Math.max(lowEnd, highEnd + 0.6 - penalty);
    }
 
-   roll(isSpecialAttack: boolean = false): AttackTableResult {
+   roll(isSpecialAttack: boolean = false, weapon: Weapon): AttackTableResult {
       const roll = Math.random();
       let cumulative = 0;
 
@@ -124,7 +124,7 @@ export class AttackTable {
          }
       }
 
-      const critChance = this.stats.critChance / 100;
+      const critChance = this.stats.critChance(weapon) / 100;
       cumulative += critChance;
       if (roll < cumulative) {
          return {type: AttackType.Crit, amountModifier: 2.0};

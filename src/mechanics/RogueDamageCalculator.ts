@@ -1,4 +1,4 @@
-import {AttackResult, GearStats, RogueTalents, SimulationConfig} from '../types';
+import {AttackResult, GearStats, RogueTalents, SimulationConfig, Weapon, WeaponType} from '../types';
 import {MeleeDamageCalculator} from './MeleeDamageCalculator';
 
 export class RogueDamageCalculator extends MeleeDamageCalculator {
@@ -14,12 +14,17 @@ export class RogueDamageCalculator extends MeleeDamageCalculator {
       return this.talents.dualWieldSpecialization * 0.05;
    }
 
-   get critChance(): number {
-      return super.critChance + this.talents.malice;
+   critChance(weapon: Weapon): number {
+      let critChance = super.critChance(weapon) + this.talents.malice;
+      if (this.talents.daggerSpecialization > 0 && weapon.type === WeaponType.Dagger) {
+         critChance += this.talents.daggerSpecialization * 0.01;
+      }
+      return critChance;
    }
 
    calculateSinisterStrikeDamage(): AttackResult {
-      const weaponDamage = this.getWeaponDamage(this.stats.mainHandWeapon);
+      const weapon = this.stats.mainHandWeapon;
+      const weaponDamage = this.getWeaponDamage(weapon);
       const baseDamage = weaponDamage + 68;
 
       const multipliers = [];
@@ -34,11 +39,13 @@ export class RogueDamageCalculator extends MeleeDamageCalculator {
          baseDamage,
          damageMultipliers: multipliers,
          isSpecialAttack: true,
+         weapon,
       });
    }
 
    calculateBackstabDamage(): AttackResult {
-      const weaponDamage = this.getWeaponDamage(this.stats.mainHandWeapon);
+      const weapon = this.stats.mainHandWeapon;
+      const weaponDamage = this.getWeaponDamage(weapon);
       const baseDamage = (weaponDamage + 210) * 1.5;
 
       const multipliers = [];
@@ -48,14 +55,12 @@ export class RogueDamageCalculator extends MeleeDamageCalculator {
       if (this.talents.lethality > 0) {
          multipliers.push(1 + (this.talents.lethality * 0.06));
       }
-      if (this.talents.daggerSpecialization > 0) {
-         multipliers.push(1 + (this.talents.daggerSpecialization * 0.01));
-      }
 
       return this.calculateMeleeDamage({
          baseDamage,
          damageMultipliers: multipliers,
          isSpecialAttack: true,
+         weapon,
       });
    }
 
@@ -68,18 +73,17 @@ export class RogueDamageCalculator extends MeleeDamageCalculator {
       if (this.talents.lethality > 0) {
          multipliers.push(1 + (this.talents.lethality * 0.06));
       }
-      if (this.talents.daggerSpecialization > 0) {
-         multipliers.push(1 + (this.talents.daggerSpecialization * 0.01));
-      }
 
       return this.calculateMeleeDamage({
          baseDamage,
          damageMultipliers: multipliers,
          isSpecialAttack: true,
+         weapon,
       });
    }
 
    calculateEviscerateDamage(comboPoints: number): AttackResult {
+      const weapon = this.stats.mainHandWeapon;
       const damagePerCP = [0, 223, 325, 427, 529, 631];
       const baseDamage = (damagePerCP[comboPoints] || 0) + (this.stats.attackPower * 0.03 * comboPoints);
 
@@ -98,6 +102,7 @@ export class RogueDamageCalculator extends MeleeDamageCalculator {
          baseDamage,
          damageMultipliers: multipliers,
          isSpecialAttack: true,
+         weapon,
       });
    }
 }

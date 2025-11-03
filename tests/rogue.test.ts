@@ -103,7 +103,7 @@ describe('Rogue Talents', () => {
             let crits = 0;
 
             for (let i = 0; i < numRolls; i++) {
-               const result = attackTable.roll(true);
+               const result = attackTable.roll(true, baseStats.mainHandWeapon);
                if (result.type === AttackType.Crit) {
                   crits++;
                }
@@ -142,7 +142,7 @@ describe('Rogue Talents', () => {
             let crits = 0;
 
             for (let i = 0; i < numRolls; i++) {
-               const result = attackTable.roll(false);
+               const result = attackTable.roll(false, baseStats.mainHandWeapon);
                if (result.type === AttackType.Crit) {
                   crits++;
                }

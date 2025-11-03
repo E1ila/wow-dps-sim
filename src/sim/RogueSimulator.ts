@@ -42,7 +42,7 @@ export class RogueSimulator extends MeleeSimulator {
    rotation: RogueRotation;
 
    get critChance(): number {
-      return this.damageCalculator.critChance;
+      return this.damageCalculator.critChance(this.stats.mainHandWeapon);
    }
 
    constructor(
