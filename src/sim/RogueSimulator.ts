@@ -63,10 +63,15 @@ export class RogueSimulator extends MeleeSimulator {
       };
    }
 
-   protected override addDamage(ability: string, attackResult: AttackResult, comboPointsGained: number = 0): void {
+   protected override addDamage(ability: string, attackResult: AttackResult, comboPointsGained: number = 0, comboPointsSpent: number = 0): void {
       super.addDamage(ability, attackResult, {
          comboPointsGained,
+         comboPointsSpent,
       });
+   }
+
+   protected printRogueBuff(buffName: string, duration: number, comboPointsUsed: number): void {
+      super.printBuff(buffName, duration, '○'.repeat(comboPointsUsed));
    }
 
    private addEnergy(amount: number): void {
@@ -116,7 +121,7 @@ export class RogueSimulator extends MeleeSimulator {
       this.state.sliceAndDiceActive = true;
       this.state.sliceAndDiceExpiry = this.state.currentTime + durationMs;
       this.handleRuthlessness();
-      this.printBuff('SnD', durationMs);
+      this.printRogueBuff('SnD', durationMs, cp);
       this.triggerGlobalCooldown();
       return true;
    }
@@ -129,7 +134,7 @@ export class RogueSimulator extends MeleeSimulator {
       const cp = this.spendComboPoints();
       const result = this.damageCalculator.calculateEviscerateDamage(cp);
       this.handleRuthlessness();
-      this.addDamage('EVIS', result);
+      this.addDamage('EVIS', result, 0, cp);
       this.triggerGlobalCooldown();
       return true;
    }
@@ -227,7 +232,9 @@ export class RogueSimulator extends MeleeSimulator {
             this.castEviscerate();
          }
       } else {
-         if (this.talents.hemorrhage) {
+         if (!this.state.sliceAndDiceActive && this.state.comboPoints > 0) {
+            this.castSliceAndDice();
+         } else if (this.talents.hemorrhage) {
             this.castHemorrhage();
          } else if (this.stats.mainHandWeapon.type === WeaponType.Dagger) {
             this.castBackstab();
@@ -260,7 +267,14 @@ export class RogueSimulator extends MeleeSimulator {
    }
 
    protected override getPrintEventExtra(event: RogueDamageEvent): string {
-      return event.comboPointsGained > 0 ? ` [+${event.comboPointsGained} CP]` : '';
+      let extra = '';
+      if (event.comboPointsSpent > 0) {
+         extra += ` ${'○'.repeat(event.comboPointsSpent)}`;
+      }
+      if (event.comboPointsGained > 0) {
+         extra += ` ${c.red}${'●'.repeat(event.comboPointsGained)}${c.reset}`;
+      }
+      return extra;
    }
 
    protected getStateText(): string {

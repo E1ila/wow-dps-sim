@@ -110,6 +110,7 @@ export interface DamageEvent extends AttackResult {
 
 export interface RogueDamageEvent extends DamageEvent {
    comboPointsGained: number;
+   comboPointsSpent: number;
 }
 
 export interface SimulationResult {
