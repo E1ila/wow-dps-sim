@@ -22,7 +22,7 @@ program
    .option('--mh-type <type>', 'Main hand type (Dagger, Sword, Mace, Fist)', 'Dagger')
    .option('--oh-min <number>', 'Off hand min damage', '58')
    .option('--oh-max <number>', 'Off hand max damage', '108')
-   .option('--oh-speed <number>', 'Off hand speed', '1.8')
+   .option('--oh-speed <number>', 'Off hand speed', '1.5')
    .option('--oh-type <type>', 'Off hand type (Dagger, Sword, Mace, Fist)', 'Dagger')
    .option('--no-offhand', 'Disable off hand weapon')
    .option('--target-level <number>', 'Target level', '63')

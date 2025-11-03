@@ -15,162 +15,69 @@ export class RogueDamageCalculator extends MeleeDamageCalculator {
    }
 
    calculateSinisterStrikeDamage(): AttackResult {
-      const weapon = this.stats.mainHandWeapon;
-      const weaponDamage = this.getWeaponDamage(weapon);
-
+      const weaponDamage = this.getWeaponDamage(this.stats.mainHandWeapon);
       const baseDamage = weaponDamage + 68;
 
-      let damage = baseDamage;
-
+      const multipliers = [];
       if (this.talents.aggression > 0) {
-         damage *= (1 + (this.talents.aggression * 0.02));
+         multipliers.push(1 + (this.talents.aggression * 0.02));
       }
-
       if (this.talents.lethality > 0) {
-         damage *= (1 + (this.talents.lethality * 0.06));
+         multipliers.push(1 + (this.talents.lethality * 0.06));
       }
 
-      const attackTableResult = this.attackTable.roll(true);
-
-      if (attackTableResult.amountModifier === 0) {
-         return {
-            type: attackTableResult.type,
-            amountModifier: attackTableResult.amountModifier,
-            baseAmount: baseDamage,
-            amount: 0
-         };
-      }
-
-      damage *= attackTableResult.amountModifier;
-      damage = Math.floor(this.applyArmorReduction(damage));
-
-      return {
-         type: attackTableResult.type,
-         amountModifier: attackTableResult.amountModifier,
-         baseAmount: baseDamage,
-         amount: damage
-      };
+      return this.calculateMeleeDamage({baseDamage, damageMultipliers: multipliers});
    }
 
    calculateBackstabDamage(): AttackResult {
-      const weapon = this.stats.mainHandWeapon;
-      const weaponDamage = this.getWeaponDamage(weapon);
+      const weaponDamage = this.getWeaponDamage(this.stats.mainHandWeapon);
+      const baseDamage = (weaponDamage + 210) * 1.5;
 
-      const baseDamage = weaponDamage + 210;
-
-      let damage = baseDamage * 1.5;
-
+      const multipliers = [];
       if (this.talents.opportunity > 0) {
-         damage *= (1 + (this.talents.opportunity * 0.04));
+         multipliers.push(1 + (this.talents.opportunity * 0.04));
       }
-
       if (this.talents.lethality > 0) {
-         damage *= (1 + (this.talents.lethality * 0.06));
+         multipliers.push(1 + (this.talents.lethality * 0.06));
       }
-
       if (this.talents.daggerSpecialization > 0) {
-         damage *= (1 + (this.talents.daggerSpecialization * 0.01));
+         multipliers.push(1 + (this.talents.daggerSpecialization * 0.01));
       }
 
-      const attackTableResult = this.attackTable.roll(true);
-
-      if (attackTableResult.amountModifier === 0) {
-         return {
-            type: attackTableResult.type,
-            amountModifier: attackTableResult.amountModifier,
-            baseAmount: baseDamage * 1.5,
-            amount: 0
-         };
-      }
-
-      damage *= attackTableResult.amountModifier;
-      damage = Math.floor(this.applyArmorReduction(damage));
-
-      return {
-         type: attackTableResult.type,
-         amountModifier: attackTableResult.amountModifier,
-         baseAmount: baseDamage * 1.5,
-         amount: damage
-      };
+      return this.calculateMeleeDamage({baseDamage, damageMultipliers: multipliers});
    }
 
    calculateHemorrhageDamage(): AttackResult {
       const weapon = this.stats.mainHandWeapon;
       const weaponDamage = this.getWeaponDamage(weapon);
+      const baseDamage = (weaponDamage + 110) * 1.1;
 
-      const baseDamage = weaponDamage + 110;
-
-      let damage = baseDamage * 1.1;
-
+      const multipliers = [];
       if (this.talents.lethality > 0) {
-         damage *= (1 + (this.talents.lethality * 0.06));
+         multipliers.push(1 + (this.talents.lethality * 0.06));
       }
-
       if (this.talents.daggerSpecialization > 0) {
-         damage *= (1 + (this.talents.daggerSpecialization * 0.01));
+         multipliers.push(1 + (this.talents.daggerSpecialization * 0.01));
       }
 
-      const attackTableResult = this.attackTable.roll(true);
-
-      if (attackTableResult.amountModifier === 0) {
-         return {
-            type: attackTableResult.type,
-            amountModifier: attackTableResult.amountModifier,
-            baseAmount: baseDamage * 1.1,
-            amount: 0
-         };
-      }
-
-      damage *= attackTableResult.amountModifier;
-      damage = Math.floor(this.applyArmorReduction(damage));
-
-      return {
-         type: attackTableResult.type,
-         amountModifier: attackTableResult.amountModifier,
-         baseAmount: baseDamage * 1.1,
-         amount: damage
-      };
+      return this.calculateMeleeDamage({baseDamage, damageMultipliers: multipliers});
    }
 
    calculateEviscerateDamage(comboPoints: number): AttackResult {
       const damagePerCP = [0, 223, 325, 427, 529, 631];
-      let baseDamage = damagePerCP[comboPoints] || 0;
+      const baseDamage = (damagePerCP[comboPoints] || 0) + (this.stats.attackPower * 0.03 * comboPoints);
 
-      baseDamage = baseDamage + (this.stats.attackPower * 0.03 * comboPoints);
-
-      let damage = baseDamage;
-
+      const multipliers = [];
       if (this.talents.improvedEviscerate > 0) {
-         damage *= (1 + (this.talents.improvedEviscerate * 0.05));
+         multipliers.push(1 + (this.talents.improvedEviscerate * 0.05));
       }
-
       if (this.talents.aggression > 0) {
-         damage *= (1 + (this.talents.aggression * 0.02));
+         multipliers.push(1 + (this.talents.aggression * 0.02));
       }
-
       if (this.talents.lethality > 0) {
-         damage *= (1 + (this.talents.lethality * 0.06));
+         multipliers.push(1 + (this.talents.lethality * 0.06));
       }
 
-      const attackTableResult = this.attackTable.roll(true);
-
-      if (attackTableResult.amountModifier === 0) {
-         return {
-            type: attackTableResult.type,
-            amountModifier: attackTableResult.amountModifier,
-            baseAmount: baseDamage,
-            amount: 0
-         };
-      }
-
-      damage *= attackTableResult.amountModifier;
-      damage = Math.floor(this.applyArmorReduction(damage));
-
-      return {
-         type: attackTableResult.type,
-         amountModifier: attackTableResult.amountModifier,
-         baseAmount: baseDamage,
-         amount: damage
-      };
+      return this.calculateMeleeDamage({baseDamage, damageMultipliers: multipliers});
    }
 }

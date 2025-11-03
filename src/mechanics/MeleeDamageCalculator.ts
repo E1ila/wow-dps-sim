@@ -2,6 +2,12 @@ import {AttackType, AttackResult, CharacterStats, Weapon, SimulationConfig} from
 import {AttackTable} from './AttackTable';
 import {DamageCalculator} from './DamageCalculator';
 
+interface MeleeDamageParams {
+   baseDamage: number;
+   damageMultipliers?: number[];
+   isSpecialAttack?: boolean;
+}
+
 export abstract class MeleeDamageCalculator extends DamageCalculator {
    protected readonly attackTable: AttackTable;
    protected readonly targetArmorReduction: number;
@@ -30,6 +36,37 @@ export abstract class MeleeDamageCalculator extends DamageCalculator {
       return damage * this.targetArmorReduction;
    }
 
+   protected calculateMeleeDamage(params: MeleeDamageParams): AttackResult {
+      const {baseDamage, damageMultipliers = [], isSpecialAttack = true} = params;
+
+      let damage = baseDamage;
+
+      for (const multiplier of damageMultipliers) {
+         damage *= multiplier;
+      }
+
+      const attackTableResult = this.attackTable.roll(isSpecialAttack);
+
+      if (attackTableResult.amountModifier === 0) {
+         return {
+            type: attackTableResult.type,
+            amountModifier: attackTableResult.amountModifier,
+            baseAmount: baseDamage,
+            amount: 0
+         };
+      }
+
+      damage *= attackTableResult.amountModifier;
+      damage = Math.floor(this.applyArmorReduction(damage));
+
+      return {
+         type: attackTableResult.type,
+         amountModifier: attackTableResult.amountModifier,
+         baseAmount: baseDamage,
+         amount: damage
+      };
+   }
+
    protected abstract getDualWieldSpecBonus(): number;
 
    calculateAutoAttackDamage(isMainHand: boolean = true): AttackResult {
@@ -45,24 +82,19 @@ export abstract class MeleeDamageCalculator extends DamageCalculator {
 
       const weaponDamage = this.getWeaponDamage(weapon);
       const apBonus = (this.stats.attackPower / 14) * weapon.speed;
-
       let baseDamage = weaponDamage + apBonus;
 
+      const multipliers = [];
       if (!isMainHand) {
          const dualWieldPenalty = 0.5;
          const dualWieldSpecBonus = this.getDualWieldSpecBonus();
-         baseDamage *= (dualWieldPenalty + dualWieldSpecBonus);
+         multipliers.push(dualWieldPenalty + dualWieldSpecBonus);
       }
 
-      const attackTableResult = this.attackTable.roll(false);
-
-      let damage = baseDamage * attackTableResult.amountModifier;
-      damage = Math.floor(this.applyArmorReduction(damage));
-
-      return {
-         ...attackTableResult,
-         baseAmount: baseDamage,
-         amount: damage,
-      };
+      return this.calculateMeleeDamage({
+         baseDamage,
+         damageMultipliers: multipliers,
+         isSpecialAttack: false
+      });
    }
 }
