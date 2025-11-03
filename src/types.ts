@@ -1,3 +1,11 @@
+export const c = {
+   gray: '\x1b[90m',
+   white: '\x1b[37m',
+   yellow: '\x1b[33m',
+   red: '\x1b[31m',
+   reset: '\x1b[0m',
+} as const;
+
 export enum CharacterClass {
    Rogue = 'rogue',
    Warrior = 'warrior',

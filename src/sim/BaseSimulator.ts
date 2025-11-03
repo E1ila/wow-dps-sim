@@ -1,6 +1,7 @@
 import {
    AttackResult,
    AttackType,
+   c,
    CharacterStats,
    DamageEvent, RogueDamageEvent,
    RogueSimulationState,
@@ -42,11 +43,13 @@ export abstract class BaseSimulator implements Simulator {
       this.state.currentTime += 100;
    }
 
-   protected addDamage(ability: string, attackResult: AttackResult): void {
+   protected addDamage(ability: string, attackResult: AttackResult, extra?: any): void {
       this.events.push({
          ...attackResult,
          timestamp: this.state.currentTime,
          ability,
+         whiteDamage: ['MH', 'OH'].includes(ability),
+         ...extra,
       });
 
       if (attackResult.amount > 0) {
@@ -190,11 +193,16 @@ export abstract class BaseSimulator implements Simulator {
       const timestampSeconds = event.timestamp / 1000;
       const extra = this.getPrintEventExtra(event);
 
+      const isWhiteDamage = event.ability === 'MH' || event.ability === 'OH' || event.ability === 'EXTRA';
+      const abilityColor = isWhiteDamage ? c.white : c.yellow;
+
+      const timestamp = `${c.gray}[${timestampSeconds.toFixed(1)}s]${c.reset}`;
+
       if (event.amount === 0) {
-         console.log(`[${timestampSeconds.toFixed(1)}s] ${event.ability}: ${event.type.toUpperCase()}${extra}`);
+         console.log(`${timestamp} ${event.ability} ${c.red}${event.type.toUpperCase()}${c.reset}${extra}`);
       } else {
          const critStr = event.type === AttackType.Crit ? ' (crit)' : '';
-         console.log(`[${timestampSeconds.toFixed(1)}s] ${event.ability}: ${event.amount}${critStr}${extra}`);
+         console.log(`${timestamp} ${event.ability} ${abilityColor}${event.amount}${c.reset}${critStr}${extra}`);
       }
    }
 

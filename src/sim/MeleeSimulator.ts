@@ -10,11 +10,11 @@ export abstract class MeleeSimulator extends BaseSimulator {
       this.processAutoAttacks(
          (result) => {
             this.onMainHandHit(result);
-            this.addDamage('Main Hand', result);
+            this.addDamage('MH', result);
          },
          (result) => {
             this.onOffHandHit(result);
-            this.addDamage('Off Hand', result);
+            this.addDamage('OH', result);
          }
       );
    }
