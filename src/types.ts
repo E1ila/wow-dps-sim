@@ -18,6 +18,10 @@ export const c = {
    reset: '\x1b[0m',
 } as const;
 
+export enum Buffs {
+   SnD = 'SnD',
+}
+
 export enum CharacterClass {
    Rogue = 'rogue',
    Warrior = 'warrior',
@@ -88,10 +92,16 @@ export interface WarriorRotation {
    // Placeholder for warrior rotation config
 }
 
+export interface Buff {
+   name: string;
+   expiry: number;
+}
+
 export interface SimulationState {
    currentTime: number;
    targetHealth: number;
    globalCooldownExpiry: number;
+   activeBuffs: Buff[];
 }
 
 export interface MeleeSimulationState extends SimulationState {
@@ -103,8 +113,6 @@ export interface RogueSimulationState extends MeleeSimulationState {
    energy: number;
    comboPoints: number;
    nextEnergyTick: number;
-   sliceAndDiceActive: boolean;
-   sliceAndDiceExpiry: number;
 }
 
 export interface SimulationConfig {

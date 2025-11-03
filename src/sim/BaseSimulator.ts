@@ -10,7 +10,6 @@ import {
    SimulationResult,
    SimulationState
 } from '../types';
-import {MeleeDamageCalculator} from "../mechanics/MeleeDamageCalculator";
 import {DamageCalculator} from "../mechanics/DamageCalculator";
 
 export interface Simulator {
@@ -77,6 +76,33 @@ export abstract class BaseSimulator implements Simulator {
 
    protected canCastAbility(): boolean {
       return this.state.currentTime >= this.state.globalCooldownExpiry;
+   }
+
+   protected activateBuff(name: string, duration: number): void {
+      const existingBuff = this.state.activeBuffs.find(buff => buff.name === name);
+      const expiry = this.state.currentTime + duration;
+
+      if (existingBuff) {
+         existingBuff.expiry = expiry;
+      } else {
+         this.state.activeBuffs.push({ name, expiry });
+      }
+   }
+
+   protected isBuffActive(name: string): boolean {
+      return this.state.activeBuffs.some(buff => buff.name === name && buff.expiry > this.state.currentTime);
+   }
+
+   protected getBuffTimeRemaining(name: string): number {
+      const buff = this.state.activeBuffs.find(buff => buff.name === name);
+      if (!buff || buff.expiry <= this.state.currentTime) {
+         return 0;
+      }
+      return buff.expiry - this.state.currentTime;
+   }
+
+   protected removeExpiredBuffs(): void {
+      this.state.activeBuffs = this.state.activeBuffs.filter(buff => buff.expiry > this.state.currentTime);
    }
 
    protected prepareSimulation(): void {

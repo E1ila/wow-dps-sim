@@ -1,14 +1,15 @@
 import {
    AttackResult,
    AttackType,
+   Buffs,
    c,
    CharacterStats,
    RogueBuffEvent,
    RogueDamageEvent,
-   RogueTalents,
    RogueRotation,
-   SimulationConfig,
    RogueSimulationState,
+   RogueTalents,
+   SimulationConfig,
    WeaponType,
 } from '../types';
 import {RogueDamageCalculator} from '../mechanics/RogueDamageCalculator';
@@ -56,12 +57,11 @@ export class RogueSimulator extends MeleeSimulator {
          energy: 100,
          comboPoints: 0,
          targetHealth: 999999999,
-         sliceAndDiceActive: false,
-         sliceAndDiceExpiry: 0,
          mainHandNextSwing: 0,
          offHandNextSwing: 0,
          globalCooldownExpiry: 0,
          nextEnergyTick: 2000,
+         activeBuffs: [],
       };
    }
 
@@ -81,7 +81,7 @@ export class RogueSimulator extends MeleeSimulator {
    }
 
    protected getHasteMultiplier(): number {
-      return this.state.sliceAndDiceActive ? 1 + SLICE_N_DICE_IAS : 1;
+      return this.isBuffActive(Buffs.SnD) ? 1 + SLICE_N_DICE_IAS : 1;
    }
 
    private spendEnergy(amount: number): boolean {
@@ -130,10 +130,9 @@ export class RogueSimulator extends MeleeSimulator {
       const durationSeconds = baseDuration * (1 + improvedSndBonus);
       const durationMs = durationSeconds * 1000;
 
-      this.state.sliceAndDiceActive = true;
-      this.state.sliceAndDiceExpiry = this.state.currentTime + durationMs;
+      this.activateBuff(Buffs.SnD, durationMs);
       this.handleRuthlessness();
-      this.addRogueBuff('SnD', durationMs, cp);
+      this.addRogueBuff(Buffs.SnD, durationMs, cp);
       this.triggerGlobalCooldown();
       return true;
    }
@@ -252,7 +251,7 @@ export class RogueSimulator extends MeleeSimulator {
             this.castEviscerate();
          }
       } else {
-         if (!this.state.sliceAndDiceActive && this.state.comboPoints > 0) {
+         if (!this.isBuffActive(Buffs.SnD) && this.state.comboPoints > 0) {
             this.castSliceAndDice();
          } else if (this.talents.hemorrhage) {
             this.castHemorrhage();
@@ -265,18 +264,16 @@ export class RogueSimulator extends MeleeSimulator {
    }
 
    private shouldRefreshSliceAndDice(): boolean {
-      if (!this.state.sliceAndDiceActive) {
+      if (!this.isBuffActive(Buffs.SnD)) {
          return true;
       }
-      const timeRemainingMs = this.state.sliceAndDiceExpiry - this.state.currentTime;
+      const timeRemainingMs = this.getBuffTimeRemaining(Buffs.SnD);
       const refreshThresholdMs = this.rotation.refreshSndSecondsAhead5Combo * 1000;
       return timeRemainingMs < refreshThresholdMs;
    }
 
    protected updateBuffs(): void {
-      if (this.state.sliceAndDiceActive && this.state.currentTime >= this.state.sliceAndDiceExpiry) {
-         this.state.sliceAndDiceActive = false;
-      }
+      this.removeExpiredBuffs();
    }
 
    protected handleResourceGeneration(): void {
@@ -308,8 +305,8 @@ export class RogueSimulator extends MeleeSimulator {
       const timestampSeconds = this.state.currentTime / 1000;
       const energyBar = this.generateResourceBar(this.state.energy, 100, 20);
       const cpDots = c.red + '●'.repeat(this.state.comboPoints) + c.reset + '○'.repeat(5 - this.state.comboPoints);
-      const sndStatus = this.state.sliceAndDiceActive
-         ? ` | SnD: ${((this.state.sliceAndDiceExpiry - this.state.currentTime) / 1000).toFixed(1)}s`
+      const sndStatus = this.isBuffActive(Buffs.SnD)
+         ? ` | SnD: ${(this.getBuffTimeRemaining(Buffs.SnD) / 1000).toFixed(1)}s`
          : '';
       return `[${timestampSeconds.toFixed(1)}s] [${energyBar}] ${this.state.energy} ${cpDots}${sndStatus}`;
    }
