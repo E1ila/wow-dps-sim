@@ -23,7 +23,9 @@ export abstract class MeleeDamageCalculator extends DamageCalculator {
 
    private calculateArmorReduction(): number {
       const armor = this.config.targetArmor;
-      const levelModifier = 400 + (85 * (this.stats.level - 60));
+      const levelDifference = Math.max(0, this.config.targetLevel - this.stats.level);
+      const effectiveLevel = this.stats.level + 1.5 * levelDifference;
+      const levelModifier = 400 + 85 * effectiveLevel;
       const reduction = armor / (armor + levelModifier);
       return 1 - reduction;
    }
