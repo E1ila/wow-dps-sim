@@ -270,6 +270,46 @@ describe('Rogue Talents', () => {
       });
    });
 
+   // describe('Lethality', () => {
+   //
+   //    it('should increase critical strike damage by 6% per point', () => {
+   //       const testCases = [
+   //          { lethality: 0, expectedMultiplier: 1.0 },
+   //          { lethality: 1, expectedMultiplier: 1.06 },
+   //          { lethality: 2, expectedMultiplier: 1.12 },
+   //          { lethality: 3, expectedMultiplier: 1.18 },
+   //          { lethality: 4, expectedMultiplier: 1.26 },
+   //          { lethality: 5, expectedMultiplier: 1.30 },
+   //       ];
+   //
+   //       testCases.forEach(({ lethality, expectedMultiplier }) => {
+   //          const talents: RogueTalents = {
+   //             ...baseTalents,
+   //             lethality,
+   //          };
+   //
+   //          const calculator = new RogueDamageCalculator({...baseStats, critChance: 100}, config, talents);
+   //          const calculatorNoLethality = new RogueDamageCalculator(baseStats, config, baseTalents);
+   //
+   //          const originalRandom = Math.random;
+   //          Math.random = () => 0.01;
+   //
+   //          const backstabResult = calculator.calculateBackstabDamage();
+   //          const backstabResultNoLethality = calculatorNoLethality.calculateBackstabDamage();
+   //
+   //          Math.random = originalRandom;
+   //
+   //          expect(backstabResult.type).toBe(AttackType.Crit);
+   //          expect(backstabResultNoLethality.type).toBe(AttackType.Crit);
+   //
+   //          const damageRatio = backstabResult.amount / backstabResultNoLethality.amount;
+   //
+   //          expect(damageRatio).toBeGreaterThan(expectedMultiplier - 0.01);
+   //          expect(damageRatio).toBeLessThan(expectedMultiplier + 0.01);
+   //       });
+   //    });
+   // });
+
    describe('Relentless Strikes', () => {
 
       it('should add energy', () => {
