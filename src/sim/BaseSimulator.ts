@@ -43,13 +43,13 @@ export abstract class BaseSimulator implements Simulator {
    }
 
    protected addDamage(ability: string, attackResult: AttackResult): void {
-      if (attackResult.amount > 0) {
-         this.events.push({
-            ...attackResult,
-            timestamp: this.state.currentTime,
-            ability,
-         });
+      this.events.push({
+         ...attackResult,
+         timestamp: this.state.currentTime,
+         ability,
+      });
 
+      if (attackResult.amount > 0) {
          const currentDamage = this.damageBreakdown.get(ability) || 0;
          this.damageBreakdown.set(ability, currentDamage + attackResult.amount);
       }
@@ -187,10 +187,15 @@ export abstract class BaseSimulator implements Simulator {
    }
 
    protected printEvent(event: DamageEvent): void {
-      const critStr = event.type === AttackType.Crit ? ' (CRIT!)' : '';
       const timestampSeconds = event.timestamp / 1000;
       const extra = this.getPrintEventExtra(event);
-      console.log(`[${timestampSeconds.toFixed(1)}s] ${event.ability}: ${event.amount}${critStr}${extra}`);
+
+      if (event.amount === 0) {
+         console.log(`[${timestampSeconds.toFixed(1)}s] ${event.ability}: ${event.type.toUpperCase()}${extra}`);
+      } else {
+         const critStr = event.type === AttackType.Crit ? ' (crit)' : '';
+         console.log(`[${timestampSeconds.toFixed(1)}s] ${event.ability}: ${event.amount}${critStr}${extra}`);
+      }
    }
 
    runMultipleIterations(): SimulationResult[] {

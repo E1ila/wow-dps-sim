@@ -47,17 +47,13 @@ export abstract class MeleeSimulator extends BaseSimulator {
    ): void {
       if (this.state.currentTime >= this.state.mainHandNextSwing) {
          const result = this.calculateMainHandDamage();
-         if (result.amount > 0) {
-            onMainHandHit(result);
-         }
+         onMainHandHit(result);
          this.state.mainHandNextSwing = this.state.currentTime + (this.stats.mainHandWeapon.speed * 1000);
       }
 
       if (this.stats.offHandWeapon && onOffHandHit && this.state.currentTime >= this.state.offHandNextSwing) {
          const result = this.calculateOffHandDamage();
-         if (result.amount > 0) {
-            onOffHandHit(result);
-         }
+         onOffHandHit(result);
          this.state.offHandNextSwing = this.state.currentTime + (this.stats.offHandWeapon.speed * 1000);
       }
    }
