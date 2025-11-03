@@ -115,6 +115,45 @@ describe('Rogue Talents', () => {
             expect(observedCritRate).toBeLessThan(expectedCritRate + 1);
          });
       });
+
+      it('should reach soft crit cap on white damage', () => {
+         const testCases = [
+            {malice: 0, hitChance: 0, baseCritChance: 25, expectedCritRate: 25},
+            {malice: 0, hitChance: 0, baseCritChance: 26, expectedCritRate: 26},
+            {malice: 0, hitChance: 0, baseCritChance: 27, expectedCritRate: 27},
+            {malice: 0, hitChance: 0, baseCritChance: 30, expectedCritRate: 27},
+            {malice: 0, hitChance: 0, baseCritChance: 35, expectedCritRate: 27},
+         ];
+
+         testCases.forEach(({malice, hitChance, baseCritChance, expectedCritRate}) => {
+            const talents: RogueTalents = {
+               ...baseTalents,
+               malice,
+            };
+
+            const simulator = new RogueSimulator({
+               ...baseStats,
+               critChance: baseCritChance,
+               hitChance,
+            }, config, talents);
+            const attackTable = new AttackTable(simulator.damageCalculator, config);
+
+            const numRolls = 100000;
+            let crits = 0;
+
+            for (let i = 0; i < numRolls; i++) {
+               const result = attackTable.roll(false);
+               if (result.type === AttackType.Crit) {
+                  crits++;
+               }
+            }
+
+            const observedCritRate = (crits / numRolls) * 100;
+
+            expect(observedCritRate).toBeGreaterThan(expectedCritRate - 1);
+            expect(observedCritRate).toBeLessThan(expectedCritRate + 1);
+         });
+      });
    });
 
 
