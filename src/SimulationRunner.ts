@@ -35,6 +35,7 @@ export interface SimulationOptions {
     talentOverrides?: string;
     setupOverrides?: string;
     gearOverrides?: string;
+    rotationOverrides?: string;
     // output
     quiet: boolean;
 }
@@ -54,6 +55,7 @@ export class SimulationRunner {
             this.applyTalentOverrides();
             this.applySetupOverrides();
             this.applyGearOverrides();
+            this.applyRotationOverrides();
             this.applyCliOverrides();
         } catch (error) {
             throw new Error(`Error loading spec file: ${(error as Error).message}`);
@@ -210,6 +212,17 @@ export class SimulationRunner {
                 console.warn(`Warning: Gear stat "${name}" not found in spec file, ignoring.`);
             }
         }
+    }
+
+    private applyRotationOverrides(): void {
+        if (!this.options.rotationOverrides) {
+            return;
+        }
+
+        this.spec.rotation = this.options.rotationOverrides
+            .split(',')
+            .map(ability => ability.trim())
+            .filter(ability => ability.length > 0);
     }
 
     private createSimulator(): BaseSimulator {

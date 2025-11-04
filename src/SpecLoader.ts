@@ -16,6 +16,7 @@ export interface SimulationSpec {
    description: string;
    class: CharacterClass;
    playerLevel: number;
+   rotation?: string[];
    setup?: RogueSetup | WarriorSetup;
    talents: RogueTalents | WarriorTalents;
    gearStats: GearStats;
