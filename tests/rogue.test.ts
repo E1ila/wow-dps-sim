@@ -5,7 +5,7 @@ import {RogueSimulator} from '../src/sim/RogueSimulator';
 import {SimulationSpec} from '../src/SpecLoader';
 
 const baseStats: GearStats = {
-   level: 60,
+   playerLevel: 60,
    attackPower: 1200,
    critChance: 30,
    hitChance: 9,

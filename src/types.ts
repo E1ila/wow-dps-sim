@@ -37,7 +37,7 @@ export enum CharacterClass {
 }
 
 export interface GearStats {
-   level: number;
+   playerLevel: number;
    attackPower: number;
    critChance: number;
    hitChance: number;

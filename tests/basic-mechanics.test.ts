@@ -3,7 +3,7 @@ import {AttackTable, AttackTableStatsProvider} from '../src/mechanics/AttackTabl
 
 describe('Attack Table Mechanics', () => {
   const createTestStats = (weaponSkill: number, hasOffHand: boolean = true): GearStats => ({
-    level: 60,
+    playerLevel: 60,
     attackPower: 1000,
     critChance: 30,
     hitChance: 0,
@@ -28,7 +28,7 @@ describe('Attack Table Mechanics', () => {
     critChance: () => gearStats.critChance,
     get weaponSkill() { return gearStats.weaponSkill; },
     get hitChance() { return gearStats.hitChance; },
-    get playerLevel() { return gearStats.level; },
+    get playerLevel() { return gearStats.playerLevel; },
     get targetLevel() { return targetLevel; },
     get isDualWielding() { return gearStats.offHandWeapon !== undefined; },
   });
