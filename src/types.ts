@@ -140,7 +140,7 @@ export interface RogueSetup {
    veiledShadowsSet?: boolean;
 }
 
-export interface WarriorRotation {
+export interface WarriorSetup {
    // Placeholder for warrior rotation config
 }
 

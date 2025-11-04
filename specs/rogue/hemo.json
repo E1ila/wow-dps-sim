@@ -2,7 +2,7 @@
     "name": "Hemorrhage",
     "class": "rogue",
     "description": "Hemorrhage PvP/PvE hybrid spec",
-    "rotation": {
+    "setup": {
         "refreshSndSecondsBeforeExpiry": 3
     },
     "talents": {

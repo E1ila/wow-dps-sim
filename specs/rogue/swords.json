@@ -2,7 +2,7 @@
     "name": "Combat Swords",
     "class": "rogue",
     "description": "Standard combat swords spec for PvE",
-    "rotation": {
+    "setup": {
         "refreshSndSecondsBeforeExpiry": 3
     },
     "talents": {

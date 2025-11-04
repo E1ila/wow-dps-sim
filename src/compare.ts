@@ -38,7 +38,7 @@ interface BuildResult extends SimulationResult {
 
 interface BuildConfig {
    talents: string;
-   rotation?: string;
+   setup?: string;
    gear?: string;
 }
 
@@ -46,13 +46,13 @@ function runSimulation(baseOptions: SimulationOptions, buildConfig: BuildConfig)
    try {
       const options = {...baseOptions};
       options.talentOverrides = buildConfig.talents;
-      options.rotationOverrides = buildConfig.rotation;
+      options.setupOverrides = buildConfig.setup;
       options.gearOverrides = buildConfig.gear;
 
       const runner = new SimulationRunner(options);
       return runner.runAndGetResults();
    } catch (error) {
-      console.error(`Error running simulation for build: ${buildConfig.talents}${buildConfig.rotation ? ` | ${buildConfig.rotation}` : ''}${buildConfig.gear ? ` | ${buildConfig.gear}` : ''}`);
+      console.error(`Error running simulation for build: ${buildConfig.talents}${buildConfig.setup ? ` | ${buildConfig.setup}` : ''}${buildConfig.gear ? ` | ${buildConfig.gear}` : ''}`);
       throw error;
    }
 }
@@ -108,16 +108,16 @@ function parseBuildString(buildStr: string): BuildConfig {
    } else if (parts.length === 2) {
       return {
          talents: parts[0].trim(),
-         rotation: parts[1].trim() || undefined
+         setup: parts[1].trim() || undefined
       };
    } else if (parts.length === 3) {
       return {
          talents: parts[0].trim(),
-         rotation: parts[1].trim() || undefined,
+         setup: parts[1].trim() || undefined,
          gear: parts[2].trim() || undefined
       };
    } else {
-      throw new Error(`Invalid build format: ${buildStr}. Expected format: talents|rotation|gear (rotation and gear optional)`);
+      throw new Error(`Invalid build format: ${buildStr}. Expected format: talents|setup|gear (setup and gear optional)`);
    }
 }
 
@@ -130,7 +130,7 @@ program
    .argument('<spec-file>', 'Path to spec file (e.g., specs/rogue/daggers)')
    .option(
       '-b, --builds <builds>',
-      'Custom builds to compare (format: talents1|rotation1|gear1;talents2|rotation2|gear2, rotation and gear optional). Example: "sealFate:5|avoidEviscerate:1|attackPower:1500;sealFate:0"'
+      'Custom builds to compare (format: talents1|setup1|gear1;talents2|setup2|gear2, setup and gear optional). Example: "sealFate:5|avoidEviscerate:1|attackPower:1500;sealFate:0"'
    )
    .option(
       '-i, --iterations <number>',

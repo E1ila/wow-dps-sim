@@ -4,7 +4,7 @@ import {SimulationOptions, SimulationRunner} from './SimulationRunner';
 
 interface BuildConfig {
    talents: string;
-   rotation?: string;
+   setup?: string;
    gear?: string;
 }
 
@@ -15,16 +15,16 @@ function parseBuild(buildStr: string): BuildConfig {
    } else if (parts.length === 2) {
       return {
          talents: parts[0].trim(),
-         rotation: parts[1].trim() || undefined
+         setup: parts[1].trim() || undefined
       };
    } else if (parts.length === 3) {
       return {
          talents: parts[0].trim(),
-         rotation: parts[1].trim() || undefined,
+         setup: parts[1].trim() || undefined,
          gear: parts[2].trim() || undefined
       };
    } else {
-      throw new Error(`Invalid build format: ${buildStr}. Expected format: talents|rotation|gear (rotation and gear optional)`);
+      throw new Error(`Invalid build format: ${buildStr}. Expected format: talents|setup|gear (setup and gear optional)`);
    }
 }
 
@@ -54,7 +54,7 @@ program
    .option('--iterations <number>', 'Number of iterations')
    .option('--post-res-gen <number>', 'Generate resource AFTER cycle, simulates a more realistic latency')
    .option('--speed <number>', 'Playback speed (0 = instant, 1 = real-time, 0.5 = half speed, etc.)')
-   .option('-b, --build <build>', 'Override build (format: talents|rotation|gear, rotation and gear optional). Example: "sealFate:5|avoidEviscerate:1|attackPower:1500"')
+   .option('-b, --build <build>', 'Override build (format: talents|rotation|gear, setup and gear optional). Example: "sealFate:5|avoidEviscerate:1|attackPower:1500"')
    .option('-q, --quiet', 'Quiet mode: only print final average DPS')
    .parse(process.argv);
 
@@ -94,7 +94,7 @@ const simulationOptions: SimulationOptions = {
    iterations: opts.iterations !== undefined ? parseInt(opts.iterations) : undefined,
    postCycleResourceGeneration: opts.postCycleResourceGeneration ? opts.postCycleResourceGeneration != '0' : false,
    talentOverrides: buildConfig?.talents,
-   rotationOverrides: buildConfig?.rotation,
+   setupOverrides: buildConfig?.setup,
    gearOverrides: buildConfig?.gear,
    playbackSpeed: opts.speed !== undefined ? parseFloat(opts.speed) : undefined,
    quiet: opts.quiet === true,

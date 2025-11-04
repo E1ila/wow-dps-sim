@@ -6,7 +6,7 @@ import {
    RogueTalents,
    SimulationConfig,
    TargetType,
-   WarriorRotation,
+   WarriorSetup,
    WarriorTalents
 } from './types';
 import path from "node:path";
@@ -16,7 +16,7 @@ export interface SimulationSpec {
    description: string;
    class: CharacterClass;
    playerLevel: number;
-   rotation?: RogueSetup | WarriorRotation;
+   setup?: RogueSetup | WarriorSetup;
    talents: RogueTalents | WarriorTalents;
    gearStats: GearStats;
    simulationConfig: SimulationConfig;

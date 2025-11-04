@@ -33,7 +33,7 @@ export interface SimulationOptions {
     playbackSpeed?: number;
     // compare input
     talentOverrides?: string;
-    rotationOverrides?: string;
+    setupOverrides?: string;
     gearOverrides?: string;
     // output
     quiet: boolean;
@@ -52,7 +52,7 @@ export class SimulationRunner {
         try {
             this.spec = SpecLoader.load(this.options.specFile);
             this.applyTalentOverrides();
-            this.applyRotationOverrides();
+            this.applySetupOverrides();
             this.applyGearOverrides();
             this.applyCliOverrides();
         } catch (error) {
@@ -159,19 +159,19 @@ export class SimulationRunner {
         }
     }
 
-    private applyRotationOverrides(): void {
-        if (!this.options.rotationOverrides) {
+    private applySetupOverrides(): void {
+        if (!this.options.setupOverrides) {
             return;
         }
 
-        if (!this.spec.rotation) {
-            this.spec.rotation = {};
+        if (!this.spec.setup) {
+            this.spec.setup = {};
         }
 
-        const overrides = this.parseOverrides(this.options.rotationOverrides, 'rotation');
+        const overrides = this.parseOverrides(this.options.setupOverrides, 'setup');
 
         for (const override of overrides) {
-            (this.spec.rotation as any)[override.name] = this.parseValue(override.value);
+            (this.spec.setup as any)[override.name] = this.parseValue(override.value);
         }
     }
 
@@ -215,7 +215,7 @@ export class SimulationRunner {
     private createSimulator(): BaseSimulator {
         switch (this.spec.class) {
             case CharacterClass.Rogue:
-                return new RogueSimulator(this.spec as SimulationSpec & { talents: RogueTalents; rotation?: RogueSetup });
+                return new RogueSimulator(this.spec as SimulationSpec & { talents: RogueTalents; setup?: RogueSetup });
 
             case CharacterClass.Warrior:
                 return new WarriorSimulator(this.spec as SimulationSpec & { talents: WarriorTalents });
@@ -235,7 +235,7 @@ export class SimulationRunner {
         console.log(`${c.cyan}Config: ${c.reset}${JSON.stringify(this.spec.gearStats)}`);
         console.log(`${c.cyan}Simulation params: ${c.reset}fightLength=${this.spec.fightLength}, targetLevel=${this.spec.targetLevel}, targetArmor=${this.spec.targetArmor}, iterations=${this.spec.iterations}, postCycleResourceGeneration=${this.spec.postCycleResourceGeneration}`);
         console.log(`${c.cyan}Talents: ${c.reset}${JSON.stringify(this.spec.talents)}`);
-        console.log(`${c.cyan}Rotation: ${c.reset}${JSON.stringify(this.spec.rotation)}`);
+        console.log(`${c.cyan}Setup: ${c.reset}${JSON.stringify(this.spec.setup)}`);
         console.log(`${c.brightCyan}Running simulation...${c.reset}`);
     }
 

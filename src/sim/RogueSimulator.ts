@@ -34,7 +34,7 @@ export class RogueSimulator extends MeleeSimulator {
    override damageCalculator: RogueDamageCalculator;
    override events: (RogueDamageEvent | RogueBuffEvent | ProcEvent)[] = [];
    damageBreakdown: Map<string, number> = new Map();
-   rotation: RogueSetup;
+   setup: RogueSetup;
    talents: RogueTalents;
 
    constructor(spec: SimulationSpec) {
@@ -42,7 +42,7 @@ export class RogueSimulator extends MeleeSimulator {
       this.talents = spec.talents as RogueTalents;
       this.damageCalculator = new RogueDamageCalculator(spec, this);
       this.state = this.initializeState();
-      this.rotation = spec.rotation as RogueSetup ?? {
+      this.setup = spec.setup as RogueSetup ?? {
          refreshSndSecondsAhead5Combo: 3,
       };
    }
@@ -130,7 +130,7 @@ export class RogueSimulator extends MeleeSimulator {
    castSliceAndDice(): boolean {
       let energyCost = 25;
 
-      if (this.rotation.veiledShadowsSet)
+      if (this.setup.veiledShadowsSet)
          energyCost -= 10;
 
       if (!this.spendEnergy(energyCost))
@@ -149,7 +149,7 @@ export class RogueSimulator extends MeleeSimulator {
    }
 
    castEviscerate(): boolean {
-      if (this.rotation.avoidEviscerate || !this.spendEnergy(35)) {
+      if (this.setup.avoidEviscerate || !this.spendEnergy(35)) {
          return false;
       }
 
@@ -270,7 +270,7 @@ export class RogueSimulator extends MeleeSimulator {
          return true;
       }
       const timeRemainingMs = this.getBuffTimeRemaining(Buffs.SnD);
-      const refreshThresholdMs = this.rotation.refreshSndSecondsAhead5Combo * 1000;
+      const refreshThresholdMs = this.setup.refreshSndSecondsAhead5Combo * 1000;
       return timeRemainingMs < refreshThresholdMs;
    }
 

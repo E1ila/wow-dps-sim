@@ -1,7 +1,7 @@
 {
     "name": "PvE Combat Daggers",
     "class": "Rogue",
-    "rotation": {
+    "setup": {
         "refreshSndSecondsBeforeExpiry": 3
     },
     "talents": {
