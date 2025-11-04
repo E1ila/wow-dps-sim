@@ -13,6 +13,7 @@ export interface SimulationSpec {
    name: string;
    description: string;
    class: CharacterClass;
+   playerLevel: number;
    rotation?: RogueRotation | WarriorRotation;
    talents: RogueTalents | WarriorTalents;
    gearStats: GearStats;
@@ -28,10 +29,20 @@ export class SpecLoader {
    static load(filePath: string): SimulationSpec {
       try {
          const fileContent = readFileSync(filePath, 'utf-8');
-         const spec: SimulationSpec = JSON.parse(fileContent);
+         const spec: any = JSON.parse(fileContent);
 
          if (!spec.name || !spec.class || !spec.talents || !spec.gearStats) {
             throw new Error('Invalid spec file: missing required fields (name, class, talents, gearStats)');
+         }
+
+         // Migrate old format: move level from gearStats to playerLevel
+         if (spec.gearStats.level !== undefined && !spec.playerLevel) {
+            spec.playerLevel = spec.gearStats.level;
+            delete spec.gearStats.level;
+         }
+
+         if (!spec.playerLevel) {
+            throw new Error('Invalid spec file: missing required field playerLevel');
          }
 
          // Set defaults for simulation parameters if not provided
@@ -52,7 +63,7 @@ export class SpecLoader {
         }
         spec.class = characterClass;
 
-         return spec;
+         return spec as SimulationSpec;
       } catch (error) {
          if ((error as NodeJS.ErrnoException).code === 'ENOENT') {
             throw new Error(`Spec file not found: ${filePath}`);

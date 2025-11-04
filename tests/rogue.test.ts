@@ -5,7 +5,6 @@ import {RogueSimulator} from '../src/sim/RogueSimulator';
 import {SimulationSpec} from '../src/SpecLoader';
 
 const baseStats: GearStats = {
-   playerLevel: 60,
    attackPower: 1200,
    critChance: 30,
    hitChance: 9,
@@ -65,6 +64,7 @@ function createTestSpec(stats: GearStats, config: SimulationConfig, talents: Rog
       name: 'test',
       description: 'test spec',
       class: CharacterClass.Rogue,
+      playerLevel: 60,
       gearStats: stats,
       simulationConfig: config,
       talents,
@@ -120,7 +120,7 @@ describe('Rogue Talents', () => {
             };
 
             const simulator = new RogueSimulator(createTestSpec(baseStats, config, talents));
-            const attackTable = new AttackTable(simulator.damageCalculator, config);
+            const attackTable = new AttackTable(simulator.damageCalculator);
 
             const numRolls = 100000;
             let crits = 0;
@@ -163,7 +163,7 @@ describe('Rogue Talents', () => {
                   critChance: baseCritChance,
                   hitChance,
                }, config, talents));
-            const attackTable = new AttackTable(simulator.damageCalculator, config);
+            const attackTable = new AttackTable(simulator.damageCalculator);
 
             const numRolls = 100000;
             let crits = 0;
@@ -254,7 +254,7 @@ describe('Rogue Talents', () => {
             };
 
             const simulator = new RogueSimulator(createTestSpec(baseStats, config, talents));
-            const attackTable = new AttackTable(simulator.damageCalculator, config);
+            const attackTable = new AttackTable(simulator.damageCalculator);
 
             const numRolls = 100000;
             let crits = 0;
@@ -296,7 +296,7 @@ describe('Rogue Talents', () => {
          };
 
          const simulator = new RogueSimulator(createTestSpec(swordStats, config, talents));
-         const attackTable = new AttackTable(simulator.damageCalculator, config);
+         const attackTable = new AttackTable(simulator.damageCalculator);
 
          const numRolls = 100000;
          let crits = 0;
@@ -342,7 +342,7 @@ describe('Rogue Talents', () => {
          };
 
          const simulator = new RogueSimulator(createTestSpec(baseStats, config, talents));
-         const attackTable = new AttackTable(simulator.damageCalculator, config);
+         const attackTable = new AttackTable(simulator.damageCalculator);
 
          const numRolls = 100000;
          let crits = 0;
@@ -562,7 +562,7 @@ describe('Rogue Talents', () => {
             };
 
             const simulator = new RogueSimulator(createTestSpec(testStats, config, talents));
-            const attackTable = new AttackTable(simulator.damageCalculator, config);
+            const attackTable = new AttackTable(simulator.damageCalculator);
 
             const numRolls = 100000;
             let misses = 0;
@@ -748,8 +748,8 @@ describe('Rogue Talents', () => {
 
          const simulator0 = new RogueSimulator(createTestSpec(testStats, config, talents0));
          const simulator5 = new RogueSimulator(createTestSpec(testStats, config, talents5));
-         const attackTable0 = new AttackTable(simulator0.damageCalculator, config);
-         const attackTable5 = new AttackTable(simulator5.damageCalculator, config);
+         const attackTable0 = new AttackTable(simulator0.damageCalculator);
+         const attackTable5 = new AttackTable(simulator5.damageCalculator);
 
          const numRolls = 100000;
          let misses0 = 0;
@@ -802,7 +802,7 @@ describe('Rogue Talents', () => {
             };
 
             const simulator = new RogueSimulator(createTestSpec(testStats, config, talents));
-            const attackTable = new AttackTable(simulator.damageCalculator, config);
+            const attackTable = new AttackTable(simulator.damageCalculator);
 
             expect(simulator.damageCalculator.weaponSkill).toBe(expectedWeaponSkill);
 

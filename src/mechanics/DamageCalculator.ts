@@ -20,7 +20,7 @@ export abstract class DamageCalculator implements AttackTableStatsProvider {
    }
 
    get playerLevel(): number {
-      return this.spec.gearStats.playerLevel;
+      return this.spec.playerLevel;
    }
 
    get isDualWielding(): boolean {
