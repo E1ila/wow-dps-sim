@@ -44,26 +44,26 @@ const weaponTypeMap: { [key: string]: WeaponType } = {
 
 const simulationOptions: SimulationOptions = {
    specFile,
-   attackPower: parseInt(opts.attackPower || opts.ap),
-   critChance: parseFloat(opts.crit),
-   hitChance: parseFloat(opts.hit),
-   weaponSkill: parseInt(opts.weaponSkill),
-   mainHand: {
+   attackPower: (opts.attackPower || opts.ap) !== undefined ? parseInt(opts.attackPower || opts.ap) : undefined,
+   critChance: opts.crit !== undefined ? parseFloat(opts.crit) : undefined,
+   hitChance: opts.hit !== undefined ? parseFloat(opts.hit) : undefined,
+   weaponSkill: opts.weaponSkill !== undefined ? parseInt(opts.weaponSkill) : undefined,
+   mainHand: opts.mhMin !== undefined ? {
       minDamage: parseFloat(opts.mhMin),
       maxDamage: parseFloat(opts.mhMax),
       speed: parseFloat(opts.mhSpeed),
       type: weaponTypeMap[(opts.mhType || 'Dagger').toLowerCase()] || WeaponType.Dagger,
-   },
-   offHand: opts.offhand ? {
+   } : undefined,
+   offHand: opts.offhand && opts.ohMin !== undefined ? {
       minDamage: parseFloat(opts.ohMin),
       maxDamage: parseFloat(opts.ohMax),
       speed: parseFloat(opts.ohSpeed),
       type: weaponTypeMap[(opts.ohType || 'Dagger').toLowerCase()] || WeaponType.Dagger,
    } : undefined,
-   targetLevel: parseInt(opts.targetLevel),
-   targetArmor: parseInt(opts.armor),
-   fightLength: parseInt(opts.length),
-   iterations: parseInt(opts.iterations),
+   targetLevel: opts.targetLevel !== undefined ? parseInt(opts.targetLevel) : undefined,
+   targetArmor: opts.armor !== undefined ? parseInt(opts.armor) : undefined,
+   fightLength: opts.length !== undefined ? parseInt(opts.length) : undefined,
+   iterations: opts.iterations !== undefined ? parseInt(opts.iterations) : undefined,
    postCycleResourceGeneration: opts.postCycleResourceGeneration ? opts.postCycleResourceGeneration != '0' : false,
    talentOverrides: opts.talent,
    playbackSpeed: opts.speed !== undefined ? parseFloat(opts.speed) : undefined,

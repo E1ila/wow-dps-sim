@@ -83,7 +83,7 @@ export class SimulationRunner {
         } else if (this.options.offHand === null) {
             this.spec.gearStats.offHandWeapon = undefined;
         }
-        
+
         if (this.options.targetLevel !== undefined) {
             this.spec.targetLevel = this.options.targetLevel;
         }
