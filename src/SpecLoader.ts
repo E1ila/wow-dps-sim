@@ -1,7 +1,15 @@
 import {readFileSync} from 'fs';
-import {CharacterClass, GearStats, RogueRotation, RogueTalents, SimulationConfig, WarriorRotation, WarriorTalents} from './types.js';
+import {
+   CharacterClass,
+   GearStats,
+   RogueRotation,
+   RogueTalents,
+   SimulationConfig,
+   WarriorRotation,
+   WarriorTalents
+} from './types';
 
-export interface SpecFile {
+export interface SimulationSpec {
    name: string;
    class: CharacterClass;
    description: string;
@@ -12,25 +20,25 @@ export interface SpecFile {
 }
 
 export class SpecLoader {
-   static load(filePath: string): SpecFile {
+   static load(filePath: string): SimulationSpec {
       try {
          const fileContent = readFileSync(filePath, 'utf-8');
-         const spec: SpecFile = JSON.parse(fileContent);
+         const spec: SimulationSpec = JSON.parse(fileContent);
 
          if (!spec.name || !spec.class || !spec.talents || !spec.gearStats || !spec.simulationConfig) {
             throw new Error('Invalid spec file: missing required fields (name, class, talents, gearStats, simulationConfig)');
          }
 
-         const classMap: { [key: string]: CharacterClass } = {
+        const classMap: { [key: string]: CharacterClass } = {
             'rogue': CharacterClass.Rogue,
             'warrior': CharacterClass.Warrior,
-         };
+        };
 
-         const characterClass = classMap[this.spec.class.toLowerCase()];
-         if (!characterClass) {
-            throw new Error(`Unknown class "${this.spec.class}". Available classes: rogue, warrior`);
-         }
-         spec.class = characterClass;
+        const characterClass = classMap[spec.class.toLowerCase()];
+        if (!characterClass) {
+            throw new Error(`Unknown class "${spec.class}". Available classes: rogue, warrior`);
+        }
+        spec.class = characterClass;
 
          return spec;
       } catch (error) {

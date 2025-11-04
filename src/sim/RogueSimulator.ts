@@ -3,16 +3,15 @@ import {
    AttackType,
    Buffs,
    c,
-   GearStats,
    ProcEvent,
    RogueBuffEvent,
    RogueDamageEvent,
    RogueRotation,
    RogueSimulationState,
    RogueTalents,
-   SimulationConfig,
    WeaponType,
 } from '../types';
+import {SimulationSpec} from '../SpecLoader';
 import {RogueDamageCalculator} from '../mechanics/RogueDamageCalculator';
 import {MeleeSimulator} from './MeleeSimulator';
 
@@ -24,15 +23,11 @@ enum RogueAbility {
    Hemorrhage = 'HEMO',
 }
 
-const DEFAULT_DAGGERS_ROTATION: RogueRotation = {
-   refreshSndSecondsAhead5Combo: 3,
-};
-
-const DEFAULT_SWORDS_ROTATION: RogueRotation = {
-   refreshSndSecondsAhead5Combo: 3,
-};
-
-const SLICE_N_DICE_IAS = 0.2; // 20% attack speed increase
+export const ROGUE = {
+   maxEnergy: 100,
+   maxEnergyVigor: 110,
+   slnDiceIAS: 0.2,
+}
 
 export class RogueSimulator extends MeleeSimulator {
    override state: RogueSimulationState;
@@ -40,30 +35,22 @@ export class RogueSimulator extends MeleeSimulator {
    override events: (RogueDamageEvent | RogueBuffEvent | ProcEvent)[] = [];
    damageBreakdown: Map<string, number> = new Map();
    rotation: RogueRotation;
+   talents: RogueTalents;
 
-   constructor(
-      stats: GearStats,
-      config: SimulationConfig,
-      public talents: RogueTalents,
-      rotation?: RogueRotation,
-   ) {
-      super(stats, config);
-      this.damageCalculator = new RogueDamageCalculator(stats, config, talents);
+   constructor(spec: SimulationSpec) {
+      super(spec.gearStats, spec.simulationConfig);
+      this.talents = spec.talents as RogueTalents;
+      this.damageCalculator = new RogueDamageCalculator(spec.gearStats, spec.simulationConfig, this.talents);
       this.state = this.initializeState();
-
-      if (rotation) {
-         this.rotation = rotation;
-      } else {
-         // Choose default rotation based on weapon type
-         const isDagger = stats.mainHandWeapon.type === WeaponType.Dagger;
-         this.rotation = isDagger ? DEFAULT_DAGGERS_ROTATION : DEFAULT_SWORDS_ROTATION;
-      }
+      this.rotation = spec.rotation as RogueRotation ?? {
+         refreshSndSecondsAhead5Combo: 3,
+      };
    }
 
    initializeState(): RogueSimulationState {
       return {
          currentTime: 0,
-         energy: 100,
+         energy: this.maxEnergy,
          comboPoints: 0,
          targetHealth: 999999999,
          mainHandNextSwing: 0,
@@ -72,6 +59,10 @@ export class RogueSimulator extends MeleeSimulator {
          nextEnergyTick: 2000,
          activeBuffs: [],
       };
+   }
+
+   get maxEnergy() {
+      return this.talents.vigor ? ROGUE.maxEnergyVigor : ROGUE.maxEnergy;
    }
 
    override addDamage(ability: string, attackResult: AttackResult, comboPointsGained: number = 0, comboPointsSpent: number = 0): void {
@@ -87,11 +78,11 @@ export class RogueSimulator extends MeleeSimulator {
    }
 
    addEnergy(amount: number): void {
-      this.state.energy = Math.min(100, this.state.energy + amount);
+      this.state.energy = Math.min(this.maxEnergy, this.state.energy + amount);
    }
 
    getHasteMultiplier(): number {
-      return this.isBuffActive(Buffs.SnD) ? 1 + SLICE_N_DICE_IAS : 1;
+      return this.isBuffActive(Buffs.SnD) ? 1 + ROGUE.slnDiceIAS : 1;
    }
 
    spendEnergy(amount: number): boolean {
@@ -312,7 +303,7 @@ export class RogueSimulator extends MeleeSimulator {
 
    getStateText(): string {
       const timestampSeconds = this.state.currentTime / 1000;
-      const energyBar = this.generateResourceBar(this.state.energy, 100, 20);
+      const energyBar = this.generateResourceBar(this.state.energy, this.maxEnergy, 20);
       const cpDots = c.red + '●'.repeat(this.state.comboPoints) + c.reset + '○'.repeat(5 - this.state.comboPoints);
       const buffsStatus = this.getBuffsStatusText();
       return `[${timestampSeconds.toFixed(1)}s] [${energyBar}] ${this.state.energy} ${cpDots}${buffsStatus}`;

@@ -103,6 +103,7 @@ export interface RogueTalents {
    hemorrhage: boolean;
    precision: number;
    weaponExpertise: number;
+   vigor: boolean;
 }
 
 export interface WarriorTalents {

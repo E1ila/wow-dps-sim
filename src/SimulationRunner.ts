@@ -1,17 +1,7 @@
-import {
-    c,
-    CharacterClass,
-    colorByClass,
-    GearStats,
-    RogueRotation,
-    RogueTalents,
-    SimulationConfig,
-    WarriorTalents,
-    WeaponType
-} from './types';
+import {c, CharacterClass, colorByClass, RogueRotation, RogueTalents, WarriorTalents, WeaponType} from './types';
 import {WarriorSimulator} from './sim/WarriorSimulator';
 import {BaseSimulator} from './sim/BaseSimulator';
-import {SpecLoader} from './SpecLoader';
+import {SimulationSpec, SpecLoader} from './SpecLoader';
 import {RogueSimulator} from "./sim/RogueSimulator";
 
 export interface SimulationOptions {
@@ -44,7 +34,7 @@ export interface SimulationOptions {
 
 export class SimulationRunner {
     private readonly options: SimulationOptions;
-    private spec: any;
+    private spec!: SimulationSpec;
     private appliedTalentOverrides: Record<string, any> = {};
 
     constructor(options: SimulationOptions) {
@@ -54,9 +44,39 @@ export class SimulationRunner {
     private loadSpec(): void {
         try {
             this.spec = SpecLoader.load(this.options.specFile);
+            this.applyCliOverrides();
         } catch (error) {
             throw new Error(`Error loading spec file: ${(error as Error).message}`);
         }
+    }
+
+    private applyCliOverrides(): void {
+        this.spec.gearStats.attackPower = this.options.attackPower;
+        this.spec.gearStats.critChance = this.options.critChance;
+        this.spec.gearStats.hitChance = this.options.hitChance;
+        this.spec.gearStats.weaponSkill = this.options.weaponSkill;
+        this.spec.gearStats.mainHandWeapon = {
+            minDamage: this.options.mainHand.minDamage,
+            maxDamage: this.options.mainHand.maxDamage,
+            speed: this.options.mainHand.speed,
+            type: this.options.mainHand.type,
+        };
+        if (this.options.offHand) {
+            this.spec.gearStats.offHandWeapon = {
+                minDamage: this.options.offHand.minDamage,
+                maxDamage: this.options.offHand.maxDamage,
+                speed: this.options.offHand.speed,
+                type: this.options.offHand.type,
+            };
+        } else {
+            this.spec.gearStats.offHandWeapon = undefined;
+        }
+        
+        this.spec.simulationConfig.targetLevel = this.options.targetLevel;
+        this.spec.simulationConfig.targetArmor = this.options.targetArmor;
+        this.spec.simulationConfig.fightLength = this.options.fightLength;
+        this.spec.simulationConfig.iterations = this.options.iterations;
+        this.spec.simulationConfig.postResGen = this.options.postResGen;
     }
 
     private applyTalentOverrides(): void {
@@ -101,15 +121,10 @@ export class SimulationRunner {
     private createSimulator(): BaseSimulator {
         switch (this.spec.class) {
             case CharacterClass.Rogue:
-                return new RogueSimulator(
-                    this.spec.gearStats,
-                    this.spec.simulationConfig,
-                    this.spec.talents as RogueTalents,
-                    this.spec.rotation as RogueRotation
-                );
+                return new RogueSimulator(this.spec as SimulationSpec & { talents: RogueTalents; rotation?: RogueRotation });
 
             case CharacterClass.Warrior:
-                return new WarriorSimulator(this.spec.gearStats, this.spec.simulationConfig, this.spec.talents as WarriorTalents);
+                return new WarriorSimulator(this.spec as SimulationSpec & { talents: WarriorTalents });
 
             default:
                 throw new Error(`Class ${this.spec.class} is not implemented yet.`);
@@ -154,9 +169,7 @@ export class SimulationRunner {
         this.loadSpec();
         this.applyTalentOverrides();
 
-        const config = this.buildConfig();
-
-        const simulator = this.createSimulator(this.spec.class, this.spec.gearStats, config);
+        const simulator = this.createSimulator();
         const {results, executionTimeMs} = simulator.runMultipleIterations();
 
         return BaseSimulator.printResults(
