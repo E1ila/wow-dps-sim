@@ -36,15 +36,21 @@ interface BuildResult extends SimulationResult {
    buildName: string;
 }
 
-function runSimulation(baseOptions: SimulationOptions, talents: string): SimulationResult {
+interface BuildConfig {
+   talents: string;
+   rotation?: string;
+}
+
+function runSimulation(baseOptions: SimulationOptions, buildConfig: BuildConfig): SimulationResult {
    try {
       const options = {...baseOptions};
-      options.talentOverrides = talents;
-      
+      options.talentOverrides = buildConfig.talents;
+      options.rotationOverrides = buildConfig.rotation;
+
       const runner = new SimulationRunner(options);
       return runner.runAndGetResults();
    } catch (error) {
-      console.error(`Error running simulation for talents: ${talents}`);
+      console.error(`Error running simulation for build: ${buildConfig.talents}${buildConfig.rotation ? ` | ${buildConfig.rotation}` : ''}`);
       throw error;
    }
 }
@@ -75,21 +81,36 @@ function printTable(results: BuildResult[]): void {
    }
 }
 
-function parseBuilds(buildsArg?: string, specFile?: string): string[] {
+function parseBuilds(buildsArg?: string, specFile?: string): BuildConfig[] {
    if (!buildsArg) {
       if (specFile) {
          specFile = path.join(__dirname, '..', 'specs', specFile + '.compare');
          if (fs.existsSync(specFile)) {
             const fileContent = readFileSync(specFile, 'utf-8');
-            return fileContent.split('\n').filter(line => line && !line.trim().startsWith('--'))
+            return fileContent.split('\n')
+               .filter(line => line && !line.trim().startsWith('--'))
                .filter(line => line.trim())
-               .map(line => line.trim());
+               .map(line => parseBuildString(line.trim()));
          }
       }
       return [];
    }
 
-   return buildsArg.split(';').map(talents => talents.trim());
+   return buildsArg.split(';').map(build => parseBuildString(build.trim()));
+}
+
+function parseBuildString(buildStr: string): BuildConfig {
+   const parts = buildStr.split('|');
+   if (parts.length === 1) {
+      return { talents: parts[0].trim() };
+   } else if (parts.length === 2) {
+      return {
+         talents: parts[0].trim(),
+         rotation: parts[1].trim() || undefined
+      };
+   } else {
+      throw new Error(`Invalid build format: ${buildStr}. Expected format: talents|rotation or just talents`);
+   }
 }
 
 const program = new Command();
@@ -101,7 +122,7 @@ program
    .argument('<spec-file>', 'Path to spec file (e.g., specs/rogue/daggers)')
    .option(
       '-b, --builds <builds>',
-      'Custom builds to compare (format: talents1;talents2). Example: "sealFate:5;sealFate:0"'
+      'Custom builds to compare (format: talents1|rotation1;talents2|rotation2, rotation optional). Example: "sealFate:5|avoidEviscerate:1;sealFate:0"'
    )
    .option(
       '-i, --iterations <number>',

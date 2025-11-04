@@ -28,6 +28,7 @@ export interface SimulationOptions {
     iterations?: number;
     postCycleResourceGeneration?: boolean;
     talentOverrides?: string;
+    rotationOverrides?: string;
     playbackSpeed?: number;
     quiet: boolean;
 }
@@ -140,6 +141,40 @@ export class SimulationRunner {
         }
     }
 
+    private applyRotationOverrides(): void {
+        if (!this.options.rotationOverrides) {
+            return;
+        }
+
+        if (!this.spec.rotation) {
+            this.spec.rotation = {};
+        }
+
+        try {
+            const rotationOverrides = this.options.rotationOverrides.split(',').map((pair: string) => {
+                const [name, value] = pair.split(':');
+                if (!name || value === undefined) {
+                    throw new Error(`Invalid rotation format: ${pair}`);
+                }
+                return {name: name.trim(), value: value.trim()};
+            });
+
+            for (const override of rotationOverrides) {
+                const rotationParam = override.name;
+                const newValue = override.value === 'true' || override.value === '1' ? true :
+                                 override.value === 'false' || override.value === '0' ? false :
+                                 parseFloat(override.value);
+
+                (this.spec.rotation as any)[rotationParam] = newValue;
+            }
+        } catch (error) {
+            throw new Error(
+                `Error parsing rotation overrides: ${(error as Error).message}\n` +
+                `Format should be: NAME:VALUE,NAME:VALUE (e.g., avoidEviscerate:1,refreshSndSecondsAhead5Combo:2)`
+            );
+        }
+    }
+
     private createSimulator(): BaseSimulator {
         switch (this.spec.class) {
             case CharacterClass.Rogue:
@@ -190,6 +225,7 @@ export class SimulationRunner {
     runAndGetResults(): any {
         this.loadSpec();
         this.applyTalentOverrides();
+        this.applyRotationOverrides();
 
         const simulator = this.createSimulator();
         const {results, executionTimeMs} = simulator.runMultipleIterations();
@@ -206,6 +242,7 @@ export class SimulationRunner {
     async run(): Promise<void> {
         this.loadSpec();
         this.applyTalentOverrides();
+        this.applyRotationOverrides();
 
         this.printSimulationInfo();
 
