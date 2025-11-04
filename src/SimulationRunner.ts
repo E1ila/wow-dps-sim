@@ -6,7 +6,7 @@ import {RogueSimulator} from "./sim/RogueSimulator";
 
 export interface SimulationOptions {
     specFile: string;
-    // gear stats
+    // gear stats CLI override
     attackPower?: number;
     critChance?: number;
     hitChance?: number;
