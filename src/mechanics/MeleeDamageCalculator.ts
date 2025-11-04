@@ -1,4 +1,4 @@
-import {Ability, Attack, AttackResult, AttackType, Weapon} from '../types';
+import {Ability, Attack, AttackResult, AttackType, Weapon, WeaponEnchant} from '../types';
 import {AttackTable} from './AttackTable';
 import {DamageCalculator} from './DamageCalculator';
 import {SimulationSpec} from '../SpecLoader';
@@ -38,7 +38,21 @@ export abstract class MeleeDamageCalculator extends DamageCalculator {
    }
 
    protected getWeaponDamage(weapon: Weapon): number {
-      return weapon.minDamage + Math.random() * (weapon.maxDamage - weapon.minDamage);
+      let minDamage = weapon.minDamage;
+      let maxDamage = weapon.maxDamage;
+      if (weapon.enchant === WeaponEnchant.Dmg5) {
+         minDamage += 5;
+         maxDamage += 5;
+      }
+      else if (weapon.enchant === WeaponEnchant.Dmg4) {
+         minDamage += 4;
+         maxDamage += 4;
+      }
+      else if (weapon.enchant === WeaponEnchant.Dmg3) {
+         minDamage += 3;
+         maxDamage += 3;
+      }
+      return minDamage + Math.random() * (maxDamage - minDamage);
    }
 
    protected calculateMeleeDamage(params: MeleeDamageParams): AttackResult {

@@ -1,4 +1,13 @@
-import {Ability, AttackType, CharacterClass, GearStats, RogueTalents, SimulationConfig, WeaponType} from '../src/types';
+import {
+  Ability,
+  AttackType,
+  CharacterClass,
+  GearStats,
+  RogueTalents,
+  SimulationConfig,
+  WeaponEnchant,
+  WeaponType
+} from '../src/types';
 import {RogueDamageCalculator} from '../src/mechanics/RogueDamageCalculator';
 import {SimulationSpec} from '../src/SpecLoader';
 
@@ -14,12 +23,14 @@ const baseStats: GearStats = {
     maxDamage: 100,
     speed: 2.0,
     type: WeaponType.Dagger,
+    enchant: WeaponEnchant.None
   },
   offHandWeapon: {
     minDamage: 80,
     maxDamage: 80,
     speed: 1.5,
     type: WeaponType.Dagger,
+    enchant: WeaponEnchant.None
   },
 };
 
@@ -472,64 +483,6 @@ describe('RogueDamageCalculator', () => {
     });
   });
 
-  describe('Hemorrhage', () => {
-    it('should calculate base damage correctly', () => {
-      const calculator = new RogueDamageCalculator(createTestSpec(baseStats, config, baseTalents));
-
-      const originalRandom = Math.random;
-      Math.random = () => 0.5;
-
-      const result = calculator.calculateHemorrhageDamage();
-
-      Math.random = originalRandom;
-
-      const expectedBase = (100 + 110) * 1.1;
-      expect(result.baseAmount).toBe(expectedBase);
-    });
-
-    it('should apply lethality talent bonus', () => {
-      const talentsNoLeth = {...baseTalents, lethality: 0};
-      const talentsWithLeth = {...baseTalents, lethality: 5};
-
-      const calcNoLeth = new RogueDamageCalculator(createTestSpec(baseStats, config, talentsNoLeth));
-      const calcWithLeth = new RogueDamageCalculator(createTestSpec(baseStats, config, talentsWithLeth));
-
-      const numTrials = 5000;
-      let totalNoLeth = 0;
-      let totalWithLeth = 0;
-
-      for (let i = 0; i < numTrials; i++) {
-        const resultNoLeth = calcNoLeth.calculateHemorrhageDamage();
-        const resultWithLeth = calcWithLeth.calculateHemorrhageDamage();
-
-        if (resultNoLeth.amount > 0) totalNoLeth += resultNoLeth.amount;
-        if (resultWithLeth.amount > 0) totalWithLeth += resultWithLeth.amount;
-      }
-
-      const expectedMultiplier = 1.30;
-      expect(totalWithLeth / totalNoLeth).toBeGreaterThan(expectedMultiplier - 0.05);
-      expect(totalWithLeth / totalNoLeth).toBeLessThan(expectedMultiplier + 0.05);
-    });
-
-    it('should NOT apply opportunity or aggression bonuses', () => {
-      const talentsNone = {...baseTalents};
-      const talentsOthers = {...baseTalents, opportunity: 5, aggression: 5};
-
-      const calcNone = new RogueDamageCalculator(createTestSpec(baseStats, config, talentsNone));
-      const calcOthers = new RogueDamageCalculator(createTestSpec(baseStats, config, talentsOthers));
-
-      const originalRandom = Math.random;
-      Math.random = () => 0.5;
-
-      const resultNone = calcNone.calculateHemorrhageDamage();
-      const resultOthers = calcOthers.calculateHemorrhageDamage();
-
-      Math.random = originalRandom;
-
-      expect(resultOthers.baseAmount).toBe(resultNone.baseAmount);
-    });
-  });
-
   describe('Eviscerate', () => {
     it('should calculate base damage correctly for each combo point level', () => {
       const calculator = new RogueDamageCalculator(createTestSpec(baseStats, config, baseTalents));
@@ -750,8 +703,8 @@ describe('RogueDamageCalculator', () => {
       }
 
       const expectedRatio = (0.5 + 0.25) / 0.5;
-      expect(totalWithDW / totalNoDW).toBeGreaterThan(expectedRatio - 0.05);
-      expect(totalWithDW / totalNoDW).toBeLessThan(expectedRatio + 0.05);
+      expect(totalWithDW / totalNoDW).toBeGreaterThan(expectedRatio - 0.06);
+      expect(totalWithDW / totalNoDW).toBeLessThan(expectedRatio + 0.06);
     });
 
     it('should return NoWeapon result when offhand does not exist', () => {

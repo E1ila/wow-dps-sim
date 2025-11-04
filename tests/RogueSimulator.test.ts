@@ -1,4 +1,13 @@
-import {Ability, AttackType, CharacterClass, GearStats, RogueTalents, SimulationConfig, WeaponType} from '../src/types';
+import {
+   Ability,
+   AttackType,
+   CharacterClass,
+   GearStats,
+   RogueTalents,
+   SimulationConfig,
+   WeaponEnchant,
+   WeaponType
+} from '../src/types';
 import {AttackTable} from '../src/mechanics/AttackTable';
 import {RogueDamageCalculator} from '../src/mechanics/RogueDamageCalculator';
 import {RogueSimulator} from '../src/sim/RogueSimulator';
@@ -16,12 +25,14 @@ const baseStats: GearStats = {
       maxDamage: 142,
       speed: 1.7,
       type: WeaponType.Dagger,
+      enchant: WeaponEnchant.None
    },
    offHandWeapon: {
       minDamage: 68,
       maxDamage: 132,
       speed: 1.5,
       type: WeaponType.Dagger,
+      enchant: WeaponEnchant.None
    },
 };
 
@@ -223,6 +234,7 @@ describe('Rogue Talents', () => {
                maxDamage: 142,
                speed: 1.7,
                type: WeaponType.Sword,
+               enchant: WeaponEnchant.None
             },
          };
 
@@ -283,6 +295,7 @@ describe('Rogue Talents', () => {
             maxDamage: 142,
             speed: 1.7,
             type: WeaponType.Sword,
+            enchant: WeaponEnchant.None
          };
 
          const swordStats: GearStats = {
@@ -687,6 +700,7 @@ describe('Rogue Talents', () => {
                maxDamage: 142,
                speed: 1.7,
                type: WeaponType.Sword,
+               enchant: WeaponEnchant.None
             },
          };
 
@@ -716,6 +730,7 @@ describe('Rogue Talents', () => {
                maxDamage: 142,
                speed: 1.7,
                type: WeaponType.Mace,
+               enchant: WeaponEnchant.None
             },
          };
 

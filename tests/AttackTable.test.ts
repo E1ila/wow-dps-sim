@@ -1,4 +1,4 @@
-import {GearStats, WeaponType} from '../src/types';
+import {GearStats, WeaponEnchant, WeaponType} from '../src/types';
 import {AttackTable, AttackTableStatsProvider} from '../src/mechanics/AttackTable';
 
 describe('Attack Table Mechanics', () => {
@@ -14,12 +14,14 @@ describe('Attack Table Mechanics', () => {
       maxDamage: 150,
       speed: 2.0,
       type: WeaponType.Sword,
+      enchant: WeaponEnchant.None,
     },
     offHandWeapon: hasOffHand ? {
       minDamage: 80,
       maxDamage: 120,
       speed: 2.0,
       type: WeaponType.Sword,
+      enchant: WeaponEnchant.None,
     } : undefined,
   });
 

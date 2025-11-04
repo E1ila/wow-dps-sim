@@ -53,6 +53,17 @@ export interface Weapon {
    maxDamage: number;
    speed: number;
    type: WeaponType;
+   enchant: WeaponEnchant;
+}
+
+export enum WeaponEnchant {
+   None = 'None',
+   Crusader = 'Crusader',
+   Dmg3 = '+3 damage',
+   Dmg4 = '+4 damage',
+   Dmg5 = '+5 damage',
+   Agility25 = '+25 agility',
+   Agility15 = '+15 agility',
 }
 
 export enum WeaponType {
