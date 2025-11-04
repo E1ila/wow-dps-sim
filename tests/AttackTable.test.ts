@@ -187,4 +187,119 @@ describe('Attack Table Mechanics', () => {
       });
     });
   });
+
+  describe('Target Level 60 (Same Level)', () => {
+    it('should have 5.0% miss with 300 skill against level 60', () => {
+      const stats = createTestStats(300, false);
+      const attackTable = new AttackTable(wrapStats(stats, 60));
+
+      const missChance = (attackTable as any).missChance;
+      expect(missChance * 100).toBeCloseTo(5.0, 1);
+    });
+
+    it('should have 10% glancing with 300 skill against level 60', () => {
+      const stats = createTestStats(300, false);
+      const attackTable = new AttackTable(wrapStats(stats, 60));
+
+      const glancingChance = (attackTable as any).glancingChance;
+      expect(glancingChance * 100).toBeCloseTo(10, 1);
+    });
+
+    it('should have ~24% DW miss with 300 skill and 0% hit against level 60', () => {
+      const stats = createTestStats(300, true);
+      stats.hitChance = 0;
+      const attackTable = new AttackTable(wrapStats(stats, 60));
+
+      const missChance = (attackTable as any).missChance;
+      const targetDefense = 300;
+      const defenseSkillDiff = targetDefense - 300;
+
+      const skillModifier = defenseSkillDiff >= 11 ? 0.002 : 0.001;
+      const baseMissNoHit = 0.05 + (defenseSkillDiff * skillModifier);
+      const expectedDWMiss = (baseMissNoHit * 0.8) + 0.2;
+
+      expect(missChance * 100).toBeCloseTo(expectedDWMiss * 100, 1);
+      expect(missChance * 100).toBeCloseTo(24, 1);
+    });
+
+    it('should have 4.5% miss with 305 skill against level 60 (DW)', () => {
+      const stats = createTestStats(305, true);
+      const attackTable = new AttackTable(wrapStats(stats, 60));
+
+      const missChance = (attackTable as any).missChance;
+      const targetDefense = 300;
+      const defenseSkillDiff = targetDefense - 305;
+
+      const baseMiss = 0.05 + (defenseSkillDiff * 0.001);
+      const expectedDWMiss = (baseMiss * 0.8) + 0.2;
+
+      expect(missChance * 100).toBeCloseTo(expectedDWMiss * 100, 1);
+    });
+
+    it('should reach 0% miss with sufficient hit rating against level 60', () => {
+      const stats = createTestStats(300, false);
+      stats.hitChance = 5;
+      const attackTable = new AttackTable(wrapStats(stats, 60));
+
+      const missChance = (attackTable as any).missChance;
+      expect(missChance * 100).toBeCloseTo(0, 1);
+    });
+
+    it('should have reduced DW miss with hit rating against level 60', () => {
+      const testCases = [
+        { hitPercent: 0, expectedMissMin: 23, expectedMissMax: 25 },
+        { hitPercent: 3, expectedMissMin: 20, expectedMissMax: 22 },
+        { hitPercent: 6, expectedMissMin: 17, expectedMissMax: 20 },
+      ];
+
+      testCases.forEach(({ hitPercent, expectedMissMin, expectedMissMax }) => {
+        const stats = createTestStats(300, true);
+        stats.hitChance = hitPercent;
+        const attackTable = new AttackTable(wrapStats(stats, 60));
+        const missChance = (attackTable as any).missChance;
+
+        expect(missChance * 100).toBeGreaterThanOrEqual(expectedMissMin);
+        expect(missChance * 100).toBeLessThanOrEqual(expectedMissMax);
+      });
+    });
+
+    it('should still have 10% glancing with 305 skill against level 60', () => {
+      const stats = createTestStats(305, false);
+      const attackTable = new AttackTable(wrapStats(stats, 60));
+
+      const glancingChance = (attackTable as any).glancingChance;
+      expect(glancingChance * 100).toBeCloseTo(10, 1);
+    });
+
+    it('should have better glancing damage with higher skill against level 60', () => {
+      const testCases = [
+        { skill: 300, expectedDamage: 95 },
+        { skill: 305, expectedDamage: 95 },
+        { skill: 308, expectedDamage: 95 },
+      ];
+
+      testCases.forEach(({ skill, expectedDamage }) => {
+        const stats = createTestStats(skill, false);
+        const attackTable = new AttackTable(wrapStats(stats, 60));
+        const glancingDamage = (attackTable as any).calculateGlancingDamageModifier();
+
+        expect(glancingDamage * 100).toBeCloseTo(expectedDamage, 1);
+      });
+    });
+
+    it('should approach ~8% DW miss floor with high hit rating against level 60', () => {
+      const stats = createTestStats(300, true);
+      stats.hitChance = 20;
+      const attackTable = new AttackTable(wrapStats(stats, 60));
+
+      const missChance = (attackTable as any).missChance;
+
+      const baseMiss = 0.05 - 0.2;
+      const expectedMiss = (baseMiss * 0.8) + 0.2;
+
+      expect(missChance * 100).toBeCloseTo(expectedMiss * 100, 1);
+      expect(missChance * 100).toBeGreaterThan(7);
+      expect(missChance * 100).toBeLessThan(9);
+    });
+  });
 });
