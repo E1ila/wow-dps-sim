@@ -1,10 +1,8 @@
 import {Command} from 'commander';
+import {readFileSync} from 'fs';
 import {SimulationOptions, SimulationRunner} from './SimulationRunner';
-
-interface TalentBuild {
-   name: string;
-   talents: string;
-}
+import * as fs from "node:fs";
+import path from "node:path";
 
 interface SimulationResult {
    dps: number;
@@ -36,21 +34,6 @@ interface SimulationResult {
 interface BuildResult extends SimulationResult {
    buildName: string;
 }
-
-const DEFAULT_BUILDS: TalentBuild[] = [
-   {
-      name: 'Seal Fate',
-      talents: 'improvedSliceAndDice:1,ruthlessness:3,lethality:5,relentlessStrikes:1,sealFate:5'
-   },
-   {
-      name: 'No Seal Fate',
-      talents: 'improvedSliceAndDice:1,ruthlessness:3,lethality:5,relentlessStrikes:1,sealFate:0'
-   },
-   {
-      name: 'Combat Potency',
-      talents: 'improvedSliceAndDice:1,ruthlessness:3,lethality:5,relentlessStrikes:1,combatPotency:5'
-   },
-];
 
 function runSimulation(baseOptions: SimulationOptions, talents: string): SimulationResult {
    try {
@@ -85,18 +68,21 @@ function printTable(results: BuildResult[]): void {
    }
 }
 
-function parseBuilds(buildsArg?: string): TalentBuild[] {
+function parseBuilds(buildsArg?: string, specFile?: string): string[] {
    if (!buildsArg) {
-      return DEFAULT_BUILDS;
+      if (specFile) {
+         specFile = path.join(__dirname, '..', 'specs', specFile + '.compare');
+         if (fs.existsSync(specFile)) {
+            const fileContent = readFileSync(specFile, 'utf-8');
+            return fileContent.split('\n')
+               .filter(line => line.trim())
+               .map(line => line.trim());
+         }
+      }
+      return [];
    }
 
-   return buildsArg.split(';').map(buildStr => {
-      const [name, talents] = buildStr.split('=');
-      if (!name || !talents) {
-         throw new Error(`Invalid build format: ${buildStr}. Expected: NAME=talent1:value1,talent2:value2`);
-      }
-      return {name: name.trim(), talents: talents.trim()};
-   });
+   return buildsArg.split(';').map(talents => talents.trim());
 }
 
 const program = new Command();
@@ -105,10 +91,10 @@ program
    .name('wow-classic-compare')
    .description('WoW Classic Era DPS Simulator - Build Comparison Tool')
    .version('1.0.0')
-   .argument('<spec-file>', 'Path to spec file (e.g., specs/rogue/daggers.json)')
+   .argument('<spec-file>', 'Path to spec file (e.g., specs/rogue/daggers)')
    .option(
       '-b, --builds <builds>',
-      'Custom builds to compare (format: NAME1=talents1;NAME2=talents2). Example: "SF=sealFate:5;NoSF=sealFate:0"'
+      'Custom builds to compare (format: talents1;talents2). Example: "sealFate:5;sealFate:0"'
    )
    .parse(process.argv);
 
@@ -116,7 +102,7 @@ const specFile = program.args[0];
 const opts = program.opts();
 
 try {
-   const builds = parseBuilds(opts.builds);
+   const builds = parseBuilds(opts.builds, specFile);
 
    console.log(`Running build comparison for: ${specFile}`);
    console.log(`Testing ${builds.length} builds...`);
@@ -124,15 +110,16 @@ try {
 
    const results: BuildResult[] = [];
 
-   for (const build of builds) {
-      console.log(`Running: ${build.name}...`);
+   for (let i = 0; i < builds.length; i++) {
+      const buildName = `Build ${i + 1}`;
+      console.log(`Running: ${buildName}...`);
       const result = runSimulation({
          specFile,
          quiet: true,
-      }, build.talents);
+      }, builds[i]);
       results.push({
          ...result,
-         buildName: build.name,
+         buildName,
       });
    }
 

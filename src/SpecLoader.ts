@@ -8,6 +8,7 @@ import {
    WarriorRotation,
    WarriorTalents
 } from './types';
+import path from "node:path";
 
 export interface SimulationSpec {
    name: string;
@@ -26,8 +27,11 @@ export interface SimulationSpec {
 }
 
 export class SpecLoader {
-   static load(filePath: string): SimulationSpec {
+   static load(specFile: string): SimulationSpec {
       try {
+         if (!specFile.endsWith('.json'))
+            specFile += '.json';
+         const filePath = path.join(__dirname, '..', 'specs', specFile);
          const fileContent = readFileSync(filePath, 'utf-8');
          const spec: any = JSON.parse(fileContent);
 
@@ -66,7 +70,7 @@ export class SpecLoader {
          return spec as SimulationSpec;
       } catch (error) {
          if ((error as NodeJS.ErrnoException).code === 'ENOENT') {
-            throw new Error(`Spec file not found: ${filePath}`);
+            throw new Error(`Spec file not found: ${specFile}`);
          }
          throw error;
       }

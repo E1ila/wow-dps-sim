@@ -9,7 +9,7 @@
     "dev": "ts-node src/sim.ts",
     "verify": "tsc && node dist/verifyMechanics.js",
     "test": "jest",
-    "compare": "tsc && node dist/compare.js"
+    "compare": "ts-node src/compare.ts"
   },
   "keywords": [
     "wow",
