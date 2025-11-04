@@ -88,7 +88,7 @@ function parseBuilds(buildsArg?: string, specFile?: string): BuildConfig[] {
          if (fs.existsSync(specFile)) {
             const fileContent = readFileSync(specFile, 'utf-8');
             return fileContent.split('\n')
-               .filter(line => line && !line.trim().startsWith('--'))
+               .filter(line => line && !line.trim().startsWith('#'))
                .filter(line => line.trim())
                .map(line => parseBuildString(line.trim()));
          }
