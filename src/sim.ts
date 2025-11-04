@@ -2,6 +2,32 @@ import {Command} from 'commander';
 import {WeaponType} from './types';
 import {SimulationOptions, SimulationRunner} from './SimulationRunner';
 
+interface BuildConfig {
+   talents: string;
+   rotation?: string;
+   gear?: string;
+}
+
+function parseBuild(buildStr: string): BuildConfig {
+   const parts = buildStr.split('|');
+   if (parts.length === 1) {
+      return { talents: parts[0].trim() };
+   } else if (parts.length === 2) {
+      return {
+         talents: parts[0].trim(),
+         rotation: parts[1].trim() || undefined
+      };
+   } else if (parts.length === 3) {
+      return {
+         talents: parts[0].trim(),
+         rotation: parts[1].trim() || undefined,
+         gear: parts[2].trim() || undefined
+      };
+   } else {
+      throw new Error(`Invalid build format: ${buildStr}. Expected format: talents|rotation|gear (rotation and gear optional)`);
+   }
+}
+
 const program = new Command();
 
 program
@@ -28,7 +54,7 @@ program
    .option('--iterations <number>', 'Number of iterations')
    .option('--post-res-gen <number>', 'Generate resource AFTER cycle, simulates a more realistic latency')
    .option('--speed <number>', 'Playback speed (0 = instant, 1 = real-time, 0.5 = half speed, etc.)')
-   .option('-t, --talent <csv>', 'Override talents (format: NAME:VALUE,NAME:VALUE)')
+   .option('-b, --build <build>', 'Override build (format: talents|rotation|gear, rotation and gear optional). Example: "sealFate:5|avoidEviscerate:1|attackPower:1500"')
    .option('-q, --quiet', 'Quiet mode: only print final average DPS')
    .parse(process.argv);
 
@@ -41,6 +67,8 @@ const weaponTypeMap: { [key: string]: WeaponType } = {
    'mace': WeaponType.Mace,
    'fist': WeaponType.Fist,
 };
+
+const buildConfig = opts.build ? parseBuild(opts.build) : undefined;
 
 const simulationOptions: SimulationOptions = {
    specFile,
@@ -65,7 +93,9 @@ const simulationOptions: SimulationOptions = {
    fightLength: opts.length !== undefined ? parseInt(opts.length) : undefined,
    iterations: opts.iterations !== undefined ? parseInt(opts.iterations) : undefined,
    postCycleResourceGeneration: opts.postCycleResourceGeneration ? opts.postCycleResourceGeneration != '0' : false,
-   talentOverrides: opts.talent,
+   talentOverrides: buildConfig?.talents,
+   rotationOverrides: buildConfig?.rotation,
+   gearOverrides: buildConfig?.gear,
    playbackSpeed: opts.speed !== undefined ? parseFloat(opts.speed) : undefined,
    quiet: opts.quiet === true,
 };

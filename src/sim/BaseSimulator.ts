@@ -297,7 +297,7 @@ export abstract class BaseSimulator implements Simulator, BuffsProvider {
          if (event.amount === 0) {
             console.log(`${timestamp} ${c.blue}${event.ability} ${c.red}${event.type.toUpperCase()}${c.reset}${extra}${timeSinceLastStr}`);
          } else {
-            const critStr = event.type === AttackType.Crit ? ' (crit)' : '';
+            const critStr = event.type === AttackType.Crit ? ' (crit)' : (event.type === AttackType.Glancing ? ' (glancing)' : '');
             console.log(`${timestamp} ${c.blue}${event.ability} ${abilityColor}${event.amount}${c.reset}${critStr}${extra}${timeSinceLastStr}`);
          }
       }
