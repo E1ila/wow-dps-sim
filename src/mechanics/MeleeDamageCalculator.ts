@@ -1,6 +1,7 @@
-import {Ability, Attack, AttackResult, AttackType, GearStats, SimulationConfig, Weapon} from '../types';
+import {Ability, Attack, AttackResult, AttackType, Weapon} from '../types';
 import {AttackTable} from './AttackTable';
 import {DamageCalculator} from './DamageCalculator';
+import {SimulationSpec} from '../SpecLoader';
 
 interface MeleeDamageParams {
    baseDamage: number;
@@ -17,19 +18,16 @@ export abstract class MeleeDamageCalculator extends DamageCalculator {
 
    abstract get dualWieldSpecBonus(): number;
 
-   protected constructor(
-      stats: GearStats,
-      config: SimulationConfig
-   ) {
-      super(stats, config);
-      this.attackTable = new AttackTable(this, config);
+   protected constructor(spec: SimulationSpec) {
+      super(spec);
+      this.attackTable = new AttackTable(this);
       this.targetArmorReduction = this.calculateArmorReduction();
    }
 
    private calculateArmorReduction(): number {
-      const armor = this.config.targetArmor;
-      const levelDifference = Math.max(0, this.config.targetLevel - this.stats.level);
-      const effectiveLevel = this.stats.level + 1.5 * levelDifference;
+      const armor = this.spec.targetArmor;
+      const levelDifference = Math.max(0, this.spec.targetLevel - this.spec.gearStats.level);
+      const effectiveLevel = this.spec.gearStats.level + 1.5 * levelDifference;
       const levelModifier = 400 + 85 * effectiveLevel;
       const reduction = armor / (armor + levelModifier);
       return 1 - reduction;
@@ -81,7 +79,7 @@ export abstract class MeleeDamageCalculator extends DamageCalculator {
    }
 
    calculateAutoAttackDamage(isOffhand: boolean = false): AttackResult {
-      const weapon = isOffhand ? this.stats.offHandWeapon : this.stats.mainHandWeapon;
+      const weapon = isOffhand ? this.spec.gearStats.offHandWeapon : this.spec.gearStats.mainHandWeapon;
       if (!weapon) {
          return {
             type: AttackType.NoWeapon,
@@ -92,7 +90,7 @@ export abstract class MeleeDamageCalculator extends DamageCalculator {
       }
 
       const weaponDamage = this.getWeaponDamage(weapon);
-      const apBonus = (this.stats.attackPower / 14) * weapon.speed;
+      const apBonus = (this.spec.gearStats.attackPower / 14) * weapon.speed;
       let baseDamage = weaponDamage + apBonus;
 
       const multipliers = [];

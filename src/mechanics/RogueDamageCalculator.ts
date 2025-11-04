@@ -1,13 +1,13 @@
-import {Ability, Attack, AttackResult, GearStats, RogueTalents, SimulationConfig, Weapon, WeaponType} from '../types';
+import {Ability, Attack, AttackResult, RogueTalents, WeaponType} from '../types';
 import {MeleeDamageCalculator} from './MeleeDamageCalculator';
+import {SimulationSpec} from '../SpecLoader';
 
 export class RogueDamageCalculator extends MeleeDamageCalculator {
-   constructor(
-      stats: GearStats,
-      config: SimulationConfig,
-      protected talents: RogueTalents,
-   ) {
-      super(stats, config);
+   protected talents: RogueTalents;
+
+   constructor(spec: SimulationSpec) {
+      super(spec);
+      this.talents = spec.talents as RogueTalents;
    }
 
    get dualWieldSpecBonus(): number {
@@ -22,7 +22,7 @@ export class RogueDamageCalculator extends MeleeDamageCalculator {
       let baseSkill = super.weaponSkill;
 
       if ((this.talents?.weaponExpertise || 0) > 0) {
-         const mainHandType = this.stats.mainHandWeapon.type;
+         const mainHandType = this.spec.gearStats.mainHandWeapon.type;
          if (mainHandType === WeaponType.Sword ||
              mainHandType === WeaponType.Fist ||
              mainHandType === WeaponType.Dagger) {
@@ -48,7 +48,7 @@ export class RogueDamageCalculator extends MeleeDamageCalculator {
    }
 
    calculateSinisterStrikeDamage(): AttackResult {
-      const weapon = this.stats.mainHandWeapon;
+      const weapon = this.spec.gearStats.mainHandWeapon;
       const weaponDamage = this.getWeaponDamage(weapon);
       const baseDamage = weaponDamage + 68;
 
@@ -70,7 +70,7 @@ export class RogueDamageCalculator extends MeleeDamageCalculator {
    }
 
    calculateBackstabDamage(): AttackResult {
-      const weapon = this.stats.mainHandWeapon;
+      const weapon = this.spec.gearStats.mainHandWeapon;
       const weaponDamage = this.getWeaponDamage(weapon);
       const baseDamage = (weaponDamage + 210) * 1.5;
 
@@ -92,7 +92,7 @@ export class RogueDamageCalculator extends MeleeDamageCalculator {
    }
 
    calculateHemorrhageDamage(): AttackResult {
-      const weapon = this.stats.mainHandWeapon;
+      const weapon = this.spec.gearStats.mainHandWeapon;
       const weaponDamage = this.getWeaponDamage(weapon);
       const baseDamage = (weaponDamage + 110) * 1.1;
 
@@ -111,9 +111,9 @@ export class RogueDamageCalculator extends MeleeDamageCalculator {
    }
 
    calculateEviscerateDamage(comboPoints: number): AttackResult {
-      const weapon = this.stats.mainHandWeapon;
+      const weapon = this.spec.gearStats.mainHandWeapon;
       const damagePerCP = [0, 223, 325, 427, 529, 631];
-      const baseDamage = (damagePerCP[comboPoints] || 0) + (this.stats.attackPower * 0.03 * comboPoints);
+      const baseDamage = (damagePerCP[comboPoints] || 0) + (this.spec.gearStats.attackPower * 0.03 * comboPoints);
 
       const multipliers = [];
       if (this.talents.improvedEviscerate > 0) {

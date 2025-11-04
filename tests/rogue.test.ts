@@ -1,7 +1,8 @@
-import {Ability, AttackType, GearStats, RogueTalents, SimulationConfig, WeaponType} from '../src/types';
+import {Ability, AttackType, CharacterClass, GearStats, RogueTalents, SimulationConfig, WeaponType} from '../src/types';
 import {AttackTable} from '../src/mechanics/AttackTable';
 import {RogueDamageCalculator} from '../src/mechanics/RogueDamageCalculator';
 import {RogueSimulator} from '../src/sim/RogueSimulator';
+import {SimulationSpec} from '../src/SpecLoader';
 
 const baseStats: GearStats = {
    level: 60,
@@ -56,7 +57,24 @@ const baseTalents: RogueTalents = {
    hemorrhage: false,
    precision: 0,
    weaponExpertise: 0,
+   vigor: false,
 };
+
+function createTestSpec(stats: GearStats, config: SimulationConfig, talents: RogueTalents): SimulationSpec {
+   return {
+      name: 'test',
+      description: 'test spec',
+      class: CharacterClass.Rogue,
+      gearStats: stats,
+      simulationConfig: config,
+      talents,
+      fightLength: config.fightLength ?? 60,
+      targetLevel: config.targetLevel,
+      targetArmor: config.targetArmor,
+      iterations: config.iterations ?? 1,
+      postResGen: config.postResGen ?? false,
+   };
+}
 
 describe('Rogue Talents', () => {
 
@@ -78,11 +96,7 @@ describe('Rogue Talents', () => {
                malice,
             };
 
-            const simulator = new RogueSimulator({
-               gearStats: baseStats,
-               simulationConfig: config,
-               talents
-            });
+            const simulator = new RogueSimulator(createTestSpec(baseStats, config, talents));
 
             expect(simulator.damageCalculator.critChance({
                ability: Ability.MainHand,
@@ -105,11 +119,7 @@ describe('Rogue Talents', () => {
                malice,
             };
 
-            const simulator = new RogueSimulator({
-               gearStats: baseStats,
-               simulationConfig: config,
-               talents
-            });
+            const simulator = new RogueSimulator(createTestSpec(baseStats, config, talents));
             const attackTable = new AttackTable(simulator.damageCalculator, config);
 
             const numRolls = 100000;
@@ -148,15 +158,11 @@ describe('Rogue Talents', () => {
                malice,
             };
 
-            const simulator = new RogueSimulator({
-               gearStats: {
+            const simulator = new RogueSimulator(createTestSpec({
                   ...baseStats,
                   critChance: baseCritChance,
                   hitChance,
-               },
-               simulationConfig: config,
-               talents
-            });
+               }, config, talents));
             const attackTable = new AttackTable(simulator.damageCalculator, config);
 
             const numRolls = 100000;
@@ -199,11 +205,7 @@ describe('Rogue Talents', () => {
                daggerSpecialization,
             };
 
-            const simulator = new RogueSimulator({
-               gearStats: baseStats,
-               simulationConfig: config,
-               talents
-            });
+            const simulator = new RogueSimulator(createTestSpec(baseStats, config, talents));
 
             expect(simulator.damageCalculator.critChance({
                ability: Ability.MainHand,
@@ -229,11 +231,7 @@ describe('Rogue Talents', () => {
             daggerSpecialization: 5,
          };
 
-         const simulator = new RogueSimulator({
-            gearStats: swordStats,
-            simulationConfig: config,
-            talents
-         });
+         const simulator = new RogueSimulator(createTestSpec(swordStats, config, talents));
 
          expect(simulator.damageCalculator.critChance({
             ability: Ability.MainHand,
@@ -255,11 +253,7 @@ describe('Rogue Talents', () => {
                daggerSpecialization,
             };
 
-            const simulator = new RogueSimulator({
-               gearStats: baseStats,
-               simulationConfig: config,
-               talents
-            });
+            const simulator = new RogueSimulator(createTestSpec(baseStats, config, talents));
             const attackTable = new AttackTable(simulator.damageCalculator, config);
 
             const numRolls = 100000;
@@ -301,11 +295,7 @@ describe('Rogue Talents', () => {
             daggerSpecialization: 5,
          };
 
-         const simulator = new RogueSimulator({
-            gearStats: swordStats,
-            simulationConfig: config,
-            talents
-         });
+         const simulator = new RogueSimulator(createTestSpec(swordStats, config, talents));
          const attackTable = new AttackTable(simulator.damageCalculator, config);
 
          const numRolls = 100000;
@@ -335,11 +325,7 @@ describe('Rogue Talents', () => {
             daggerSpecialization: 5,
          };
 
-         const simulator = new RogueSimulator({
-            gearStats: baseStats,
-            simulationConfig: config,
-            talents
-         });
+         const simulator = new RogueSimulator(createTestSpec(baseStats, config, talents));
 
          expect(simulator.damageCalculator.critChance({
             ability: Ability.Backstab,
@@ -355,11 +341,7 @@ describe('Rogue Talents', () => {
             daggerSpecialization: 5,
          };
 
-         const simulator = new RogueSimulator({
-            gearStats: baseStats,
-            simulationConfig: config,
-            talents
-         });
+         const simulator = new RogueSimulator(createTestSpec(baseStats, config, talents));
          const attackTable = new AttackTable(simulator.damageCalculator, config);
 
          const numRolls = 100000;
@@ -399,7 +381,7 @@ describe('Rogue Talents', () => {
                opportunity,
             };
 
-            const calculator = new RogueDamageCalculator(baseStats, config, talents);
+            const calculator = new RogueDamageCalculator(createTestSpec(baseStats, config, talents));
 
             const numRolls = 5000;
             let totalDamage = 0;
@@ -417,7 +399,7 @@ describe('Rogue Talents', () => {
                ...baseTalents,
                opportunity: 0,
             };
-            const calculatorNoOpportunity = new RogueDamageCalculator(baseStats, config, talentsWithoutOpportunity);
+            const calculatorNoOpportunity = new RogueDamageCalculator(createTestSpec(baseStats, config, talentsWithoutOpportunity));
 
             let totalDamageNoOpportunity = 0;
             let hitCountNoOpportunity = 0;
@@ -444,8 +426,8 @@ describe('Rogue Talents', () => {
             opportunity: 5,
          };
 
-         const calculator = new RogueDamageCalculator(baseStats, config, talentsWithOpportunity);
-         const calculatorNoOpportunity = new RogueDamageCalculator(baseStats, config, baseTalents);
+         const calculator = new RogueDamageCalculator(createTestSpec(baseStats, config, talentsWithOpportunity));
+         const calculatorNoOpportunity = new RogueDamageCalculator(createTestSpec(baseStats, config, baseTalents));
 
          const originalRandom = Math.random;
          const fixedRandomValue = 0.5;
@@ -465,8 +447,8 @@ describe('Rogue Talents', () => {
             opportunity: 5,
          };
 
-         const calculator = new RogueDamageCalculator(baseStats, config, talents);
-         const calculatorNoOpportunity = new RogueDamageCalculator(baseStats, config, baseTalents);
+         const calculator = new RogueDamageCalculator(createTestSpec(baseStats, config, talents));
+         const calculatorNoOpportunity = new RogueDamageCalculator(createTestSpec(baseStats, config, baseTalents));
 
          const numRolls = 10000;
          let totalDamageWithOpportunity = 0;
@@ -555,11 +537,7 @@ describe('Rogue Talents', () => {
                precision,
             };
 
-            const simulator = new RogueSimulator({
-               gearStats: baseStats,
-               simulationConfig: config,
-               talents
-            });
+            const simulator = new RogueSimulator(createTestSpec(baseStats, config, talents));
 
             expect(simulator.damageCalculator.hitChance).toBe(expectedHitChance);
          });
@@ -583,11 +561,7 @@ describe('Rogue Talents', () => {
                hitChance: baseHitChance,
             };
 
-            const simulator = new RogueSimulator({
-               gearStats: testStats,
-               simulationConfig: config,
-               talents
-            });
+            const simulator = new RogueSimulator(createTestSpec(testStats, config, talents));
             const attackTable = new AttackTable(simulator.damageCalculator, config);
 
             const numRolls = 100000;
@@ -619,11 +593,7 @@ describe('Rogue Talents', () => {
             ...baseTalents,
             relentlessStrikes: true,
          };
-         const simulator = new RogueSimulator({
-            gearStats: baseStats,
-            simulationConfig: config,
-            talents
-         });
+         const simulator = new RogueSimulator(createTestSpec(baseStats, config, talents));
          const originalRandom = Math.random;
          Math.random = () => 0.99;
 
@@ -644,11 +614,7 @@ describe('Rogue Talents', () => {
             ...baseTalents,
             relentlessStrikes: false,
          };
-         const simulator = new RogueSimulator({
-            gearStats: baseStats,
-            simulationConfig: config,
-            talents
-         });
+         const simulator = new RogueSimulator(createTestSpec(baseStats, config, talents));
          const originalRandom = Math.random;
          Math.random = () => 0.99;
 
@@ -707,11 +673,7 @@ describe('Rogue Talents', () => {
                weaponExpertise,
             };
 
-            const simulator = new RogueSimulator({
-               gearStats: baseStats,
-               simulationConfig: config,
-               talents
-            });
+            const simulator = new RogueSimulator(createTestSpec(baseStats, config, talents));
 
             expect(simulator.damageCalculator.weaponSkill).toBe(expectedWeaponSkill);
          });
@@ -740,11 +702,7 @@ describe('Rogue Talents', () => {
                weaponExpertise,
             };
 
-            const simulator = new RogueSimulator({
-               gearStats: swordStats,
-               simulationConfig: config,
-               talents
-            });
+            const simulator = new RogueSimulator(createTestSpec(swordStats, config, talents));
 
             expect(simulator.damageCalculator.weaponSkill).toBe(expectedWeaponSkill);
          });
@@ -766,11 +724,7 @@ describe('Rogue Talents', () => {
             weaponExpertise: 5,
          };
 
-         const simulator = new RogueSimulator({
-            gearStats: maceStats,
-            simulationConfig: config,
-            talents
-         });
+         const simulator = new RogueSimulator(createTestSpec(maceStats, config, talents));
 
          expect(simulator.damageCalculator.weaponSkill).toBe(300);
       });
@@ -792,16 +746,8 @@ describe('Rogue Talents', () => {
             weaponSkill: 300,
          };
 
-         const simulator0 = new RogueSimulator({
-            gearStats: testStats,
-            simulationConfig: config,
-            talents: talents0
-         });
-         const simulator5 = new RogueSimulator({
-            gearStats: testStats,
-            simulationConfig: config,
-            talents: talents5
-         });
+         const simulator0 = new RogueSimulator(createTestSpec(testStats, config, talents0));
+         const simulator5 = new RogueSimulator(createTestSpec(testStats, config, talents5));
          const attackTable0 = new AttackTable(simulator0.damageCalculator, config);
          const attackTable5 = new AttackTable(simulator5.damageCalculator, config);
 
@@ -855,11 +801,7 @@ describe('Rogue Talents', () => {
                weaponSkill: 300,
             };
 
-            const simulator = new RogueSimulator({
-               gearStats: testStats,
-               simulationConfig: config,
-               talents
-            });
+            const simulator = new RogueSimulator(createTestSpec(testStats, config, talents));
             const attackTable = new AttackTable(simulator.damageCalculator, config);
 
             expect(simulator.damageCalculator.weaponSkill).toBe(expectedWeaponSkill);

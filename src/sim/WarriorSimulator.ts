@@ -9,7 +9,7 @@ export class WarriorSimulator extends MeleeSimulator {
    protected talents: WarriorTalents;
 
    constructor(spec: SimulationSpec) {
-      super(spec.gearStats, spec.simulationConfig);
+      super(spec);
       this.talents = spec.talents as WarriorTalents;
    }
 

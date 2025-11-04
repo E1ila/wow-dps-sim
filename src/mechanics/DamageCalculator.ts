@@ -1,29 +1,33 @@
-import {Attack, GearStats, SimulationConfig, Weapon} from '../types';
+import {Attack} from '../types';
 import {AttackTableStatsProvider} from "./AttackTable";
+import {SimulationSpec} from '../SpecLoader';
 
 export abstract class DamageCalculator implements AttackTableStatsProvider {
    protected constructor(
-      protected stats: GearStats,
-      protected config: SimulationConfig
+      protected spec: SimulationSpec
    ) {}
 
    critChance(attack: Attack): number {
-      return this.stats.critChance;
+      return this.spec.gearStats.critChance;
    }
 
    get weaponSkill(): number {
-      return this.stats.weaponSkill;
+      return this.spec.gearStats.weaponSkill;
    }
 
    get hitChance(): number {
-      return this.stats.hitChance;
+      return this.spec.gearStats.hitChance;
    }
 
    get playerLevel(): number {
-      return this.stats.level;
+      return this.spec.gearStats.level;
    }
 
    get isDualWielding(): boolean {
-      return this.stats.offHandWeapon !== undefined;
+      return this.spec.gearStats.offHandWeapon !== undefined;
+   }
+
+   get targetLevel(): number {
+      return this.spec.targetLevel;
    }
 }

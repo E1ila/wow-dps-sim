@@ -3,7 +3,8 @@
     "allow": [
       "WebFetch(domain:bookdown.org)",
       "Bash(npm test:*)",
-      "Bash(npm run build:*)"
+      "Bash(npm run build:*)",
+      "Bash(npm run dev:*)"
     ],
     "deny": [],
     "ask": []

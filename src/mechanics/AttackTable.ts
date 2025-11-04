@@ -1,4 +1,4 @@
-import {Attack, AttackTableResult, AttackType, SimulationConfig, Weapon} from '../types';
+import {Attack, AttackTableResult, AttackType} from '../types';
 
 export interface AttackTableStatsProvider {
    critChance(attack: Attack): number;
@@ -6,6 +6,7 @@ export interface AttackTableStatsProvider {
    get hitChance(): number;
    get playerLevel(): number;
    get isDualWielding(): boolean;
+   get targetLevel(): number;
 }
 
 /**
@@ -19,7 +20,6 @@ export class AttackTable {
 
    constructor(
       private stats: AttackTableStatsProvider,
-      private config: SimulationConfig
    ) {
       this.missChance = this.calculateMissChance();
       this.dodgeChance = this.calculateDodgeChance();
@@ -27,7 +27,7 @@ export class AttackTable {
    }
 
    private calculateMissChance(): number {
-      const targetDefense = this.config.targetLevel * 5;
+      const targetDefense = this.stats.targetLevel * 5;
       const weaponSkill = this.stats.weaponSkill;
       const defenseSkillDiff = targetDefense - weaponSkill;
 
@@ -51,7 +51,7 @@ export class AttackTable {
    }
 
    private calculateDodgeChance(): number {
-      const baseDodge = this.config.targetLevel === 63 ? 0.065 : 0.05;
+      const baseDodge = this.stats.targetLevel === 63 ? 0.065 : 0.05;
       const weaponSkillOver300 = Math.max(0, this.stats.weaponSkill - 300);
       const dodgeReduction = weaponSkillOver300 * 0.0004;
 
@@ -59,7 +59,7 @@ export class AttackTable {
    }
 
    private calculateGlancingChance(): number {
-      const targetLevel = this.config.targetLevel;
+      const targetLevel = this.stats.targetLevel;
       const playerLevel = this.stats.playerLevel;
       const weaponSkill = this.stats.weaponSkill;
 
@@ -77,7 +77,7 @@ export class AttackTable {
 
    private calculateGlancingDamageModifier(): number {
       const weaponSkill = this.stats.weaponSkill;
-      const targetLevel = this.config.targetLevel;
+      const targetLevel = this.stats.targetLevel;
       const targetDefense = targetLevel * 5;
 
       if (targetLevel <= this.stats.playerLevel) {

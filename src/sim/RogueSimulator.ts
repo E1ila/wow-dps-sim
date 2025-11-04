@@ -38,9 +38,9 @@ export class RogueSimulator extends MeleeSimulator {
    talents: RogueTalents;
 
    constructor(spec: SimulationSpec) {
-      super(spec.gearStats, spec.simulationConfig);
+      super(spec);
       this.talents = spec.talents as RogueTalents;
-      this.damageCalculator = new RogueDamageCalculator(spec.gearStats, spec.simulationConfig, this.talents);
+      this.damageCalculator = new RogueDamageCalculator(spec);
       this.state = this.initializeState();
       this.rotation = spec.rotation as RogueRotation ?? {
          refreshSndSecondsAhead5Combo: 3,
@@ -233,7 +233,7 @@ export class RogueSimulator extends MeleeSimulator {
    onMainHandHit(result: AttackResult): void {
       if (result.amount > 0 &&
          this.talents.swordSpecialization > 0 &&
-         this.stats.mainHandWeapon.type === WeaponType.Sword &&
+         this.spec.gearStats.mainHandWeapon.type === WeaponType.Sword &&
          Math.random() < (this.talents.swordSpecialization * 0.01)) {
          this.addDamage(RogueAbility.Extra, result);
       }
@@ -255,7 +255,7 @@ export class RogueSimulator extends MeleeSimulator {
             this.castSliceAndDice();
          } else if (this.talents.hemorrhage) {
             this.castHemorrhage();
-         } else if (this.stats.mainHandWeapon.type === WeaponType.Dagger) {
+         } else if (this.spec.gearStats.mainHandWeapon.type === WeaponType.Dagger) {
             this.castBackstab();
          } else {
             this.castSinisterStrike();

@@ -5,14 +5,13 @@ import {
    BuffEvent,
    c,
    DamageEvent,
-   GearStats,
-   SimulationConfig,
    SimulationEvent,
    SimulationResult,
    SimulationState,
    SimulationStatistics
 } from '../types';
 import {DamageCalculator} from "../mechanics/DamageCalculator";
+import {SimulationSpec} from '../SpecLoader';
 
 export interface Simulator {
    simulate(): SimulationResult;
@@ -37,8 +36,7 @@ export abstract class BaseSimulator implements Simulator {
    };
 
    protected constructor(
-      protected stats: GearStats,
-      protected config: SimulationConfig
+      protected spec: SimulationSpec
    ) {
    }
 
@@ -157,7 +155,7 @@ export abstract class BaseSimulator implements Simulator {
 
    protected getSimulationResult(): SimulationResult {
       const totalDamage = Array.from(this.damageBreakdown.values()).reduce((a, b) => a + b, 0);
-      const dps = totalDamage / this.config.fightLength;
+      const dps = totalDamage / this.spec.fightLength;
 
       return {
          totalDamage,
@@ -170,7 +168,7 @@ export abstract class BaseSimulator implements Simulator {
 
    simulate(): SimulationResult {
       this.prepareSimulation();
-      const fightLengthMs = this.config.fightLength * 1000;
+      const fightLengthMs = this.spec.fightLength * 1000;
       while (this.state.currentTime < fightLengthMs) {
          this.processTimeStep();
          this.advanceTime();
@@ -191,7 +189,7 @@ export abstract class BaseSimulator implements Simulator {
       await this.waitForGameTime(1000, speed);
       this.updateFloatingBar();
 
-      const fightLengthMs = this.config.fightLength * 1000;
+      const fightLengthMs = this.spec.fightLength * 1000;
       while (this.state.currentTime < fightLengthMs) {
          const eventsBefore = this.events.length;
          const timeBefore = this.state.currentTime;
@@ -311,7 +309,7 @@ export abstract class BaseSimulator implements Simulator {
       const startTime = Date.now();
       const results: SimulationResult[] = [];
 
-      for (let i = 0; i < this.config.iterations; i++) {
+      for (let i = 0; i < this.spec.iterations; i++) {
          results.push(this.simulate());
       }
 
@@ -434,7 +432,7 @@ export abstract class BaseSimulator implements Simulator {
          const gearCrit = simulator.damageCalculator.critChance({
             ability: Ability.MainHand,
             isSpecialAttack: false,
-            weapon: simulator.stats.mainHandWeapon
+            weapon: simulator.spec.gearStats.mainHandWeapon
          });
          jsonResults.hitStats = this.printStatistics(aggregatedStats, gearCrit, quiet);
       }

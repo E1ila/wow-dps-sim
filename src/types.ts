@@ -144,10 +144,10 @@ export interface RogueSimulationState extends MeleeSimulationState {
 }
 
 export interface SimulationConfig {
-   fightLength: number;
    targetLevel: number;
    targetArmor: number;
-   iterations: number;
+   fightLength?: number;
+   iterations?: number;
    postResGen?: boolean;
 }
 
