@@ -1,6 +1,6 @@
 import {Ability, Attack, AttackResult, AttackType, Weapon, WeaponEnchant} from '../types';
 import {AttackTable} from './AttackTable';
-import {DamageCalculator} from './DamageCalculator';
+import {BuffsProvider, DamageCalculator} from './DamageCalculator';
 import {SimulationSpec} from '../SpecLoader';
 
 interface MeleeDamageParams {
@@ -18,8 +18,8 @@ export abstract class MeleeDamageCalculator extends DamageCalculator {
 
    abstract get dualWieldSpecBonus(): number;
 
-   protected constructor(spec: SimulationSpec) {
-      super(spec);
+   protected constructor(spec: SimulationSpec, buffsProvider: BuffsProvider) {
+      super(spec, buffsProvider);
       this.attackTable = new AttackTable(this);
       this.targetArmorReduction = this.calculateArmorReduction();
    }
@@ -104,7 +104,7 @@ export abstract class MeleeDamageCalculator extends DamageCalculator {
       }
 
       const weaponDamage = this.getWeaponDamage(weapon);
-      const apBonus = (this.spec.gearStats.attackPower / 14) * weapon.speed;
+      const apBonus = (this.attackPower / 14) * weapon.speed;
       let baseDamage = weaponDamage + apBonus;
 
       const multipliers = [];

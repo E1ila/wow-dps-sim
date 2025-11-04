@@ -1,5 +1,5 @@
 import {BaseSimulator} from './BaseSimulator';
-import {AttackResult, MeleeSimulationState} from '../types';
+import {AttackResult, Buffs, MeleeSimulationState, Weapon, WeaponEnchant} from '../types';
 import {MeleeDamageCalculator} from "../mechanics/MeleeDamageCalculator";
 
 export enum MeleeAbility {
@@ -25,11 +25,27 @@ export abstract class MeleeSimulator extends BaseSimulator {
    }
 
    protected onMainHandHit(result: AttackResult): void {
+      this.checkCrusaderProc(this.spec.gearStats.mainHandWeapon);
       // Override in subclasses for class-specific logic (e.g., Sword Specialization)
    }
 
    protected onOffHandHit(result: AttackResult): void {
+      if (this.spec.gearStats.offHandWeapon) {
+         this.checkCrusaderProc(this.spec.gearStats.offHandWeapon);
+      }
       // Override in subclasses for class-specific logic
+   }
+
+   protected checkCrusaderProc(weapon: Weapon): void {
+      // Crusader procs once per minute on average (1 PPM)
+      // Proc chance per hit = weapon_speed / 60
+      if (weapon.enchant === WeaponEnchant.Crusader) {
+         const procChance = weapon.speed / 60;
+         if (Math.random() < procChance) {
+            this.addProc(Buffs.Crusader);
+            this.activateBuff(Buffs.Crusader, 15000); // 15 seconds duration
+         }
+      }
    }
 
    protected processTimeStep(): void {

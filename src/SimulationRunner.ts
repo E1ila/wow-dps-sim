@@ -6,11 +6,11 @@ import {RogueSimulator} from "./sim/RogueSimulator";
 
 export interface SimulationOptions {
     specFile: string;
-    attackPower: number;
-    critChance: number;
-    hitChance: number;
-    weaponSkill: number;
-    mainHand: {
+    attackPower?: number;
+    critChance?: number;
+    hitChance?: number;
+    weaponSkill?: number;
+    mainHand?: {
         minDamage: number;
         maxDamage: number;
         speed: number;
@@ -22,11 +22,11 @@ export interface SimulationOptions {
         speed: number;
         type: WeaponType;
     };
-    targetLevel: number;
-    targetArmor: number;
-    fightLength: number;
-    iterations: number;
-    postCycleResourceGeneration: boolean;
+    targetLevel?: number;
+    targetArmor?: number;
+    fightLength?: number;
+    iterations?: number;
+    postCycleResourceGeneration?: boolean;
     talentOverrides?: string;
     playbackSpeed?: number;
     quiet: boolean;
@@ -51,32 +51,54 @@ export class SimulationRunner {
     }
 
     private applyCliOverrides(): void {
-        this.spec.gearStats.attackPower = this.options.attackPower;
-        this.spec.gearStats.critChance = this.options.critChance;
-        this.spec.gearStats.hitChance = this.options.hitChance;
-        this.spec.gearStats.weaponSkill = this.options.weaponSkill;
-        this.spec.gearStats.mainHandWeapon = {
-            minDamage: this.options.mainHand.minDamage,
-            maxDamage: this.options.mainHand.maxDamage,
-            speed: this.options.mainHand.speed,
-            type: this.options.mainHand.type,
-        };
-        if (this.options.offHand) {
+        if (this.options.attackPower !== undefined) {
+            this.spec.gearStats.attackPower = this.options.attackPower;
+        }
+        if (this.options.critChance !== undefined) {
+            this.spec.gearStats.critChance = this.options.critChance;
+        }
+        if (this.options.hitChance !== undefined) {
+            this.spec.gearStats.hitChance = this.options.hitChance;
+        }
+        if (this.options.weaponSkill !== undefined) {
+            this.spec.gearStats.weaponSkill = this.options.weaponSkill;
+        }
+        if (this.options.mainHand) {
+            this.spec.gearStats.mainHandWeapon = {
+                ...this.spec.gearStats.mainHandWeapon,
+                minDamage: this.options.mainHand.minDamage,
+                maxDamage: this.options.mainHand.maxDamage,
+                speed: this.options.mainHand.speed,
+                type: this.options.mainHand.type,
+            };
+        }
+        if (this.options.offHand && this.spec.gearStats.offHandWeapon) {
             this.spec.gearStats.offHandWeapon = {
+                ...this.spec.gearStats.offHandWeapon,
                 minDamage: this.options.offHand.minDamage,
                 maxDamage: this.options.offHand.maxDamage,
                 speed: this.options.offHand.speed,
                 type: this.options.offHand.type,
             };
-        } else {
+        } else if (this.options.offHand === null) {
             this.spec.gearStats.offHandWeapon = undefined;
         }
         
-        this.spec.targetLevel = this.options.targetLevel;
-        this.spec.targetArmor = this.options.targetArmor;
-        this.spec.fightLength = this.options.fightLength;
-        this.spec.iterations = this.options.iterations;
-        this.spec.postCycleResourceGeneration = this.options.postCycleResourceGeneration;
+        if (this.options.targetLevel !== undefined) {
+            this.spec.targetLevel = this.options.targetLevel;
+        }
+        if (this.options.targetArmor !== undefined) {
+            this.spec.targetArmor = this.options.targetArmor;
+        }
+        if (this.options.fightLength !== undefined) {
+            this.spec.fightLength = this.options.fightLength;
+        }
+        if (this.options.iterations !== undefined) {
+            this.spec.iterations = this.options.iterations;
+        }
+        if (this.options.postCycleResourceGeneration !== undefined) {
+            this.spec.postCycleResourceGeneration = this.options.postCycleResourceGeneration;
+        }
     }
 
     private applyTalentOverrides(): void {

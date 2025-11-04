@@ -1,12 +1,13 @@
-import {Ability, Attack, AttackResult, RogueTalents, WeaponType} from '../types';
+import {Ability, Attack, AttackResult, Buffs, RogueTalents, WeaponType} from '../types';
 import {MeleeDamageCalculator} from './MeleeDamageCalculator';
 import {SimulationSpec} from '../SpecLoader';
+import {BuffsProvider} from "./DamageCalculator";
 
 export class RogueDamageCalculator extends MeleeDamageCalculator {
    protected talents: RogueTalents;
 
-   constructor(spec: SimulationSpec) {
-      super(spec);
+   constructor(spec: SimulationSpec, buffsProvider: BuffsProvider) {
+      super(spec, buffsProvider);
       this.talents = spec.talents as RogueTalents;
    }
 
@@ -46,6 +47,15 @@ export class RogueDamageCalculator extends MeleeDamageCalculator {
       
       return critChance;
    }
+
+   get attackPower(): number {
+      let attackPower = this.spec.gearStats.attackPower;
+      if (this.buffsProvider.hasBuff(Buffs.Crusader)) {
+         attackPower += 100; // 1 Strength = 1 AP for Rogues
+      }
+      return attackPower;
+   }
+
 
    get lethalityMultiplier() {
       if (this.talents.lethality === 0) {
@@ -135,7 +145,7 @@ export class RogueDamageCalculator extends MeleeDamageCalculator {
    calculateEviscerateDamage(comboPoints: number): AttackResult {
       const weapon = this.spec.gearStats.mainHandWeapon;
       const damagePerCP = [0, 223, 325, 427, 529, 631];
-      const baseDamage = (damagePerCP[comboPoints] || 0) + (this.spec.gearStats.attackPower * 0.03 * comboPoints);
+      const baseDamage = (damagePerCP[comboPoints] || 0) + (0.03 * comboPoints);
 
       const multipliers = [
          this.eviscerateMultiplier,

@@ -40,7 +40,7 @@ export class RogueSimulator extends MeleeSimulator {
    constructor(spec: SimulationSpec) {
       super(spec);
       this.talents = spec.talents as RogueTalents;
-      this.damageCalculator = new RogueDamageCalculator(spec);
+      this.damageCalculator = new RogueDamageCalculator(spec, this);
       this.state = this.initializeState();
       this.rotation = spec.rotation as RogueRotation ?? {
          refreshSndSecondsAhead5Combo: 3,

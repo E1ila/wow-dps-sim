@@ -10,18 +10,16 @@ import {
    SimulationState,
    SimulationStatistics
 } from '../types';
-import {DamageCalculator} from "../mechanics/DamageCalculator";
+import {BuffsProvider, DamageCalculator} from "../mechanics/DamageCalculator";
 import {SimulationSpec} from '../SpecLoader';
 
 export interface Simulator {
    simulate(): SimulationResult;
-
    runMultipleIterations(): { results: SimulationResult[], executionTimeMs: number };
-
    simulateWithPlayback(speed: number): Promise<void>;
 }
 
-export abstract class BaseSimulator implements Simulator {
+export abstract class BaseSimulator implements Simulator, BuffsProvider {
    protected abstract state: SimulationState;
    protected abstract damageCalculator: DamageCalculator;
    protected events: SimulationEvent[] = [];
@@ -446,5 +444,11 @@ export abstract class BaseSimulator implements Simulator {
          console.log(` ${c.green}**  ${c.brightGreen}DPS ${avgDPS.toFixed(2)} ${c.green}**${c.reset}`);
       }
       return jsonResults;
+   }
+
+   // -- buffs provider
+
+   hasBuff(name: string): boolean {
+      return this.state.activeBuffs.some(buff => buff.name === name && buff.expiry >= this.state.currentTime);
    }
 }

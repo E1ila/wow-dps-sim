@@ -29,6 +29,7 @@ export function colorByClass(characterClass: CharacterClass): string {
 
 export enum Buffs {
    SnD = 'SnD',
+   Crusader = 'Crusader',
 }
 
 export enum CharacterClass {

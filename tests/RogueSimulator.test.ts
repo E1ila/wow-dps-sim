@@ -12,6 +12,11 @@ import {AttackTable} from '../src/mechanics/AttackTable';
 import {RogueDamageCalculator} from '../src/mechanics/RogueDamageCalculator';
 import {RogueSimulator} from '../src/sim/RogueSimulator';
 import {SimulationSpec} from '../src/SpecLoader';
+import {BuffsProvider} from '../src/mechanics/DamageCalculator';
+
+const createMockBuffsProvider = (activeBuffs: string[] = []): BuffsProvider => ({
+  hasBuff: (name: string) => activeBuffs.includes(name)
+});
 
 const baseStats: GearStats = {
    attackPower: 1200,
@@ -394,7 +399,7 @@ describe('Rogue Talents', () => {
                opportunity,
             };
 
-            const calculator = new RogueDamageCalculator(createTestSpec(baseStats, config, talents));
+            const calculator = new RogueDamageCalculator(createTestSpec(baseStats, config, talents), createMockBuffsProvider());
 
             const numRolls = 5000;
             let totalDamage = 0;
@@ -412,7 +417,7 @@ describe('Rogue Talents', () => {
                ...baseTalents,
                opportunity: 0,
             };
-            const calculatorNoOpportunity = new RogueDamageCalculator(createTestSpec(baseStats, config, talentsWithoutOpportunity));
+            const calculatorNoOpportunity = new RogueDamageCalculator(createTestSpec(baseStats, config, talentsWithoutOpportunity), createMockBuffsProvider());
 
             let totalDamageNoOpportunity = 0;
             let hitCountNoOpportunity = 0;
@@ -439,8 +444,8 @@ describe('Rogue Talents', () => {
             opportunity: 5,
          };
 
-         const calculator = new RogueDamageCalculator(createTestSpec(baseStats, config, talentsWithOpportunity));
-         const calculatorNoOpportunity = new RogueDamageCalculator(createTestSpec(baseStats, config, baseTalents));
+         const calculator = new RogueDamageCalculator(createTestSpec(baseStats, config, talentsWithOpportunity), createMockBuffsProvider());
+         const calculatorNoOpportunity = new RogueDamageCalculator(createTestSpec(baseStats, config, baseTalents), createMockBuffsProvider());
 
          const originalRandom = Math.random;
          const fixedRandomValue = 0.5;
@@ -460,8 +465,8 @@ describe('Rogue Talents', () => {
             opportunity: 5,
          };
 
-         const calculator = new RogueDamageCalculator(createTestSpec(baseStats, config, talents));
-         const calculatorNoOpportunity = new RogueDamageCalculator(createTestSpec(baseStats, config, baseTalents));
+         const calculator = new RogueDamageCalculator(createTestSpec(baseStats, config, talents), createMockBuffsProvider());
+         const calculatorNoOpportunity = new RogueDamageCalculator(createTestSpec(baseStats, config, baseTalents), createMockBuffsProvider());
 
          const numRolls = 10000;
          let totalDamageWithOpportunity = 0;
