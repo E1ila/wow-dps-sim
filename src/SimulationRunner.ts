@@ -6,6 +6,7 @@ import {RogueSimulator} from "./sim/RogueSimulator";
 
 export interface SimulationOptions {
     specFile: string;
+    // gear stats
     attackPower?: number;
     critChance?: number;
     hitChance?: number;
@@ -22,14 +23,19 @@ export interface SimulationOptions {
         speed: number;
         type: WeaponType;
     };
+    // encounter
     targetLevel?: number;
     targetArmor?: number;
     fightLength?: number;
+    // simulation
     iterations?: number;
     postCycleResourceGeneration?: boolean;
+    playbackSpeed?: number;
+    // compare input
     talentOverrides?: string;
     rotationOverrides?: string;
-    playbackSpeed?: number;
+    gearOverrides?: string;
+    // output
     quiet: boolean;
 }
 
@@ -45,6 +51,9 @@ export class SimulationRunner {
     private loadSpec(): void {
         try {
             this.spec = SpecLoader.load(this.options.specFile);
+            this.applyTalentOverrides();
+            this.applyRotationOverrides();
+            this.applyGearOverrides();
             this.applyCliOverrides();
         } catch (error) {
             throw new Error(`Error loading spec file: ${(error as Error).message}`);
@@ -166,6 +175,43 @@ export class SimulationRunner {
         }
     }
 
+    private applyGearOverrides(): void {
+        if (!this.options.gearOverrides) {
+            return;
+        }
+
+        const overrides = this.parseOverrides(this.options.gearOverrides, 'gear');
+
+        for (const override of overrides) {
+            const name = override.name;
+            const value = override.value;
+
+            if (name.startsWith('mainHand.')) {
+                const prop = name.substring('mainHand.'.length);
+                if (prop === 'type') {
+                    this.spec.gearStats.mainHandWeapon.type = value as WeaponType;
+                } else {
+                    (this.spec.gearStats.mainHandWeapon as any)[prop] = parseFloat(value);
+                }
+            } else if (name.startsWith('offHand.')) {
+                if (!this.spec.gearStats.offHandWeapon) {
+                    console.warn(`Warning: No off-hand weapon in spec, cannot override "${name}"`);
+                    continue;
+                }
+                const prop = name.substring('offHand.'.length);
+                if (prop === 'type') {
+                    this.spec.gearStats.offHandWeapon.type = value as WeaponType;
+                } else {
+                    (this.spec.gearStats.offHandWeapon as any)[prop] = parseFloat(value);
+                }
+            } else if (name in this.spec.gearStats) {
+                (this.spec.gearStats as any)[name] = parseFloat(value);
+            } else {
+                console.warn(`Warning: Gear stat "${name}" not found in spec file, ignoring.`);
+            }
+        }
+    }
+
     private createSimulator(): BaseSimulator {
         switch (this.spec.class) {
             case CharacterClass.Rogue:
@@ -215,8 +261,6 @@ export class SimulationRunner {
 
     runAndGetResults(): any {
         this.loadSpec();
-        this.applyTalentOverrides();
-        this.applyRotationOverrides();
 
         const simulator = this.createSimulator();
         const {results, executionTimeMs} = simulator.runMultipleIterations();
@@ -232,8 +276,6 @@ export class SimulationRunner {
 
     async run(): Promise<void> {
         this.loadSpec();
-        this.applyTalentOverrides();
-        this.applyRotationOverrides();
 
         this.printSimulationInfo();
 
