@@ -1,4 +1,4 @@
-import {c, CharacterClass, colorByClass, RogueRotation, RogueTalents, WarriorTalents, WeaponType} from './types';
+import {c, CharacterClass, colorByClass, RogueSetup, RogueTalents, WarriorTalents, WeaponType} from './types';
 import {WarriorSimulator} from './sim/WarriorSimulator';
 import {BaseSimulator} from './sim/BaseSimulator';
 import {SimulationSpec, SpecLoader} from './SpecLoader';
@@ -169,7 +169,7 @@ export class SimulationRunner {
     private createSimulator(): BaseSimulator {
         switch (this.spec.class) {
             case CharacterClass.Rogue:
-                return new RogueSimulator(this.spec as SimulationSpec & { talents: RogueTalents; rotation?: RogueRotation });
+                return new RogueSimulator(this.spec as SimulationSpec & { talents: RogueTalents; rotation?: RogueSetup });
 
             case CharacterClass.Warrior:
                 return new WarriorSimulator(this.spec as SimulationSpec & { talents: WarriorTalents });

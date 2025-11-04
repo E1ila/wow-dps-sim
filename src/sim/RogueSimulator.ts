@@ -6,7 +6,7 @@ import {
    ProcEvent,
    RogueBuffEvent,
    RogueDamageEvent,
-   RogueRotation,
+   RogueSetup,
    RogueSimulationState,
    RogueTalents,
    WeaponType,
@@ -34,7 +34,7 @@ export class RogueSimulator extends MeleeSimulator {
    override damageCalculator: RogueDamageCalculator;
    override events: (RogueDamageEvent | RogueBuffEvent | ProcEvent)[] = [];
    damageBreakdown: Map<string, number> = new Map();
-   rotation: RogueRotation;
+   rotation: RogueSetup;
    talents: RogueTalents;
 
    constructor(spec: SimulationSpec) {
@@ -42,7 +42,7 @@ export class RogueSimulator extends MeleeSimulator {
       this.talents = spec.talents as RogueTalents;
       this.damageCalculator = new RogueDamageCalculator(spec, this);
       this.state = this.initializeState();
-      this.rotation = spec.rotation as RogueRotation ?? {
+      this.rotation = spec.rotation as RogueSetup ?? {
          refreshSndSecondsAhead5Combo: 3,
       };
    }
@@ -128,9 +128,13 @@ export class RogueSimulator extends MeleeSimulator {
    }
 
    castSliceAndDice(): boolean {
-      if (!this.spendEnergy(25)) {
+      let energyCost = 25;
+
+      if (this.rotation.veiledShadowsSet)
+         energyCost -= 10;
+
+      if (!this.spendEnergy(energyCost))
          return false;
-      }
 
       const cp = this.spendComboPoints();
       const baseDuration = 6 + (cp * 3);

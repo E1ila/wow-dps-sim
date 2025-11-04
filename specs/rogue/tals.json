@@ -1,0 +1,61 @@
+{
+    "name": "PvE Combat Daggers",
+    "class": "Rogue",
+    "rotation": {
+        "refreshSndSecondsBeforeExpiry": 3
+    },
+    "talents": {
+        "adrenalineRush": true,
+        "aggression": 0,
+        "bladeFurry": true,
+        "daggerSpecialization": 5,
+        "dualWieldSpecialization": 5,
+        "fistWeaponSpecialization": 0,
+        "hemorrhage": false,
+        "improvedBackstab": 3,
+        "improvedEviscerate": 0,
+        "improvedSinisterStrike": 2,
+        "improvedSliceAndDice": 3,
+        "lethality": 5,
+        "maceSpecialization": 0,
+        "malice": 5,
+        "murder": 0,
+        "opportunity": 5,
+        "precision": 5,
+        "relentlessStrikes": 0,
+        "ruthlessness": 2,
+        "sealFate": 0,
+        "swordSpecialization": 0,
+        "weaponExpertise": 2
+    },
+    "gearStats": {
+        "level": 60,
+        "attackPower": 844,
+        "critChance": 19,
+        "hitChance": 9,
+        "agility": 393,
+        "strength": 151,
+        "weaponSkill": 300,
+        "mainHandWeapon": {
+            "minDamage": 65,
+            "maxDamage": 121,
+            "speed": 1.8,
+            "type": "Dagger",
+            "enchant": "+5 damage"
+        },
+        "offHandWeapon": {
+            "minDamage": 57,
+            "maxDamage": 107,
+            "speed": 1.6,
+            "type": "Dagger",
+            "enchant": "+5 damage"
+        }
+    },
+    "simulationConfig": {
+        "fightLength": 120,
+        "targetLevel": 63,
+        "targetArmor": 3731,
+        "iterations": 4000,
+        "postCycleResourceGeneration": true
+    }
+}

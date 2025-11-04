@@ -2,7 +2,7 @@ import {readFileSync} from 'fs';
 import {
    CharacterClass,
    GearStats,
-   RogueRotation,
+   RogueSetup,
    RogueTalents,
    SimulationConfig,
    TargetType,
@@ -16,7 +16,7 @@ export interface SimulationSpec {
    description: string;
    class: CharacterClass;
    playerLevel: number;
-   rotation?: RogueRotation | WarriorRotation;
+   rotation?: RogueSetup | WarriorRotation;
    talents: RogueTalents | WarriorTalents;
    gearStats: GearStats;
    simulationConfig: SimulationConfig;

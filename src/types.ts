@@ -134,9 +134,10 @@ export interface WarriorTalents {
    protectionTree: Record<string, number>;
 }
 
-export interface RogueRotation {
+export interface RogueSetup {
    refreshSndSecondsAhead5Combo: number;
    avoidEviscerate?: boolean;
+   veiledShadowsSet?: boolean;
 }
 
 export interface WarriorRotation {
