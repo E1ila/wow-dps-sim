@@ -136,6 +136,7 @@ export interface WarriorTalents {
 
 export interface RogueRotation {
    refreshSndSecondsAhead5Combo: number;
+   avoidEviscerate?: boolean;
 }
 
 export interface WarriorRotation {

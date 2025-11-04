@@ -145,7 +145,7 @@ export class RogueSimulator extends MeleeSimulator {
    }
 
    castEviscerate(): boolean {
-      if (!this.spendEnergy(35)) {
+      if (this.rotation.avoidEviscerate || !this.spendEnergy(35)) {
          return false;
       }
 

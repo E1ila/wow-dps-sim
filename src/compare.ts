@@ -53,7 +53,7 @@ function printTable(results: BuildResult[]): void {
    console.log('='.repeat(120));
    console.log('Build Comparison Results');
    console.log('='.repeat(120));
-   console.log();
+   console.log(`Iterations: ${results[0].iterations}\n`);
 
    console.log(`${'Build Name'.padEnd(20)} | ${'DPS'.padStart(10)} | Talents`);
    console.log('-'.repeat(120));
@@ -103,6 +103,16 @@ program
       '-b, --builds <builds>',
       'Custom builds to compare (format: talents1;talents2). Example: "sealFate:5;sealFate:0"'
    )
+   .option(
+      '-i, --iterations <number>',
+      'Number of simulation iterations to run',
+      parseInt
+   )
+   .option(
+      '-f, --fight-length <seconds>',
+      'Fight length in seconds',
+      parseInt
+   )
    .parse(process.argv);
 
 const specFile = program.args[0];
@@ -112,7 +122,6 @@ try {
    const builds = parseBuilds(opts.builds, specFile);
 
    console.log(`Running build comparison for: ${specFile}`);
-   console.log(`Testing ${builds.length} builds...`);
    console.log();
 
    const results: BuildResult[] = [];
@@ -123,6 +132,8 @@ try {
       const result = runSimulation({
          specFile,
          quiet: true,
+         iterations: opts.iterations,
+         fightLength: opts.fightLength,
       }, builds[i]);
       results.push({
          ...result,
