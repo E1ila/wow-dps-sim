@@ -1,4 +1,4 @@
-import {GearStats, SimulationConfig, WeaponType} from '../src/types';
+import {GearStats, WeaponType} from '../src/types';
 import {AttackTable, AttackTableStatsProvider} from '../src/mechanics/AttackTable';
 
 describe('Attack Table Mechanics', () => {
@@ -32,17 +32,10 @@ describe('Attack Table Mechanics', () => {
     get isDualWielding() { return gearStats.offHandWeapon !== undefined; },
   });
 
-  const raidBossConfig: SimulationConfig = {
-    fightLength: 60,
-    targetLevel: 63,
-    targetArmor: 3731,
-    iterations: 1,
-  };
-
   describe('Single-Wield against Level 63 Raid Boss', () => {
     it('should have 8.0% miss and 40% glancing (65% damage) with 300 skill', () => {
       const stats = createTestStats(300, false);
-      const attackTable = new AttackTable(wrapStats(stats, raidBossConfig.targetLevel));
+      const attackTable = new AttackTable(wrapStats(stats, 63));
 
       const missChance = (attackTable as any).missChance;
       const glancingChance = (attackTable as any).glancingChance;
@@ -55,7 +48,7 @@ describe('Attack Table Mechanics', () => {
 
     it('should have 6.0% miss and 40% glancing (85% damage) with 305 skill', () => {
       const stats = createTestStats(305, false);
-      const attackTable = new AttackTable(wrapStats(stats, raidBossConfig.targetLevel));
+      const attackTable = new AttackTable(wrapStats(stats, 63));
 
       const missChance = (attackTable as any).missChance;
       const glancingChance = (attackTable as any).glancingChance;
@@ -68,7 +61,7 @@ describe('Attack Table Mechanics', () => {
 
     it('should have 5.7% miss and 40% glancing (95% damage) with 308 skill', () => {
       const stats = createTestStats(308, false);
-      const attackTable = new AttackTable(wrapStats(stats, raidBossConfig.targetLevel));
+      const attackTable = new AttackTable(wrapStats(stats, 63));
 
       const missChance = (attackTable as any).missChance;
       const glancingChance = (attackTable as any).glancingChance;
@@ -83,7 +76,7 @@ describe('Attack Table Mechanics', () => {
   describe('Dual-Wield Miss Calculation', () => {
     it('should calculate DW miss as (base_miss × 0.8) + 20% with 300 skill', () => {
       const stats = createTestStats(300, true);
-      const attackTable = new AttackTable(wrapStats(stats, raidBossConfig.targetLevel));
+      const attackTable = new AttackTable(wrapStats(stats, 63));
 
       const missChance = (attackTable as any).missChance;
       const targetDefense = 315;
@@ -98,7 +91,7 @@ describe('Attack Table Mechanics', () => {
 
     it('should calculate DW miss as (base_miss × 0.8) + 20% with 305 skill', () => {
       const stats = createTestStats(305, true);
-      const attackTable = new AttackTable(wrapStats(stats, raidBossConfig.targetLevel));
+      const attackTable = new AttackTable(wrapStats(stats, 63));
 
       const missChance = (attackTable as any).missChance;
       const targetDefense = 315;
@@ -113,7 +106,7 @@ describe('Attack Table Mechanics', () => {
 
     it('should calculate DW miss as (base_miss × 0.8) + 20% with 308 skill', () => {
       const stats = createTestStats(308, true);
-      const attackTable = new AttackTable(wrapStats(stats, raidBossConfig.targetLevel));
+      const attackTable = new AttackTable(wrapStats(stats, 63));
 
       const missChance = (attackTable as any).missChance;
       const targetDefense = 315;
@@ -141,7 +134,7 @@ describe('Attack Table Mechanics', () => {
         testCases.forEach(({ hitPercent, expectedMissMin, expectedMissMax }) => {
           const stats = createTestStats(skill, true);
           stats.hitChance = hitPercent;
-          const attackTable = new AttackTable(wrapStats(stats, raidBossConfig.targetLevel));
+          const attackTable = new AttackTable(wrapStats(stats, 63));
           const missChance = (attackTable as any).missChance;
 
           expect(missChance * 100).toBeGreaterThanOrEqual(expectedMissMin);
@@ -163,7 +156,7 @@ describe('Attack Table Mechanics', () => {
         testCases.forEach(({ hitPercent, expectedMissMin, expectedMissMax }) => {
           const stats = createTestStats(skill, true);
           stats.hitChance = hitPercent;
-          const attackTable = new AttackTable(wrapStats(stats, raidBossConfig.targetLevel));
+          const attackTable = new AttackTable(wrapStats(stats, 63));
           const missChance = (attackTable as any).missChance;
 
           expect(missChance * 100).toBeGreaterThanOrEqual(expectedMissMin);
@@ -185,7 +178,7 @@ describe('Attack Table Mechanics', () => {
         testCases.forEach(({ hitPercent, expectedMissMin, expectedMissMax }) => {
           const stats = createTestStats(skill, true);
           stats.hitChance = hitPercent;
-          const attackTable = new AttackTable(wrapStats(stats, raidBossConfig.targetLevel));
+          const attackTable = new AttackTable(wrapStats(stats, 63));
           const missChance = (attackTable as any).missChance;
 
           expect(missChance * 100).toBeGreaterThanOrEqual(expectedMissMin);
