@@ -92,6 +92,10 @@ export abstract class MeleeDamageCalculator extends DamageCalculator {
       };
    }
 
+   get autoAttackMultiplier(): number {
+      return 1;
+   }
+
    calculateAutoAttackDamage(isOffhand: boolean = false): AttackResult {
       const weapon = isOffhand ? this.spec.gearStats.offHandWeapon : this.spec.gearStats.mainHandWeapon;
       if (!weapon) {
@@ -107,7 +111,9 @@ export abstract class MeleeDamageCalculator extends DamageCalculator {
       const apBonus = (this.attackPower / 14) * weapon.speed;
       let baseDamage = weaponDamage + apBonus;
 
-      const multipliers = [];
+      const multipliers = [
+         this.autoAttackMultiplier,
+      ];
       if (!isOffhand) {
          const dualWieldPenalty = 0.5;
          multipliers.push(dualWieldPenalty + this.dualWieldSpecBonus);

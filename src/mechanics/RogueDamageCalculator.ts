@@ -1,4 +1,4 @@
-import {Ability, Attack, AttackResult, Buffs, RogueTalents, WeaponType} from '../types';
+import {Ability, Attack, AttackResult, Buffs, RogueTalents, TargetType, WeaponType} from '../types';
 import {MeleeDamageCalculator} from './MeleeDamageCalculator';
 import {SimulationSpec} from '../SpecLoader';
 import {BuffsProvider} from "./DamageCalculator";
@@ -56,6 +56,9 @@ export class RogueDamageCalculator extends MeleeDamageCalculator {
       return attackPower;
    }
 
+   override get autoAttackMultiplier(): number {
+      return this.murderMultiplier;
+   }
 
    get lethalityMultiplier() {
       if (this.talents.lethality === 0) {
@@ -85,6 +88,13 @@ export class RogueDamageCalculator extends MeleeDamageCalculator {
       return 1 + (this.talents.improvedEviscerate * 0.05);
    }
 
+   get murderMultiplier(): number {
+      if (this.talents.murder && this.spec.targetType && [TargetType.Humanoid, TargetType.Beast, TargetType.Giant, TargetType.Dragonkin].includes(this.spec.targetType)) {
+         return 1 + this.talents.murder * 0.01;
+      }
+      return 1;
+   }
+
    calculateSinisterStrikeDamage(): AttackResult {
       const weapon = this.spec.gearStats.mainHandWeapon;
       const weaponDamage = this.getWeaponDamage(weapon);
@@ -93,6 +103,7 @@ export class RogueDamageCalculator extends MeleeDamageCalculator {
       const multipliers = [
          this.aggressionMultiplier,
          this.lethalityMultiplier,
+         this.murderMultiplier,
       ];
 
       return this.calculateMeleeDamage({
@@ -112,6 +123,7 @@ export class RogueDamageCalculator extends MeleeDamageCalculator {
       const multipliers = [
          this.opportunityMultiplier,
          this.lethalityMultiplier,
+         this.murderMultiplier,
       ];
 
       return this.calculateMeleeDamage({
@@ -131,6 +143,7 @@ export class RogueDamageCalculator extends MeleeDamageCalculator {
 
       const multipliers = [
          this.lethalityMultiplier,
+         this.murderMultiplier,
       ];
 
       return this.calculateMeleeDamage({
@@ -151,6 +164,7 @@ export class RogueDamageCalculator extends MeleeDamageCalculator {
          this.eviscerateMultiplier,
          this.aggressionMultiplier,
          this.lethalityMultiplier,
+         this.murderMultiplier,
       ];
 
       return this.calculateMeleeDamage({

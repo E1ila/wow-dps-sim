@@ -37,6 +37,17 @@ export enum CharacterClass {
    Warrior = 'warrior',
 }
 
+export enum TargetType {
+   Undefined = 'undefined',
+   Humanoid = 'humanoid',
+   Beast = 'beast',
+   Dragonkin = 'dragonkin',
+   Giant = 'giant',
+   Undead = 'undead',
+   Demon = 'demon',
+   Elemental = 'elemental',
+}
+
 export interface GearStats {
    attackPower: number;
    critChance: number;
@@ -156,6 +167,7 @@ export interface RogueSimulationState extends MeleeSimulationState {
 
 export interface SimulationConfig {
    targetLevel: number;
+   targetType?: TargetType;
    targetArmor: number;
    fightLength?: number;
    iterations?: number;

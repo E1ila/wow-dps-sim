@@ -5,6 +5,7 @@ import {
    RogueRotation,
    RogueTalents,
    SimulationConfig,
+   TargetType,
    WarriorRotation,
    WarriorTalents
 } from './types';
@@ -21,6 +22,7 @@ export interface SimulationSpec {
    simulationConfig: SimulationConfig;
    fightLength: number;
    targetLevel: number;
+   targetType?: TargetType;
    targetArmor: number;
    iterations: number;
    postCycleResourceGeneration?: boolean;
