@@ -3,6 +3,7 @@ import {readFileSync} from 'fs';
 import {SimulationOptions, SimulationRunner} from './SimulationRunner';
 import * as fs from "node:fs";
 import path from "node:path";
+import {c} from './types';
 
 interface SimulationResult {
    dps: number;
@@ -57,13 +58,19 @@ function printTable(results: BuildResult[]): void {
    console.log(`${'Build Name'.padEnd(20)} | ${'DPS'.padStart(10)} | Talents`);
    console.log('-'.repeat(120));
 
+   // Find the maximum DPS
+   const maxDPS = Math.max(...results.map(r => r.dps));
+
    for (const result of results) {
       const talentString = Object.entries(result.talentOverrides)
          .map(([name, value]) => `${name}:${value}`)
          .join(', ');
 
+      const dpsString = result.dps.toFixed(2).padStart(10);
+      const coloredDPS = result.dps === maxDPS ? `${c.brightGreen}${dpsString}${c.reset}` : dpsString;
+
       console.log(
-         `${result.buildName.padEnd(20)} | ${result.dps.toFixed(2).padStart(10)} | ${talentString}`
+         `${result.buildName.padEnd(20)} | ${coloredDPS} | ${talentString}`
       );
    }
 }
