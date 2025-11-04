@@ -47,18 +47,43 @@ export class RogueDamageCalculator extends MeleeDamageCalculator {
       return critChance;
    }
 
+   get lethalityMultiplier() {
+      if (this.talents.lethality === 0) {
+         return 1;
+      }
+      return 1 + (this.talents.lethality * 0.06);
+   }
+
+   get aggressionMultiplier() {
+      if (this.talents.aggression === 0) {
+         return 1;
+      }
+      return 1 + (this.talents.aggression * 0.02);
+   }
+
+   get opportunityMultiplier() {
+      if (this.talents.opportunity === 0) {
+         return 1;
+      }
+      return 1 + (this.talents.opportunity * 0.04);
+   }
+
+   get eviscerateMultiplier() {
+      if (this.talents.improvedEviscerate === 0) {
+         return 1;
+      }
+      return 1 + (this.talents.improvedEviscerate * 0.05);
+   }
+
    calculateSinisterStrikeDamage(): AttackResult {
       const weapon = this.spec.gearStats.mainHandWeapon;
       const weaponDamage = this.getWeaponDamage(weapon);
       const baseDamage = weaponDamage + 68;
 
-      const multipliers = [];
-      if (this.talents.aggression > 0) {
-         multipliers.push(1 + (this.talents.aggression * 0.02));
-      }
-      if (this.talents.lethality > 0) {
-         multipliers.push(1 + (this.talents.lethality * 0.06));
-      }
+      const multipliers = [
+         this.aggressionMultiplier,
+         this.lethalityMultiplier,
+      ];
 
       return this.calculateMeleeDamage({
          baseDamage,
@@ -74,13 +99,10 @@ export class RogueDamageCalculator extends MeleeDamageCalculator {
       const weaponDamage = this.getWeaponDamage(weapon);
       const baseDamage = (weaponDamage + 210) * 1.5;
 
-      const multipliers = [];
-      if (this.talents.opportunity > 0) {
-         multipliers.push(1 + (this.talents.opportunity * 0.04));
-      }
-      if (this.talents.lethality > 0) {
-         multipliers.push(1 + (this.talents.lethality * 0.06));
-      }
+      const multipliers = [
+         this.opportunityMultiplier,
+         this.lethalityMultiplier,
+      ];
 
       return this.calculateMeleeDamage({
          baseDamage,
@@ -94,12 +116,11 @@ export class RogueDamageCalculator extends MeleeDamageCalculator {
    calculateHemorrhageDamage(): AttackResult {
       const weapon = this.spec.gearStats.mainHandWeapon;
       const weaponDamage = this.getWeaponDamage(weapon);
-      const baseDamage = (weaponDamage + 110) * 1.1;
+      const baseDamage = weaponDamage + 3;
 
-      const multipliers = [];
-      if (this.talents.lethality > 0) {
-         multipliers.push(1 + (this.talents.lethality * 0.06));
-      }
+      const multipliers = [
+         this.lethalityMultiplier,
+      ];
 
       return this.calculateMeleeDamage({
          baseDamage,
@@ -115,16 +136,11 @@ export class RogueDamageCalculator extends MeleeDamageCalculator {
       const damagePerCP = [0, 223, 325, 427, 529, 631];
       const baseDamage = (damagePerCP[comboPoints] || 0) + (this.spec.gearStats.attackPower * 0.03 * comboPoints);
 
-      const multipliers = [];
-      if (this.talents.improvedEviscerate > 0) {
-         multipliers.push(1 + (this.talents.improvedEviscerate * 0.05));
-      }
-      if (this.talents.aggression > 0) {
-         multipliers.push(1 + (this.talents.aggression * 0.02));
-      }
-      if (this.talents.lethality > 0) {
-         multipliers.push(1 + (this.talents.lethality * 0.06));
-      }
+      const multipliers = [
+         this.eviscerateMultiplier,
+         this.aggressionMultiplier,
+         this.lethalityMultiplier,
+      ];
 
       return this.calculateMeleeDamage({
          baseDamage,

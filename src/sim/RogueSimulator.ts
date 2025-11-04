@@ -192,9 +192,7 @@ export class RogueSimulator extends MeleeSimulator {
    }
 
    castHemorrhage(): boolean {
-      let energyCost = 45;
-      const improvedSSCostReduction = this.talents.improvedSinisterStrike * 2;
-      energyCost -= improvedSSCostReduction;
+      let energyCost = 35;
 
       if (!this.spendEnergy(energyCost)) {
          return false;
