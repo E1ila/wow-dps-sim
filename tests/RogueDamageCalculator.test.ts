@@ -6,6 +6,7 @@ import {
   GearStats,
   RogueTalents,
   SimulationConfig,
+  TargetType,
   WeaponEnchant,
   WeaponType
 } from '../src/types';
@@ -86,6 +87,7 @@ function createTestSpec(stats: GearStats, config: SimulationConfig, talents: Rog
     fightLength: config.fightLength ?? 60,
     targetLevel: config.targetLevel,
     targetArmor: config.targetArmor,
+    targetType: config.targetType,
     iterations: config.iterations ?? 1,
     postCycleResourceGeneration: config.postCycleResourceGeneration ?? false,
   };
@@ -813,6 +815,62 @@ describe('RogueDamageCalculator', () => {
       Math.random = originalRandom;
 
       expect(result1.baseAmount).toBe(result2.baseAmount);
+    });
+  });
+
+  describe('Murder Talent', () => {
+    it('should return correct multiplier for each talent point', () => {
+      const testCases = [
+        {murder: 0, expectedMultiplier: 1.00, targetType: TargetType.Humanoid},
+        {murder: 1, expectedMultiplier: 1.01, targetType: TargetType.Humanoid},
+        {murder: 2, expectedMultiplier: 1.02, targetType: TargetType.Humanoid},
+        {murder: 0, expectedMultiplier: 1.00, targetType: TargetType.Beast},
+        {murder: 1, expectedMultiplier: 1.01, targetType: TargetType.Beast},
+        {murder: 2, expectedMultiplier: 1.02, targetType: TargetType.Beast},
+        {murder: 0, expectedMultiplier: 1.00, targetType: TargetType.Dragonkin},
+        {murder: 1, expectedMultiplier: 1.01, targetType: TargetType.Dragonkin},
+        {murder: 2, expectedMultiplier: 1.02, targetType: TargetType.Dragonkin},
+        {murder: 0, expectedMultiplier: 1.00, targetType: TargetType.Undefined},
+        {murder: 1, expectedMultiplier: 1.00, targetType: TargetType.Undefined},
+        {murder: 2, expectedMultiplier: 1.00, targetType: TargetType.Undefined},
+      ];
+
+      testCases.forEach(({murder, expectedMultiplier, targetType}) => {
+        const talents = {...baseTalents, murder};
+        const configWithTarget = {...config, targetType};
+        const calculator = new RogueDamageCalculator(createTestSpec(baseStats, configWithTarget, talents), createMockBuffsProvider());
+
+        expect(calculator.autoAttackMultiplier).toBe(expectedMultiplier);
+      });
+    });
+
+    it('should increase actual auto attack damage against humanoids', () => {
+      const talentsNoMurder = {...baseTalents, murder: 0};
+      const talentsWithMurder = {...baseTalents, murder: 2};
+      const configWithTarget = {...config, targetType: TargetType.Humanoid};
+
+      const calcNoMurder = new RogueDamageCalculator(createTestSpec(baseStats, configWithTarget, talentsNoMurder), createMockBuffsProvider());
+      const calcWithMurder = new RogueDamageCalculator(createTestSpec(baseStats, configWithTarget, talentsWithMurder), createMockBuffsProvider());
+
+      const numTrials = 20000;
+      let totalNoMurder = 0;
+      let totalWithMurder = 0;
+      const originalRandom = Math.random;
+      Math.random = () => 0.9;
+
+      for (let i = 0; i < numTrials; i++) {
+        const resultNoMurder = calcNoMurder.calculateAutoAttackDamage(false);
+        const resultWithMurder = calcWithMurder.calculateAutoAttackDamage(false);
+
+        if (resultNoMurder.amount > 0) totalNoMurder += resultNoMurder.amount;
+        if (resultWithMurder.amount > 0) totalWithMurder += resultWithMurder.amount;
+      }
+      Math.random = originalRandom;
+
+      // maybe with armor and other multiplier in % it's not a perfect 1.02
+      const expectedMultiplier = 1.018;
+      expect(totalWithMurder / totalNoMurder).toBeGreaterThan(expectedMultiplier - 0.005);
+      expect(totalWithMurder / totalNoMurder).toBeLessThan(expectedMultiplier + 0.005);
     });
   });
 });
