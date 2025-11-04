@@ -1,15 +1,15 @@
 {
   "name": "wow-classic-sim",
   "version": "1.0.0",
-  "main": "dist/index.js",
+  "main": "dist/sim.js",
   "type": "commonjs",
   "scripts": {
     "build": "tsc",
-    "start": "node dist/index.js",
-    "dev": "ts-node src/index.ts",
+    "start": "node dist/sim.js",
+    "dev": "ts-node src/sim.ts",
     "verify": "tsc && node dist/verifyMechanics.js",
     "test": "jest",
-    "compare": "tsc && node dist/compare_builds.js"
+    "compare": "tsc && node dist/compare.js"
   },
   "keywords": [
     "wow",

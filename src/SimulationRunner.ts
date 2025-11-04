@@ -206,6 +206,26 @@ export class SimulationRunner {
         }
     }
 
+    runAndGetResults(): any {
+        this.loadSpec();
+        this.applyTalentOverrides();
+
+        const characterClass = this.getCharacterClass();
+        const baseStats = this.buildBaseStats();
+        const config = this.buildConfig();
+
+        const simulator = this.createSimulator(characterClass, baseStats, config);
+        const {results, executionTimeMs} = simulator.runMultipleIterations();
+        
+        return BaseSimulator.printResults(
+            results,
+            simulator,
+            executionTimeMs,
+            this.appliedTalentOverrides,
+            true
+        );
+    }
+
     async run(): Promise<void> {
         this.loadSpec();
         this.applyTalentOverrides();

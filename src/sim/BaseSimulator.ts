@@ -353,7 +353,7 @@ export abstract class BaseSimulator implements Simulator {
       console.log(`Expected Crit Rate (from stats): ${expectedCritChance.toFixed(2)}%`);
    }
 
-   static printResults(results: SimulationResult[], simulator: BaseSimulator, executionTimeMs?: number, talentOverrides?: Record<string, any>, quiet: boolean = false): void {
+   static printResults(results: SimulationResult[], simulator: BaseSimulator, executionTimeMs?: number, talentOverrides?: Record<string, any>, quiet: boolean = false): any {
       const avgDPS = this.calculateAverageDPS(results);
       const jsonResults: any = {
          dps: avgDPS,

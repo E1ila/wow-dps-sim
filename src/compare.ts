@@ -1,4 +1,5 @@
-import {execSync} from 'child_process';
+import {SimulationRunner, SimulationOptions} from './SimulationRunner';
+import {WeaponType} from './types';
 
 interface TalentBuild {
    name: string;
@@ -18,12 +19,12 @@ interface SimulationResult {
    }>;
    hitStats: {
       totalAttacks: number;
-      wornCritRate: number;
-      actualCritRate: string;
-      actualHitRate: string;
-      actualGlancingRate: string;
-      actualMissRate: string;
-      actualDodgeRate: string;
+      wornCrit: string;
+      actualCrit: string;
+      actualHit: string;
+      actualGlancing: string;
+      actualMiss: string;
+      actualDodge: string;
       critCount: number;
       hitCount: number;
       glancingCount: number;
@@ -51,12 +52,41 @@ const TESTED_TALENTS: TalentBuild[] = [
    },
 ];
 
-function runSimulation(specFile: string, talents: string): SimulationResult {
-   const command = `node dist/index.js ${specFile} -t ${talents} -q`;
+function getDefaultOptions(specFile: string): SimulationOptions {
+   return {
+      specFile,
+      attackPower: 1200,
+      critChance: 35,
+      hitChance: 9,
+      weaponSkill: 300,
+      mainHand: {
+         minDamage: 76,
+         maxDamage: 142,
+         speed: 1.7,
+         type: WeaponType.Dagger,
+      },
+      offHand: {
+         minDamage: 58,
+         maxDamage: 108,
+         speed: 1.5,
+         type: WeaponType.Dagger,
+      },
+      targetLevel: 63,
+      targetArmor: 3731,
+      fightLength: 300,
+      iterations: 2000,
+      postResGen: true,
+      quiet: true,
+   };
+}
 
+function runSimulation(specFile: string, talents: string): SimulationResult {
    try {
-      const output = execSync(command, {encoding: 'utf-8'});
-      return JSON.parse(output) as SimulationResult;
+      const options = getDefaultOptions(specFile);
+      options.talentOverrides = talents;
+      
+      const runner = new SimulationRunner(options);
+      return runner.runAndGetResults();
    } catch (error) {
       console.error(`Error running simulation for talents: ${talents}`);
       throw error;
@@ -112,7 +142,7 @@ function printTable(results: BuildResult[]): void {
    for (const result of results) {
       const stats = result.hitStats;
       console.log(
-         `${result.buildName.padEnd(20)} | ${stats.totalAttacks.toString().padStart(12)} | ${stats.actualCritRate.padStart(10)} | ${stats.actualHitRate.padStart(10)} | ${stats.actualGlancingRate.padStart(10)} | ${stats.actualMissRate.padStart(10)} | ${stats.actualDodgeRate.padStart(10)}`
+         `${result.buildName.padEnd(20)} | ${stats.totalAttacks.toString().padStart(12)} | ${stats.actualCrit.padStart(10)} | ${stats.actualHit.padStart(10)} | ${stats.actualGlancing.padStart(10)} | ${stats.actualMiss.padStart(10)} | ${stats.actualDodge.padStart(10)}`
       );
    }
 
