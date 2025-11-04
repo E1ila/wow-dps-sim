@@ -116,6 +116,7 @@ export class RogueDamageCalculator extends MeleeDamageCalculator {
    calculateHemorrhageDamage(): AttackResult {
       const weapon = this.spec.gearStats.mainHandWeapon;
       const weaponDamage = this.getWeaponDamage(weapon);
+      // todo: that's not what happens - it should actually appply a debuff
       const baseDamage = weaponDamage + 3;
 
       const multipliers = [

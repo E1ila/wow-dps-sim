@@ -52,6 +52,6 @@
         "targetLevel": 63,
         "targetArmor": 3731,
         "iterations": 10000,
-        "postResGen": false
+        "postCycleResourceGeneration": false
     }
 }

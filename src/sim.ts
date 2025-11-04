@@ -1,6 +1,6 @@
 import {Command} from 'commander';
 import {WeaponType} from './types';
-import {SimulationRunner, SimulationOptions} from './SimulationRunner';
+import {SimulationOptions, SimulationRunner} from './SimulationRunner';
 
 const program = new Command();
 
@@ -64,7 +64,7 @@ const simulationOptions: SimulationOptions = {
    targetArmor: parseInt(opts.armor),
    fightLength: parseInt(opts.length),
    iterations: parseInt(opts.iterations),
-   postResGen: opts.postResGen ? opts.postResGen != '0' : false,
+   postCycleResourceGeneration: opts.postCycleResourceGeneration ? opts.postCycleResourceGeneration != '0' : false,
    talentOverrides: opts.talent,
    playbackSpeed: opts.speed !== undefined ? parseFloat(opts.speed) : undefined,
    quiet: opts.quiet === true,

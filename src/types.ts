@@ -147,7 +147,7 @@ export interface SimulationConfig {
    targetArmor: number;
    fightLength?: number;
    iterations?: number;
-   postResGen?: boolean;
+   postCycleResourceGeneration?: boolean;
 }
 
 export interface DamageEvent extends AttackResult {

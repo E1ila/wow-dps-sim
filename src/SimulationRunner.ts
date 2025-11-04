@@ -26,7 +26,7 @@ export interface SimulationOptions {
     targetArmor: number;
     fightLength: number;
     iterations: number;
-    postResGen: boolean;
+    postCycleResourceGeneration: boolean;
     talentOverrides?: string;
     playbackSpeed?: number;
     quiet: boolean;
@@ -76,7 +76,7 @@ export class SimulationRunner {
         this.spec.targetArmor = this.options.targetArmor;
         this.spec.fightLength = this.options.fightLength;
         this.spec.iterations = this.options.iterations;
-        this.spec.postResGen = this.options.postResGen;
+        this.spec.postCycleResourceGeneration = this.options.postCycleResourceGeneration;
     }
 
     private applyTalentOverrides(): void {
@@ -139,7 +139,7 @@ export class SimulationRunner {
         console.log(`${c.brightMagenta}WoW Classic Era - DPS Simulator${c.reset}`);
         console.log(` ## ${colorByClass(this.spec.class)}${this.spec.class.toUpperCase()}${c.reset} ##`);
         console.log(`${c.cyan}Config: ${c.reset}${JSON.stringify(this.spec.gearStats)}`);
-        console.log(`${c.cyan}Simulation params: ${c.reset}fightLength=${this.spec.fightLength}, targetLevel=${this.spec.targetLevel}, targetArmor=${this.spec.targetArmor}, iterations=${this.spec.iterations}, postResGen=${this.spec.postResGen}`);
+        console.log(`${c.cyan}Simulation params: ${c.reset}fightLength=${this.spec.fightLength}, targetLevel=${this.spec.targetLevel}, targetArmor=${this.spec.targetArmor}, iterations=${this.spec.iterations}, postCycleResourceGeneration=${this.spec.postCycleResourceGeneration}`);
         console.log(`${c.cyan}Talents: ${c.reset}${JSON.stringify(this.spec.talents)}`);
         console.log(`${c.cyan}Rotation: ${c.reset}${JSON.stringify(this.spec.rotation)}`);
         console.log(`${c.brightCyan}Running simulation...${c.reset}`);

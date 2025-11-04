@@ -70,7 +70,7 @@ function createTestSpec(stats: GearStats, config: SimulationConfig, talents: Rog
     targetLevel: config.targetLevel,
     targetArmor: config.targetArmor,
     iterations: config.iterations ?? 1,
-    postResGen: config.postResGen ?? false,
+    postCycleResourceGeneration: config.postCycleResourceGeneration ?? false,
   };
 }
 

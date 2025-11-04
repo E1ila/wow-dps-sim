@@ -22,7 +22,7 @@ export interface SimulationSpec {
    targetLevel: number;
    targetArmor: number;
    iterations: number;
-   postResGen?: boolean;
+   postCycleResourceGeneration?: boolean;
 }
 
 export class SpecLoader {
@@ -50,7 +50,7 @@ export class SpecLoader {
          spec.targetLevel = spec.targetLevel ?? spec.simulationConfig?.targetLevel ?? 63;
          spec.targetArmor = spec.targetArmor ?? spec.simulationConfig?.targetArmor ?? 3731;
          spec.iterations = spec.iterations ?? spec.simulationConfig?.iterations ?? 1000;
-         spec.postResGen = spec.postResGen ?? spec.simulationConfig?.postResGen ?? false;
+         spec.postCycleResourceGeneration = spec.postCycleResourceGeneration ?? spec.simulationConfig?.postCycleResourceGeneration ?? false;
 
         const classMap: { [key: string]: CharacterClass } = {
             'rogue': CharacterClass.Rogue,

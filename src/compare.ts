@@ -1,5 +1,5 @@
 import {Command} from 'commander';
-import {SimulationRunner, SimulationOptions} from './SimulationRunner';
+import {SimulationOptions, SimulationRunner} from './SimulationRunner';
 import {WeaponType} from './types';
 
 interface TalentBuild {
@@ -83,7 +83,7 @@ function buildSimulationOptions(specFile: string, opts: any): SimulationOptions 
       targetArmor: parseInt(opts.armor),
       fightLength: parseInt(opts.length),
       iterations: parseInt(opts.iterations),
-      postResGen: opts.postResGen ? opts.postResGen != '0' : false,
+      postCycleResourceGeneration: opts.postCycleResourceGeneration ? opts.postCycleResourceGeneration != '0' : false,
       quiet: true,
    };
 }

@@ -1,7 +1,6 @@
 {
-    "name": "Seal Fate Daggers",
-    "class": "rogue",
-    "description": "Standard Seal Fate dagger spec for PvE",
+    "name": "PvE Combat Daggers",
+    "class": "Rogue",
     "rotation": {
         "refreshSndSecondsBeforeExpiry": 3
     },
@@ -9,7 +8,6 @@
         "adrenalineRush": true,
         "aggression": 0,
         "bladeFurry": true,
-        "coldBlood": true,
         "daggerSpecialization": 5,
         "dualWieldSpecialization": 5,
         "fistWeaponSpecialization": 0,
@@ -28,34 +26,34 @@
         "ruthlessness": 2,
         "sealFate": 0,
         "swordSpecialization": 0,
-        "weaponExpertise": 5
+        "weaponExpertise": 2
     },
     "gearStats": {
         "level": 60,
-        "attackPower": 1150,
-        "critChance": 32,
+        "attackPower": 844,
+        "critChance": 19,
         "hitChance": 9,
-        "agility": 330,
-        "strength": 100,
-        "weaponSkill": 308,
+        "agility": 393,
+        "strength": 151,
+        "weaponSkill": 300,
         "mainHandWeapon": {
-            "minDamage": 86,
-            "maxDamage": 130,
+            "minDamage": 65,
+            "maxDamage": 121,
             "speed": 1.8,
             "type": "Dagger"
         },
         "offHandWeapon": {
-            "minDamage": 65,
-            "maxDamage": 122,
-            "speed": 1.5,
+            "minDamage": 57,
+            "maxDamage": 107,
+            "speed": 1.6,
             "type": "Dagger"
         }
     },
     "simulationConfig": {
-        "fightLength": 60,
+        "fightLength": 120,
         "targetLevel": 63,
         "targetArmor": 3731,
-        "iterations": 10000,
-        "postResGen": false
+        "iterations": 4000,
+        "postCycleResourceGeneration": true
     }
 }
