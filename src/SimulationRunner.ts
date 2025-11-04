@@ -98,89 +98,33 @@ export class SimulationRunner {
         }
     }
 
-    private getCharacterClass(): CharacterClass {
-        const classMap: { [key: string]: CharacterClass } = {
-            'rogue': CharacterClass.Rogue,
-            'warrior': CharacterClass.Warrior,
-        };
-
-        const characterClass = classMap[this.spec.class.toLowerCase()];
-        if (!characterClass) {
-            throw new Error(`Unknown class "${this.spec.class}". Available classes: rogue, warrior`);
-        }
-
-        return characterClass;
-    }
-
-    private buildBaseStats(): GearStats {
-        return {
-            level: 60,
-            attackPower: this.options.attackPower,
-            critChance: this.options.critChance,
-            hitChance: this.options.hitChance,
-            agility: 300,
-            strength: 100,
-            weaponSkill: this.options.weaponSkill,
-            mainHandWeapon: {
-                minDamage: this.options.mainHand.minDamage,
-                maxDamage: this.options.mainHand.maxDamage,
-                speed: this.options.mainHand.speed,
-                type: this.options.mainHand.type,
-            },
-            offHandWeapon: this.options.offHand ? {
-                minDamage: this.options.offHand.minDamage,
-                maxDamage: this.options.offHand.maxDamage,
-                speed: this.options.offHand.speed,
-                type: this.options.offHand.type,
-            } : undefined,
-        };
-    }
-
-    private buildConfig(): SimulationConfig {
-        return {
-            fightLength: this.options.fightLength,
-            targetLevel: this.options.targetLevel,
-            targetArmor: this.options.targetArmor,
-            iterations: this.options.iterations,
-            postResGen: this.options.postResGen,
-        };
-    }
-
-    private createSimulator(
-        characterClass: CharacterClass,
-        baseStats: GearStats,
-        config: SimulationConfig
-    ): BaseSimulator {
-        switch (characterClass) {
+    private createSimulator(): BaseSimulator {
+        switch (this.spec.class) {
             case CharacterClass.Rogue:
                 return new RogueSimulator(
-                    baseStats,
-                    config,
+                    this.spec.gearStats,
+                    this.spec.simulationConfig,
                     this.spec.talents as RogueTalents,
                     this.spec.rotation as RogueRotation
                 );
 
             case CharacterClass.Warrior:
-                return new WarriorSimulator(baseStats, config, this.spec.talents as WarriorTalents);
+                return new WarriorSimulator(this.spec.gearStats, this.spec.simulationConfig, this.spec.talents as WarriorTalents);
 
             default:
-                throw new Error(`Class ${characterClass} is not implemented yet.`);
+                throw new Error(`Class ${this.spec.class} is not implemented yet.`);
         }
     }
 
-    private printSimulationInfo(
-        characterClass: CharacterClass,
-        baseStats: GearStats,
-        config: SimulationConfig
-    ): void {
+    private printSimulationInfo(): void {
         if (this.options.quiet) {
             return;
         }
 
         console.log(`${c.brightMagenta}WoW Classic Era - DPS Simulator${c.reset}`);
-        console.log(` ## ${colorByClass(characterClass)}${characterClass.toUpperCase()}${c.reset} ##`);
-        console.log(`${c.cyan}Config: ${c.reset}${JSON.stringify(baseStats)}`);
-        console.log(`${c.cyan}Base stats (inc. gear): ${c.reset}${JSON.stringify(config)}`);
+        console.log(` ## ${colorByClass(this.spec.class)}${this.spec.class.toUpperCase()}${c.reset} ##`);
+        console.log(`${c.cyan}Config: ${c.reset}${JSON.stringify(this.spec.gearStats)}`);
+        console.log(`${c.cyan}Base stats (inc. gear): ${c.reset}${JSON.stringify(this.spec.simulationConfig)}`);
         console.log(`${c.cyan}Talents: ${c.reset}${JSON.stringify(this.spec.talents)}`);
         console.log(`${c.cyan}Rotation: ${c.reset}${JSON.stringify(this.spec.rotation)}`);
         console.log(`${c.brightCyan}Running simulation...${c.reset}`);
@@ -210,13 +154,11 @@ export class SimulationRunner {
         this.loadSpec();
         this.applyTalentOverrides();
 
-        const characterClass = this.getCharacterClass();
-        const baseStats = this.buildBaseStats();
         const config = this.buildConfig();
 
-        const simulator = this.createSimulator(characterClass, baseStats, config);
+        const simulator = this.createSimulator(this.spec.class, this.spec.gearStats, config);
         const {results, executionTimeMs} = simulator.runMultipleIterations();
-        
+
         return BaseSimulator.printResults(
             results,
             simulator,
@@ -230,13 +172,9 @@ export class SimulationRunner {
         this.loadSpec();
         this.applyTalentOverrides();
 
-        const characterClass = this.getCharacterClass();
-        const baseStats = this.buildBaseStats();
-        const config = this.buildConfig();
+        this.printSimulationInfo();
 
-        this.printSimulationInfo(characterClass, baseStats, config);
-
-        const simulator = this.createSimulator(characterClass, baseStats, config);
+        const simulator = this.createSimulator();
 
         if (this.options.playbackSpeed !== undefined) {
             await this.runWithPlayback(simulator);

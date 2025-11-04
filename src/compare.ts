@@ -1,3 +1,4 @@
+import {Command} from 'commander';
 import {SimulationRunner, SimulationOptions} from './SimulationRunner';
 import {WeaponType} from './types';
 
@@ -37,7 +38,7 @@ interface BuildResult extends SimulationResult {
    buildName: string;
 }
 
-const TESTED_TALENTS: TalentBuild[] = [
+const DEFAULT_BUILDS: TalentBuild[] = [
    {
       name: 'Seal Fate',
       talents: 'improvedSliceAndDice:1,ruthlessness:3,lethality:5,relentlessStrikes:1,sealFate:5'
@@ -52,37 +53,44 @@ const TESTED_TALENTS: TalentBuild[] = [
    },
 ];
 
-function getDefaultOptions(specFile: string): SimulationOptions {
+function buildSimulationOptions(specFile: string, opts: any): SimulationOptions {
+   const weaponTypeMap: { [key: string]: WeaponType } = {
+      'dagger': WeaponType.Dagger,
+      'sword': WeaponType.Sword,
+      'mace': WeaponType.Mace,
+      'fist': WeaponType.Fist,
+   };
+
    return {
       specFile,
-      attackPower: 1200,
-      critChance: 35,
-      hitChance: 9,
-      weaponSkill: 300,
+      attackPower: parseInt(opts.attackPower || opts.ap),
+      critChance: parseFloat(opts.crit),
+      hitChance: parseFloat(opts.hit),
+      weaponSkill: parseInt(opts.weaponSkill),
       mainHand: {
-         minDamage: 76,
-         maxDamage: 142,
-         speed: 1.7,
-         type: WeaponType.Dagger,
+         minDamage: parseFloat(opts.mhMin),
+         maxDamage: parseFloat(opts.mhMax),
+         speed: parseFloat(opts.mhSpeed),
+         type: weaponTypeMap[(opts.mhType || 'Dagger').toLowerCase()] || WeaponType.Dagger,
       },
-      offHand: {
-         minDamage: 58,
-         maxDamage: 108,
-         speed: 1.5,
-         type: WeaponType.Dagger,
-      },
-      targetLevel: 63,
-      targetArmor: 3731,
-      fightLength: 300,
-      iterations: 2000,
-      postResGen: true,
+      offHand: opts.offhand ? {
+         minDamage: parseFloat(opts.ohMin),
+         maxDamage: parseFloat(opts.ohMax),
+         speed: parseFloat(opts.ohSpeed),
+         type: weaponTypeMap[(opts.ohType || 'Dagger').toLowerCase()] || WeaponType.Dagger,
+      } : undefined,
+      targetLevel: parseInt(opts.targetLevel),
+      targetArmor: parseInt(opts.armor),
+      fightLength: parseInt(opts.length),
+      iterations: parseInt(opts.iterations),
+      postResGen: opts.postResGen ? opts.postResGen != '0' : false,
       quiet: true,
    };
 }
 
-function runSimulation(specFile: string, talents: string): SimulationResult {
+function runSimulation(baseOptions: SimulationOptions, talents: string): SimulationResult {
    try {
-      const options = getDefaultOptions(specFile);
+      const options = {...baseOptions};
       options.talentOverrides = talents;
       
       const runner = new SimulationRunner(options);
@@ -94,12 +102,12 @@ function runSimulation(specFile: string, talents: string): SimulationResult {
 }
 
 function printTable(results: BuildResult[]): void {
-   console.log('\n='.repeat(120));
+   console.log('='.repeat(120));
    console.log('Build Comparison Results');
    console.log('='.repeat(120));
    console.log();
 
-   console.log(`${'Build Name'.padEnd(20)} | ${'DPS'.padStart(10)} | ${'Iterations'.padStart(10)} | ${'Time (s)'.padStart(10)} | Talents`);
+   console.log(`${'Build Name'.padEnd(20)} | ${'DPS'.padStart(10)} | Talents`);
    console.log('-'.repeat(120));
 
    for (const result of results) {
@@ -108,74 +116,73 @@ function printTable(results: BuildResult[]): void {
          .join(', ');
 
       console.log(
-         `${result.buildName.padEnd(20)} | ${result.dps.toFixed(2).padStart(10)} | ${result.iterations.toString().padStart(10)} | ${(result.executionTimeMs / 1000).toFixed(2).padStart(10)} | ${talentString}`
+         `${result.buildName.padEnd(20)} | ${result.dps.toFixed(2).padStart(10)} | ${talentString}`
       );
    }
-
-   console.log();
-   console.log('='.repeat(120));
-   console.log('Ability Breakdown');
-   console.log('='.repeat(120));
-   console.log();
-
-   for (const result of results) {
-      console.log(`\n${result.buildName}:`);
-      console.log(`${'Ability'.padEnd(15)} | ${'% of DMG'.padStart(10)} | ${'Avg Hit'.padStart(12)} | ${'Hit Count'.padStart(12)} | ${'Total DMG'.padStart(15)}`);
-      console.log('-'.repeat(80));
-
-      for (const [ability, data] of Object.entries(result.abilityBreakdown)) {
-         console.log(
-            `${ability.padEnd(15)} | ${data.percentage.padStart(10)} | ${parseFloat(data.avgHitDamage).toFixed(2).padStart(12)} | ${data.hitCount.toString().padStart(12)} | ${data.totalDamage.toLocaleString().padStart(15)}`
-         );
-      }
-   }
-
-   console.log();
-   console.log('='.repeat(120));
-   console.log('Hit Statistics');
-   console.log('='.repeat(120));
-   console.log();
-
-   console.log(`${'Build'.padEnd(20)} | ${'Total Atks'.padStart(12)} | ${'Crit %'.padStart(10)} | ${'Hit %'.padStart(10)} | ${'Glance %'.padStart(10)} | ${'Miss %'.padStart(10)} | ${'Dodge %'.padStart(10)}`);
-   console.log('-'.repeat(120));
-
-   for (const result of results) {
-      const stats = result.hitStats;
-      console.log(
-         `${result.buildName.padEnd(20)} | ${stats.totalAttacks.toString().padStart(12)} | ${stats.actualCrit.padStart(10)} | ${stats.actualHit.padStart(10)} | ${stats.actualGlancing.padStart(10)} | ${stats.actualMiss.padStart(10)} | ${stats.actualDodge.padStart(10)}`
-      );
-   }
-
-   console.log();
-   console.log('='.repeat(120));
-
-   const sortedByDps = [...results].sort((a, b) => b.dps - a.dps);
-   const best = sortedByDps[0];
-
-   console.log(`\nBest Build: ${best.buildName} with ${best.dps.toFixed(2)} DPS`);
-   console.log();
-
-   for (let i = 1; i < sortedByDps.length; i++) {
-      const diff = best.dps - sortedByDps[i].dps;
-      const percentDiff = ((diff / sortedByDps[i].dps) * 100).toFixed(2);
-      console.log(`  ${sortedByDps[i].buildName}: -${diff.toFixed(2)} DPS (-${percentDiff}%)`);
-   }
-
-   console.log('='.repeat(120));
 }
 
-function main(): void {
-   const specFile = process.argv[2] || 'specs/rogue/daggers.json';
+function parseBuilds(buildsArg?: string): TalentBuild[] {
+   if (!buildsArg) {
+      return DEFAULT_BUILDS;
+   }
+
+   return buildsArg.split(';').map(buildStr => {
+      const [name, talents] = buildStr.split('=');
+      if (!name || !talents) {
+         throw new Error(`Invalid build format: ${buildStr}. Expected: NAME=talent1:value1,talent2:value2`);
+      }
+      return {name: name.trim(), talents: talents.trim()};
+   });
+}
+
+const program = new Command();
+
+program
+   .name('wow-classic-compare')
+   .description('WoW Classic Era DPS Simulator - Build Comparison Tool')
+   .version('1.0.0')
+   .argument('<spec-file>', 'Path to spec file (e.g., specs/rogue/daggers.json)')
+   .option('--ap, --attack-power <number>', 'Attack power', '1200')
+   .option('--crit <number>', 'Crit chance percentage', '35')
+   .option('--hit <number>', 'Hit chance percentage', '9')
+   .option('--weapon-skill <number>', 'Weapon skill', '300')
+   .option('--mh-min <number>', 'Main hand min damage', '76')
+   .option('--mh-max <number>', 'Main hand max damage', '142')
+   .option('--mh-speed <number>', 'Main hand speed', '1.7')
+   .option('--mh-type <type>', 'Main hand type (Dagger, Sword, Mace, Fist)', 'Dagger')
+   .option('--oh-min <number>', 'Off hand min damage', '58')
+   .option('--oh-max <number>', 'Off hand max damage', '108')
+   .option('--oh-speed <number>', 'Off hand speed', '1.5')
+   .option('--oh-type <type>', 'Off hand type (Dagger, Sword, Mace, Fist)', 'Dagger')
+   .option('--no-offhand', 'Disable off hand weapon')
+   .option('--target-level <number>', 'Target level', '63')
+   .option('--armor <number>', 'Target armor', '3731')
+   .option('--length <number>', 'Fight length in seconds', '300')
+   .option('--iterations <number>', 'Number of iterations', '2000')
+   .option('--post-res-gen <number>', 'Generate resource AFTER cycle, simulates a more realistic latency', '1')
+   .option(
+      '-b, --builds <builds>',
+      'Custom builds to compare (format: NAME1=talents1;NAME2=talents2). Example: "SF=sealFate:5;NoSF=sealFate:0"'
+   )
+   .parse(process.argv);
+
+const specFile = program.args[0];
+const opts = program.opts();
+
+try {
+   const builds = parseBuilds(opts.builds);
+   const baseOptions = buildSimulationOptions(specFile, opts);
 
    console.log(`Running build comparison for: ${specFile}`);
-   console.log(`Testing ${TESTED_TALENTS.length} builds...`);
+   console.log(`Iterations per build: ${opts.iterations}`);
+   console.log(`Testing ${builds.length} builds...`);
    console.log();
 
    const results: BuildResult[] = [];
 
-   for (const build of TESTED_TALENTS) {
+   for (const build of builds) {
       console.log(`Running: ${build.name}...`);
-      const result = runSimulation(specFile, build.talents);
+      const result = runSimulation(baseOptions, build.talents);
       results.push({
          ...result,
          buildName: build.name,
@@ -183,6 +190,7 @@ function main(): void {
    }
 
    printTable(results);
+} catch (error) {
+   console.error(`Error: ${(error as Error).message}`);
+   process.exit(1);
 }
-
-main();

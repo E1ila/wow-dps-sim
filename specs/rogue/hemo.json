@@ -25,5 +25,33 @@
         "opportunity": 5,
         "improvedBackstab": 0,
         "hemorrhage": true
+    },
+    "gearStats": {
+        "level": 60,
+        "attackPower": 1100,
+        "critChance": 28,
+        "hitChance": 9,
+        "agility": 320,
+        "strength": 100,
+        "weaponSkill": 308,
+        "mainHandWeapon": {
+            "minDamage": 86,
+            "maxDamage": 130,
+            "speed": 1.8,
+            "type": "Dagger"
+        },
+        "offHandWeapon": {
+            "minDamage": 65,
+            "maxDamage": 122,
+            "speed": 1.5,
+            "type": "Dagger"
+        }
+    },
+    "simulationConfig": {
+        "fightLength": 60,
+        "targetLevel": 63,
+        "targetArmor": 3731,
+        "iterations": 10000,
+        "postResGen": false
     }
 }

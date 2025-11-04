@@ -25,5 +25,33 @@
         "opportunity": 0,
         "improvedBackstab": 0,
         "hemorrhage": false
+    },
+    "gearStats": {
+        "level": 60,
+        "attackPower": 1200,
+        "critChance": 30,
+        "hitChance": 9,
+        "agility": 300,
+        "strength": 100,
+        "weaponSkill": 308,
+        "mainHandWeapon": {
+            "minDamage": 76,
+            "maxDamage": 142,
+            "speed": 1.7,
+            "type": "Sword"
+        },
+        "offHandWeapon": {
+            "minDamage": 76,
+            "maxDamage": 142,
+            "speed": 1.7,
+            "type": "Sword"
+        }
+    },
+    "simulationConfig": {
+        "fightLength": 60,
+        "targetLevel": 63,
+        "targetArmor": 3731,
+        "iterations": 10000,
+        "postResGen": false
     }
 }
