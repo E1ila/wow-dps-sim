@@ -8,7 +8,8 @@
     "start": "node dist/index.js",
     "dev": "ts-node src/index.ts",
     "verify": "tsc && node dist/verifyMechanics.js",
-    "test": "jest"
+    "test": "jest",
+    "compare": "tsc && node dist/compare_builds.js"
   },
   "keywords": [
     "wow",

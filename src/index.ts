@@ -38,9 +38,11 @@ program
    .option('--target-level <number>', 'Target level', '63')
    .option('--armor <number>', 'Target armor', '3731')
    .option('--length <number>', 'Fight length in seconds', '300')
-   .option('--iterations <number>', 'Number of iterations', '5000')
+   .option('--iterations <number>', 'Number of iterations', '2000')
    .option('--post-res-gen <number>', 'Generate resource AFTER cycle, simulates a more realistic latency', '1')
    .option('--speed <number>', 'Playback speed (0 = instant, 1 = real-time, 0.5 = half speed, etc.)')
+   .option('-t, --talent <csv>', 'Override talents (format: NAME:VALUE,NAME:VALUE)')
+   .option('-q, --quiet', 'Quiet mode: only print final average DPS')
    .parse(process.argv);
 
 const specFile = program.args[0];
@@ -61,6 +63,43 @@ try {
 } catch (error) {
    console.error(`Error loading spec file: ${(error as Error).message}`);
    process.exit(1);
+}
+
+// Parse and apply talent overrides if provided
+const appliedTalentOverrides: Record<string, any> = {};
+if (opts.talent) {
+   try {
+      const talentOverrides = opts.talent.split(',').map((pair: string) => {
+         const [name, value] = pair.split(':');
+         if (!name || value === undefined) {
+            throw new Error(`Invalid talent format: ${pair}`);
+         }
+         return {name: name.trim(), value: value.trim()};
+      });
+
+      for (const override of talentOverrides) {
+         const talentName = override.name;
+         if (talentName in spec.talents) {
+            const originalValue = (spec.talents as any)[talentName];
+            // Parse as boolean if original value is boolean, otherwise as number
+            if (typeof originalValue === 'boolean') {
+               const newValue = override.value === 'true' || override.value === '1';
+               (spec.talents as any)[talentName] = newValue;
+               appliedTalentOverrides[talentName] = newValue;
+            } else {
+               const newValue = parseFloat(override.value);
+               (spec.talents as any)[talentName] = newValue;
+               appliedTalentOverrides[talentName] = newValue;
+            }
+         } else {
+            console.warn(`Warning: Talent "${talentName}" not found in spec file, ignoring.`);
+         }
+      }
+   } catch (error) {
+      console.error(`Error parsing talent overrides: ${(error as Error).message}`);
+      console.error(`Format should be: NAME:VALUE,NAME:VALUE (e.g., malice:5,lethality:5)`);
+      process.exit(1);
+   }
 }
 
 const classMap: { [key: string]: CharacterClass } = {
@@ -104,13 +143,17 @@ const config: SimulationConfig = {
    postResGen: opts.postResGen ? opts.postResGen != '0' : false,
 };
 
-console.log(`${c.brightMagenta}WoW Classic Era - DPS Simulator${c.reset}`);
-console.log(` ## ${colorByClass(characterClass)}${characterClass.toUpperCase()}${c.reset} ##`);
-console.log(`${c.cyan}Config: ${c.reset}${JSON.stringify(baseStats)}`);
-console.log(`${c.cyan}Base stats (inc. gear): ${c.reset}${JSON.stringify(config)}`);
-console.log(`${c.cyan}Talents: ${c.reset}${JSON.stringify(spec.talents)}`);
-console.log(`${c.cyan}Rotation: ${c.reset}${JSON.stringify(spec.rotation)}`);
-console.log(`${c.brightCyan}Running simulation...${c.reset}`);
+const quiet = opts.quiet === true;
+
+if (!quiet) {
+   console.log(`${c.brightMagenta}WoW Classic Era - DPS Simulator${c.reset}`);
+   console.log(` ## ${colorByClass(characterClass)}${characterClass.toUpperCase()}${c.reset} ##`);
+   console.log(`${c.cyan}Config: ${c.reset}${JSON.stringify(baseStats)}`);
+   console.log(`${c.cyan}Base stats (inc. gear): ${c.reset}${JSON.stringify(config)}`);
+   console.log(`${c.cyan}Talents: ${c.reset}${JSON.stringify(spec.talents)}`);
+   console.log(`${c.cyan}Rotation: ${c.reset}${JSON.stringify(spec.rotation)}`);
+   console.log(`${c.brightCyan}Running simulation...${c.reset}`);
+}
 
 let simulator: BaseSimulator;
 
@@ -143,7 +186,7 @@ if (playbackSpeed !== undefined) {
    })();
 } else {
    // Run multiple iterations
-   const { results, executionTimeMs } = simulator.runMultipleIterations();
-   BaseSimulator.printResults(results, simulator, executionTimeMs);
-   console.log('\nSimulation complete!');
+   const {results, executionTimeMs} = simulator.runMultipleIterations();
+   const jsonResults = BaseSimulator.printResults(results, simulator, executionTimeMs, appliedTalentOverrides, quiet);
+   quiet && console.log(jsonResults);
 }

@@ -39,7 +39,8 @@ export abstract class BaseSimulator implements Simulator {
    protected constructor(
       protected stats: GearStats,
       protected config: SimulationConfig
-   ) { }
+   ) {
+   }
 
    protected abstract initializeState(): SimulationState;
 
@@ -120,7 +121,7 @@ export abstract class BaseSimulator implements Simulator {
       if (existingBuff) {
          existingBuff.expiry = expiry;
       } else {
-         this.state.activeBuffs.push({ name, expiry });
+         this.state.activeBuffs.push({name, expiry});
       }
    }
 
@@ -222,25 +223,8 @@ export abstract class BaseSimulator implements Simulator {
       process.stdout.write('\n');
 
       const result = this.getSimulationResult();
-
       console.log('\n=== Playback Complete ===');
-      console.log(`Total Damage: ${result.totalDamage.toFixed(0)}`);
       console.log(`DPS: ${result.dps.toFixed(2)}`);
-
-      console.log('\n=== Damage Breakdown ===');
-      const sortedBreakdown = Array.from(result.damageBreakdown.entries())
-         .sort((a, b) => b[1] - a[1]);
-
-      for (const [ability, damage] of sortedBreakdown) {
-         const percentage = (damage / result.totalDamage) * 100;
-         console.log(`${ability}: ${damage.toFixed(0)} (${percentage.toFixed(1)}%)`);
-      }
-
-      BaseSimulator.printStatistics(result.statistics, this.damageCalculator.critChance({
-         ability: Ability.MainHand,
-         isSpecialAttack: false,
-         weapon: this.stats.mainHandWeapon
-      }));
    }
 
    protected abstract getStateText(): string;
@@ -333,7 +317,7 @@ export abstract class BaseSimulator implements Simulator {
 
       const executionTimeMs = Date.now() - startTime;
 
-      return { results, executionTimeMs };
+      return {results, executionTimeMs};
    }
 
    static calculateAverageDPS(results: SimulationResult[]): number {
@@ -341,13 +325,26 @@ export abstract class BaseSimulator implements Simulator {
       return totalDPS / results.length;
    }
 
-   static printStatistics(stats: SimulationStatistics, expectedCritChance: number): void {
+   static printStatistics(stats: SimulationStatistics, expectedCritChance: number, quiet?: boolean): any {
       const totalAttacks = stats.critCount + stats.hitCount + stats.glancingCount + stats.missCount + stats.dodgeCount;
       const critRate = totalAttacks > 0 ? (stats.critCount / totalAttacks * 100) : 0;
 
+      if (quiet) {
+         return {
+            totalAttacks,
+            wornCrit: expectedCritChance + '%',
+            actualCrit: Math.round(critRate) + '%',
+            actualHit: Math.round(stats.hitCount / totalAttacks * 100) + '%',
+            actualGlancing: Math.round(stats.glancingCount / totalAttacks * 100) + '%',
+            actualMiss: Math.round(stats.missCount / totalAttacks * 100) + '%',
+            actualDodge: Math.round(stats.dodgeCount / totalAttacks * 100) + '%',
+            ...stats,
+         }
+      }
+
       console.log('\n=== Statistics ===');
       console.log(`Total Attacks: ${totalAttacks}`);
-      console.log(`  Crits: ${stats.critCount} (${(stats.critCount / totalAttacks * 100).toFixed(2)}%)`);
+      console.log(`  Crits: ${stats.critCount} (${critRate.toFixed(2)}%)`);
       console.log(`  Hits: ${stats.hitCount} (${(stats.hitCount / totalAttacks * 100).toFixed(2)}%)`);
       console.log(`  Glancing: ${stats.glancingCount} (${(stats.glancingCount / totalAttacks * 100).toFixed(2)}%)`);
       console.log(`  Miss: ${stats.missCount} (${(stats.missCount / totalAttacks * 100).toFixed(2)}%)`);
@@ -356,33 +353,37 @@ export abstract class BaseSimulator implements Simulator {
       console.log(`Expected Crit Rate (from stats): ${expectedCritChance.toFixed(2)}%`);
    }
 
-   static printResults(results: SimulationResult[], simulator: BaseSimulator, executionTimeMs?: number): void {
+   static printResults(results: SimulationResult[], simulator: BaseSimulator, executionTimeMs?: number, talentOverrides?: Record<string, any>, quiet: boolean = false): void {
       const avgDPS = this.calculateAverageDPS(results);
-      // const minDPS = Math.min(...results.map(r => r.dps));
-      // const maxDPS = Math.max(...results.map(r => r.dps));
+      const jsonResults: any = {
+         dps: avgDPS,
+         talentOverrides,
+         executionTimeMs,
+         iterations: results.length,
+      };
 
-      console.log('\n=== Simulation Results ===');
-      console.log(`Iterations: ${results.length}`);
-      if (executionTimeMs !== undefined) {
-         const executionTimeSec = executionTimeMs / 1000;
-         console.log(`Execution Time: ${executionTimeSec.toFixed(2)}s`);
+      if (!quiet) {
+         console.log('\n=== Simulation Results ===');
+         console.log(`Iterations: ${results.length}`);
+         if (executionTimeMs !== undefined) {
+            const executionTimeSec = executionTimeMs / 1000;
+            console.log(`Execution Time: ${executionTimeSec.toFixed(2)}s`);
+         }
       }
-      // console.log(`Min DPS: ${minDPS.toFixed(2)}`);
-      // console.log(`Max DPS: ${maxDPS.toFixed(2)}`);
 
       if (results.length > 0) {
          // Aggregate damage breakdown across all iterations
          const aggregatedBreakdown = new Map<string, number>();
          const aggregatedHitCount = new Map<string, number>();
          let totalDamageSum = 0;
-         
+
          for (const result of results) {
             totalDamageSum += result.totalDamage;
             for (const [ability, damage] of result.damageBreakdown.entries()) {
                const currentDamage = aggregatedBreakdown.get(ability) || 0;
                aggregatedBreakdown.set(ability, currentDamage + damage);
             }
-            
+
             // Count hits for each ability
             for (const event of result.events) {
                if (event.eventType === 'damage' && event.amount > 0) {
@@ -394,7 +395,8 @@ export abstract class BaseSimulator implements Simulator {
 
          const avgTotalDamage = totalDamageSum / results.length;
 
-         console.log('\n=== Damage Breakdown (Average across all iterations) ===');
+         !quiet && console.log('\n=== Damage Breakdown (Average across all iterations) ===');
+         jsonResults.abilityBreakdown = {};
          const sortedBreakdown = Array.from(aggregatedBreakdown.entries())
             .sort((a, b) => b[1] - a[1]);
 
@@ -403,12 +405,14 @@ export abstract class BaseSimulator implements Simulator {
             const percentage = (avgDamage / avgTotalDamage) * 100;
             const hitCount = aggregatedHitCount.get(ability) || 0;
             const avgHitDamage = hitCount > 0 ? totalDamage / hitCount : 0;
-            console.log(`${ability}: ${percentage.toFixed(1)}% - Avg Hit: ${avgHitDamage.toFixed(1)}`);
+            jsonResults.abilityBreakdown[ability] = {
+               percentage: Math.round(percentage) + '%',
+               avgHitDamage: Math.round(avgHitDamage),
+               hitCount,
+               totalDamage,
+            };
+            !quiet && console.log(`${ability}: ${percentage.toFixed(1)}% - Avg Hit: ${avgHitDamage.toFixed(1)}`);
          }
-
-         // Print average DPS as final row
-         console.log(`${'─'.repeat(50)}`);
-         console.log(`Average DPS: ${avgDPS.toFixed(2)}`);
 
          // Aggregate statistics across all iterations
          const aggregatedStats: SimulationStatistics = {
@@ -427,16 +431,22 @@ export abstract class BaseSimulator implements Simulator {
             aggregatedStats.dodgeCount += result.statistics.dodgeCount;
          }
 
-         this.printStatistics(aggregatedStats, simulator.damageCalculator.critChance({
+         const gearCrit = simulator.damageCalculator.critChance({
             ability: Ability.MainHand,
             isSpecialAttack: false,
             weapon: simulator.stats.mainHandWeapon
-         }));
-
-         console.log(`\n`);
-         console.log(`=======================`);
-         console.log(`|  DPS: ${avgDPS.toFixed(2).padEnd('=============='.length)}|`);
-         console.log(`=======================`);
+         });
+         jsonResults.hitStats = this.printStatistics(aggregatedStats, gearCrit, quiet);
       }
+      if (!quiet) {
+         if (talentOverrides && Object.keys(talentOverrides).length > 0) {
+            console.log('Overrides:');
+            for (const [name, value] of Object.entries(talentOverrides)) {
+               console.log(` ${value} ${name}`);
+            }
+         }
+         console.log(` ${c.green}**  ${c.brightGreen}DPS ${avgDPS.toFixed(2)} ${c.green}**${c.reset}`);
+      }
+      return jsonResults;
    }
 }
