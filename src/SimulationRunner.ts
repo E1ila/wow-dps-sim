@@ -102,42 +102,51 @@ export class SimulationRunner {
         }
     }
 
+    private parseOverrides(overrideString: string, type: string): Array<{name: string; value: string}> {
+        try {
+            return overrideString.split(',').map((pair: string) => {
+                const [name, value] = pair.split(':');
+                if (!name || value === undefined) {
+                    throw new Error(`Invalid ${type} format: ${pair}`);
+                }
+                return {name: name.trim(), value: value.trim()};
+            });
+        } catch (error) {
+            throw new Error(
+                `Error parsing ${type} overrides: ${(error as Error).message}\n` +
+                `Format should be: NAME:VALUE,NAME:VALUE`
+            );
+        }
+    }
+
+    private parseValue(valueStr: string, originalValue?: any): any {
+        if (typeof originalValue === 'boolean') {
+            return valueStr === 'true' || valueStr === '1';
+        }
+
+        if (valueStr === 'true' || valueStr === '1') return true;
+        if (valueStr === 'false' || valueStr === '0') return false;
+
+        return parseFloat(valueStr);
+    }
+
     private applyTalentOverrides(): void {
         if (!this.options.talentOverrides) {
             return;
         }
 
-        try {
-            const talentOverrides = this.options.talentOverrides.split(',').map((pair: string) => {
-                const [name, value] = pair.split(':');
-                if (!name || value === undefined) {
-                    throw new Error(`Invalid talent format: ${pair}`);
-                }
-                return {name: name.trim(), value: value.trim()};
-            });
+        const overrides = this.parseOverrides(this.options.talentOverrides, 'talent');
 
-            for (const override of talentOverrides) {
-                const talentName = override.name;
-                if (talentName in this.spec.talents) {
-                    const originalValue = (this.spec.talents as any)[talentName];
-                    if (typeof originalValue === 'boolean') {
-                        const newValue = override.value === 'true' || override.value === '1';
-                        (this.spec.talents as any)[talentName] = newValue;
-                        this.appliedTalentOverrides[talentName] = newValue;
-                    } else {
-                        const newValue = parseFloat(override.value);
-                        (this.spec.talents as any)[talentName] = newValue;
-                        this.appliedTalentOverrides[talentName] = newValue;
-                    }
-                } else {
-                    console.warn(`Warning: Talent "${talentName}" not found in spec file, ignoring.`);
-                }
+        for (const override of overrides) {
+            const talentName = override.name;
+            if (talentName in this.spec.talents) {
+                const originalValue = (this.spec.talents as any)[talentName];
+                const newValue = this.parseValue(override.value, originalValue);
+                (this.spec.talents as any)[talentName] = newValue;
+                this.appliedTalentOverrides[talentName] = newValue;
+            } else {
+                console.warn(`Warning: Talent "${talentName}" not found in spec file, ignoring.`);
             }
-        } catch (error) {
-            throw new Error(
-                `Error parsing talent overrides: ${(error as Error).message}\n` +
-                `Format should be: NAME:VALUE,NAME:VALUE (e.g., malice:5,lethality:5)`
-            );
         }
     }
 
@@ -150,28 +159,10 @@ export class SimulationRunner {
             this.spec.rotation = {};
         }
 
-        try {
-            const rotationOverrides = this.options.rotationOverrides.split(',').map((pair: string) => {
-                const [name, value] = pair.split(':');
-                if (!name || value === undefined) {
-                    throw new Error(`Invalid rotation format: ${pair}`);
-                }
-                return {name: name.trim(), value: value.trim()};
-            });
+        const overrides = this.parseOverrides(this.options.rotationOverrides, 'rotation');
 
-            for (const override of rotationOverrides) {
-                const rotationParam = override.name;
-                const newValue = override.value === 'true' || override.value === '1' ? true :
-                                 override.value === 'false' || override.value === '0' ? false :
-                                 parseFloat(override.value);
-
-                (this.spec.rotation as any)[rotationParam] = newValue;
-            }
-        } catch (error) {
-            throw new Error(
-                `Error parsing rotation overrides: ${(error as Error).message}\n` +
-                `Format should be: NAME:VALUE,NAME:VALUE (e.g., avoidEviscerate:1,refreshSndSecondsAhead5Combo:2)`
-            );
+        for (const override of overrides) {
+            (this.spec.rotation as any)[override.name] = this.parseValue(override.value);
         }
     }
 

@@ -69,14 +69,14 @@ function printTable(results: BuildResult[]): void {
 
    for (const result of results) {
       const talentString = Object.entries(result.talentOverrides)
-         .map(([name, value]) => `${name}:${value}`)
+         .map(([name, value]) => `${name}:${value >= 0 ? +value : "0"}`)
          .join(', ');
 
       const dpsString = result.dps.toFixed(2).padStart(10);
       const coloredDPS = result.dps === maxDPS ? `${c.brightGreen}${dpsString}${c.reset}` : dpsString;
 
       console.log(
-         `${result.buildName.padEnd(20)} | ${coloredDPS} | ${talentString}`
+         `${result.buildName.padEnd(10)} | ${coloredDPS} | ${talentString}`
       );
    }
 }
