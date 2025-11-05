@@ -1,5 +1,6 @@
 import {
    Ability,
+   Attack,
    AttackResult,
    AttackType,
    Buffs,
@@ -33,7 +34,7 @@ export class RogueSimulator extends MeleeSimulator {
    constructor(spec: SimulationSpec) {
       super(spec);
       this.talents = spec.talents as RogueTalents;
-      this.damageCalculator = new RogueDamageCalculator(spec, this);
+      this.damageCalculator = new RogueDamageCalculator(spec, this, this);
       this.state = this.initializeState();
       this.setup = spec.setup as SimulationSetup ?? {};
    }
@@ -356,5 +357,48 @@ export class RogueSimulator extends MeleeSimulator {
       const cpDots = c.red + '●'.repeat(this.state.comboPoints) + c.reset + '○'.repeat(5 - this.state.comboPoints);
       const buffsStatus = this.getBuffsStatusText();
       return `[${timestampSeconds.toFixed(1)}s] [${energyBar}] ${this.state.energy} ${cpDots}${buffsStatus}`;
+   }
+
+   // -- player stats provider
+
+   get hitChance(): number {
+      return super.hitChance + (this.talents?.precision || 0);
+   }
+
+   get weaponSkill(): number {
+      let baseSkill = super.weaponSkill;
+
+      if ((this.talents?.weaponExpertise || 0) > 0) {
+         const mainHandType = this.spec.gearStats.mainHandWeapon.type;
+         if (mainHandType === WeaponType.Sword ||
+            mainHandType === WeaponType.Fist ||
+            mainHandType === WeaponType.Dagger) {
+            baseSkill += this.talents.weaponExpertise === 1 ? 3 : 5;
+         }
+      }
+
+      return baseSkill;
+   }
+
+   critChance(attack: Attack): number {
+      let critChance = super.critChance(attack) + this.talents.malice;
+      if (this.talents.daggerSpecialization > 0 && attack.weapon.type === WeaponType.Dagger) {
+         critChance += this.talents.daggerSpecialization;
+      }
+
+      // Add ability-specific crit bonuses
+      if (attack.ability === Ability.Backstab && this.talents.improvedBackstab > 0) {
+         critChance += this.talents.improvedBackstab * 10;
+      }
+
+      return critChance;
+   }
+
+   get attackPower(): number {
+      let attackPower = this.spec.gearStats.attackPower;
+      if (this.hasBuff(Buffs.Crusader)) {
+         attackPower += 100; // 1 Strength = 1 AP for Rogues
+      }
+      return attackPower;
    }
 }

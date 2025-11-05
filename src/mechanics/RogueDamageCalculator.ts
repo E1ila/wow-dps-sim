@@ -1,4 +1,4 @@
-import {Ability, Attack, AttackResult, Buffs, RogueTalents, TargetType, WeaponType} from '../types';
+import {Ability, AttackResult, PlayerStatsProvider, RogueTalents, TargetType} from '../types';
 import {MeleeDamageCalculator} from './MeleeDamageCalculator';
 import {SimulationSpec} from '../SpecLoader';
 import {BuffsProvider} from "./DamageCalculator";
@@ -10,54 +10,13 @@ const BACKSTAB_9 = 225;
 export class RogueDamageCalculator extends MeleeDamageCalculator {
    protected talents: RogueTalents;
 
-   constructor(spec: SimulationSpec, buffsProvider: BuffsProvider) {
-      super(spec, buffsProvider);
+   constructor(spec: SimulationSpec, buffsProvider: BuffsProvider, statsProvider: PlayerStatsProvider) {
+      super(spec, buffsProvider, statsProvider);
       this.talents = spec.talents as RogueTalents;
    }
 
    get dualWieldSpecBonus(): number {
       return this.talents.dualWieldSpecialization * 0.05;
-   }
-
-   get hitChance(): number {
-      return super.hitChance + (this.talents?.precision || 0);
-   }
-
-   get weaponSkill(): number {
-      let baseSkill = super.weaponSkill;
-
-      if ((this.talents?.weaponExpertise || 0) > 0) {
-         const mainHandType = this.spec.gearStats.mainHandWeapon.type;
-         if (mainHandType === WeaponType.Sword ||
-             mainHandType === WeaponType.Fist ||
-             mainHandType === WeaponType.Dagger) {
-            baseSkill += this.talents.weaponExpertise === 1 ? 3 : 5;
-         }
-      }
-
-      return baseSkill;
-   }
-
-   critChance(attack: Attack): number {
-      let critChance = super.critChance(attack) + this.talents.malice;
-      if (this.talents.daggerSpecialization > 0 && attack.weapon.type === WeaponType.Dagger) {
-         critChance += this.talents.daggerSpecialization;
-      }
-      
-      // Add ability-specific crit bonuses
-      if (attack.ability === Ability.Backstab && this.talents.improvedBackstab > 0) {
-         critChance += this.talents.improvedBackstab * 10;
-      }
-      
-      return critChance;
-   }
-
-   get attackPower(): number {
-      let attackPower = this.spec.gearStats.attackPower;
-      if (this.buffsProvider.hasBuff(Buffs.Crusader)) {
-         attackPower += 100; // 1 Strength = 1 AP for Rogues
-      }
-      return attackPower;
    }
 
    override get autoAttackMultiplier(): number {

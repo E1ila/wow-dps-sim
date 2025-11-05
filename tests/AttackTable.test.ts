@@ -1,5 +1,5 @@
 import {GearStats, WeaponEnchant, WeaponType} from '../src/types';
-import {AttackTable, AttackTableStatsProvider} from '../src/mechanics/AttackTable';
+import {AttackTable, PlayerStatsProvider} from '../src/mechanics/AttackTable';
 
 describe('Attack Table Mechanics', () => {
   const createTestStats = (weaponSkill: number, hasOffHand: boolean = true): GearStats => ({
@@ -25,7 +25,7 @@ describe('Attack Table Mechanics', () => {
     } : undefined,
   });
 
-  const wrapStats = (gearStats: GearStats, targetLevel: number): AttackTableStatsProvider => ({
+  const wrapStats = (gearStats: GearStats, targetLevel: number): PlayerStatsProvider => ({
     critChance: () => gearStats.critChance,
     get weaponSkill() { return gearStats.weaponSkill; },
     get hitChance() { return gearStats.hitChance; },

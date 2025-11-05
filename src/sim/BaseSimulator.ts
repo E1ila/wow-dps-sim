@@ -1,10 +1,12 @@
 import {
    Ability,
+   Attack,
    AttackResult,
    AttackType,
    BuffEvent,
    c,
    DamageEvent,
+   PlayerStatsProvider,
    SimulationEvent,
    SimulationResult,
    SimulationState,
@@ -21,7 +23,7 @@ export interface Simulator {
    simulateWithPlayback(speed: number): Promise<void>;
 }
 
-export abstract class BaseSimulator implements Simulator, BuffsProvider {
+export abstract class BaseSimulator implements Simulator, BuffsProvider, PlayerStatsProvider {
    protected abstract state: SimulationState;
    protected abstract damageCalculator: DamageCalculator;
    protected events: SimulationEvent[] = [];
@@ -474,7 +476,7 @@ export abstract class BaseSimulator implements Simulator, BuffsProvider {
             aggregatedStats.dodgeCount += result.statistics.dodgeCount;
          }
 
-         const gearCrit = simulator.damageCalculator.critChance({
+         const gearCrit = simulator.critChance({
             ability: Ability.MainHand,
             isSpecialAttack: false,
             weapon: simulator.spec.gearStats.mainHandWeapon
@@ -497,5 +499,39 @@ export abstract class BaseSimulator implements Simulator, BuffsProvider {
 
    hasBuff(name: string): boolean {
       return this.state.activeBuffs.some(buff => buff.name === name && buff.expiry >= this.state.currentTime);
+   }
+
+   // -- player stats provider
+
+   critChance(attack: Attack): number {
+      return this.spec.gearStats.critChance;
+   }
+
+   get haste(): number {
+      return 1;
+   }
+
+   get attackPower(): number {
+      return this.spec.gearStats.attackPower;
+   }
+
+   get weaponSkill(): number {
+      return this.spec.gearStats.weaponSkill;
+   }
+
+   get hitChance(): number {
+      return this.spec.gearStats.hitChance;
+   }
+
+   get playerLevel(): number {
+      return this.spec.playerLevel;
+   }
+
+   get isDualWielding(): boolean {
+      return this.spec.gearStats.offHandWeapon !== undefined;
+   }
+
+   get targetLevel(): number {
+      return this.spec.targetLevel;
    }
 }

@@ -1,13 +1,4 @@
-import {Attack, AttackTableResult, AttackType} from '../types';
-
-export interface AttackTableStatsProvider {
-   critChance(attack: Attack): number;
-   get weaponSkill(): number;
-   get hitChance(): number;
-   get playerLevel(): number;
-   get isDualWielding(): boolean;
-   get targetLevel(): number;
-}
+import {Attack, AttackTableResult, AttackType, PlayerStatsProvider} from '../types';
 
 /**
  * WoW Classic (Era) Attack Table Mechanics
@@ -19,7 +10,7 @@ export class AttackTable {
    private readonly glancingChance: number;
 
    constructor(
-      private stats: AttackTableStatsProvider,
+      private stats: PlayerStatsProvider,
    ) {
       this.missChance = this.calculateMissChance();
       this.dodgeChance = this.calculateDodgeChance();

@@ -1,4 +1,4 @@
-import {Ability, Attack, AttackResult, AttackType, Weapon, WeaponEnchant} from '../types';
+import {Ability, Attack, AttackResult, AttackType, PlayerStatsProvider, Weapon, WeaponEnchant} from '../types';
 import {AttackTable} from './AttackTable';
 import {BuffsProvider, DamageCalculator} from './DamageCalculator';
 import {SimulationSpec} from '../SpecLoader';
@@ -18,9 +18,9 @@ export abstract class MeleeDamageCalculator extends DamageCalculator {
 
    abstract get dualWieldSpecBonus(): number;
 
-   protected constructor(spec: SimulationSpec, buffsProvider: BuffsProvider) {
-      super(spec, buffsProvider);
-      this.attackTable = new AttackTable(this);
+   protected constructor(spec: SimulationSpec, buffsProvider: BuffsProvider, statsProvider: PlayerStatsProvider) {
+      super(spec, buffsProvider, statsProvider);
+      this.attackTable = new AttackTable(statsProvider);
       this.targetArmorReduction = this.calculateArmorReduction();
    }
 
@@ -103,7 +103,7 @@ export abstract class MeleeDamageCalculator extends DamageCalculator {
    }
 
    calcAttackPowerDamage(weapon: Weapon): number {
-      return Math.round((this.attackPower / 14) * weapon.speed);
+      return Math.round((this.statsProvider.attackPower / 14) * weapon.speed);
    }
 
    calculateAutoAttackDamage(isOffhand: boolean = false): AttackResult {
