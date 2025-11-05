@@ -51,6 +51,8 @@ export abstract class BaseSimulator implements Simulator, BuffsProvider {
    }
 
    executeRotation(): void {
+      if (!this.canCastAbility())
+         return;
       if (this.spec.rotation) {
          let originalIndex = this.nextRotationCommandIndex;
          let result = false;
@@ -119,7 +121,7 @@ export abstract class BaseSimulator implements Simulator, BuffsProvider {
    }
 
    protected triggerGlobalCooldown(): void {
-      this.state.globalCooldownExpiry = this.state.currentTime + 1000;
+      this.state.globalCooldownExpiry = this.state.currentTime + 1500;
    }
 
    protected canCastAbility(): boolean {
@@ -200,7 +202,7 @@ export abstract class BaseSimulator implements Simulator, BuffsProvider {
       console.log('=== Starting Playback ===\n');
       console.log('\n'); // Reserve space for the floating bar
 
-      await this.waitForGameTime(1000, speed);
+      await this.waitForGameTime(100, speed);
       this.updateFloatingBar();
 
       const fightLengthMs = this.spec.fightLength * 1000;

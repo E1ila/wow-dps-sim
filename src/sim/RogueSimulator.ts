@@ -300,10 +300,6 @@ export class RogueSimulator extends MeleeSimulator {
    }
 
    executeHardcodedRotation(): void {
-      if (!this.canCastAbility()) {
-         return;
-      }
-
       if (this.state.comboPoints === 5) {
          if (!this.setup.prefer5EvisOverSnd && this.shouldRefreshSliceAndDice()) {
             this.castSliceAndDice();

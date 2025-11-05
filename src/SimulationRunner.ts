@@ -290,7 +290,7 @@ export class SimulationRunner {
     async run(): Promise<void> {
         this.loadSpec();
 
-        this.printSimulationInfo();
+        // this.printSimulationInfo();
 
         const simulator = this.createSimulator();
 
