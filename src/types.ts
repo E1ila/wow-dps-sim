@@ -27,6 +27,27 @@ export function colorByClass(characterClass: CharacterClass): string {
    }
 }
 
+export function parseSpecString(specStr: string): SpecOverrides {
+   const parts = specStr.split('|');
+   if (parts.length >= 1 &&  parts.length <= 4) {
+      return {
+         talents: parts[0].trim(),
+         setup: parts.length >= 2 && parts[1].trim() || undefined,
+         gear: parts.length >= 3 && parts[2].trim() || undefined,
+         rotation: parts.length >= 4 && parts[3].trim() || undefined
+      };
+   } else {
+      throw new Error(`Invalid spec format: ${specStr}. Expected format: talents|setup|gear|rotation (setup, gear, and rotation optional)`);
+   }
+}
+
+export interface SpecOverrides {
+   talents: string;
+   setup?: string;
+   gear?: string;
+   rotation?: string;
+}
+
 export enum Buffs {
    SnD = 'SnD',
    Crusader = 'Crusader',
@@ -136,14 +157,12 @@ export interface WarriorTalents {
 
 export interface SimulationSetup {
    // rogue
-   refreshSndSecondsAhead5Combo?: number;
+   refreshSndSecondsBeforeExpiry?: number;
    avoidEviscerate?: boolean;
    veiledShadowsSet?: boolean;
    disableAutoAttacks?: boolean;
-}
-
-export interface WarriorSetup {
-   // Placeholder for warrior rotation config
+   prefer5EvisOverSnd?: boolean;
+   maxSnd2?: boolean;
 }
 
 export interface Buff {

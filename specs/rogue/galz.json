@@ -1,0 +1,61 @@
+{
+    "name": "PvE Combat Swords",
+    "class": "Rogue",
+    "setup": {
+        "refreshSndSecondsBeforeExpiry": 0.5
+    },
+    "talents": {
+        "adrenalineRush": true,
+        "aggression": 3,
+        "bladeFurry": true,
+        "daggerSpecialization": 0,
+        "dualWieldSpecialization": 5,
+        "fistWeaponSpecialization": 0,
+        "hemorrhage": false,
+        "improvedBackstab": 3,
+        "improvedEviscerate": 0,
+        "improvedSinisterStrike": 2,
+        "improvedSliceAndDice": 3,
+        "lethality": 5,
+        "maceSpecialization": 0,
+        "malice": 5,
+        "murder": 2,
+        "opportunity": 5,
+        "precision": 5,
+        "relentlessStrikes": 1,
+        "ruthlessness": 3,
+        "sealFate": 0,
+        "swordSpecialization": 5,
+        "weaponExpertise": 2
+    },
+    "gearStats": {
+        "level": 60,
+        "attackPower": 1168,
+        "critChance": 34.1,
+        "hitChance": 11,
+        "agility": 339,
+        "strength": 213,
+        "weaponSkill": 306,
+        "mainHandWeapon": {
+            "minDamage": 138,
+            "maxDamage": 258,
+            "speed": 2.7,
+            "type": "Sword",
+            "enchant": "Crusader"
+        },
+        "offHandWeapon": {
+            "minDamage": 76,
+            "maxDamage": 143,
+            "speed": 1.5,
+            "type": "Sword",
+            "enchant": "Crusader"
+        }
+    },
+    "simulationConfig": {
+        "fightLength": 120,
+        "targetLevel": 63,
+        "targetArmor": 3731,
+        "iterations": 4000,
+        "postCycleResourceGeneration": true
+    }
+}

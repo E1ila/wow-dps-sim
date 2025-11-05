@@ -53,9 +53,7 @@ export class RogueSimulator extends MeleeSimulator {
       this.talents = spec.talents as RogueTalents;
       this.damageCalculator = new RogueDamageCalculator(spec, this);
       this.state = this.initializeState();
-      this.setup = spec.setup as SimulationSetup ?? {
-         refreshSndSecondsAhead5Combo: 3,
-      };
+      this.setup = spec.setup as SimulationSetup ?? {};
    }
 
    initializeState(): RogueSimulationState {
@@ -307,13 +305,13 @@ export class RogueSimulator extends MeleeSimulator {
       }
 
       if (this.state.comboPoints === 5) {
-         if (this.shouldRefreshSliceAndDice()) {
+         if (!this.setup.prefer5EvisOverSnd && this.shouldRefreshSliceAndDice()) {
             this.castSliceAndDice();
          } else {
             this.castEviscerate();
          }
       } else {
-         if (!this.isBuffActive(Buffs.SnD) && this.state.comboPoints > 0) {
+         if (this.shouldRefreshSliceAndDice()) {
             this.castSliceAndDice();
          } else if (this.talents.hemorrhage) {
             this.castHemorrhage();
@@ -326,11 +324,15 @@ export class RogueSimulator extends MeleeSimulator {
    }
 
    shouldRefreshSliceAndDice(): boolean {
-      if (!this.isBuffActive(Buffs.SnD)) {
+      if (this.state.comboPoints == 0)
+         return false;
+      if (this.setup.maxSnd2 && this.state.comboPoints > 2)
+         return false;
+      if (!this.isBuffActive(Buffs.SnD))
          return true;
-      }
       const timeRemainingMs = this.getBuffTimeRemaining(Buffs.SnD);
-      const refreshThresholdMs = (this.setup.refreshSndSecondsAhead5Combo ?? 1) * 1000;
+      const timeBefore = this.setup.refreshSndSecondsBeforeExpiry ?? 1;
+      const refreshThresholdMs = (timeBefore) * 1000;
       return timeRemainingMs < refreshThresholdMs;
    }
 

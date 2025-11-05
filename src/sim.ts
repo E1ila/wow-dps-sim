@@ -1,27 +1,6 @@
 import {Command} from 'commander';
-import {WeaponType} from './types';
+import {parseSpecString, WeaponType} from './types';
 import {SimulationOptions, SimulationRunner} from './SimulationRunner';
-
-export interface SpecOverrides {
-   talents: string;
-   setup?: string;
-   gear?: string;
-   rotation?: string;
-}
-
-export function parseSpecString(specStr: string): SpecOverrides {
-   const parts = specStr.split('|');
-   if (parts.length >= 1 &&  parts.length <= 4) {
-      return {
-         talents: parts[0].trim(),
-         setup: parts.length >= 1 && parts[1].trim() || undefined,
-         gear: parts.length >= 2 && parts[2].trim() || undefined,
-         rotation: parts.length >= 3 && parts[3].trim() || undefined
-      };
-   } else {
-      throw new Error(`Invalid spec format: ${specStr}. Expected format: talents|setup|gear|rotation (setup, gear, and rotation optional)`);
-   }
-}
 
 const program = new Command();
 

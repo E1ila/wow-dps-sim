@@ -3,8 +3,7 @@ import {readFileSync} from 'fs';
 import {SimulationOptions, SimulationRunner} from './SimulationRunner';
 import * as fs from "node:fs";
 import path from "node:path";
-import {c} from './types';
-import {parseSpecString, SpecOverrides} from "./sim";
+import {c, parseSpecString, SpecOverrides} from './types';
 
 interface SimulationResult {
    name?: string;
@@ -131,7 +130,7 @@ try {
    const results: SimulationResult[] = [];
 
    for (let i = 0; i < specs.length; i++) {
-      console.log(`Running spec #${i}...`);
+      console.log(`Simulating spec #${i+1}...`);
       const result = runSimulation({
          specFile,
          quiet: true,
