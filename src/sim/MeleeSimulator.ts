@@ -12,6 +12,8 @@ export abstract class MeleeSimulator extends BaseSimulator {
    protected abstract damageCalculator: MeleeDamageCalculator;
 
    protected handleAutoAttacks(): void {
+      if (this.spec.setup?.disableAutoAttacks)
+         return;
       this.processAutoAttacks(
          (result) => {
             this.onMainHandHit(result);

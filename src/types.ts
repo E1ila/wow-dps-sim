@@ -134,10 +134,12 @@ export interface WarriorTalents {
    protectionTree: Record<string, number>;
 }
 
-export interface RogueSetup {
-   refreshSndSecondsAhead5Combo: number;
+export interface SimulationSetup {
+   // rogue
+   refreshSndSecondsAhead5Combo?: number;
    avoidEviscerate?: boolean;
    veiledShadowsSet?: boolean;
+   disableAutoAttacks?: boolean;
 }
 
 export interface WarriorSetup {

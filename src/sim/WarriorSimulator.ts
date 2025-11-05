@@ -21,7 +21,11 @@ export class WarriorSimulator extends MeleeSimulator {
       throw new Error('Warrior simulator is not yet implemented.');
    }
 
-   protected executeRotation(): void {
+   protected executeHardcodedRotation() {
+      throw new Error('Warrior simulator is not yet implemented.');
+   }
+
+   protected executeCommand(cmd: string): boolean {
       throw new Error('Warrior simulator is not yet implemented.');
    }
 

@@ -6,21 +6,32 @@ import {
    ProcEvent,
    RogueBuffEvent,
    RogueDamageEvent,
-   RogueSetup,
    RogueSimulationState,
    RogueTalents,
+   SimulationSetup,
    WeaponType,
 } from '../types';
 import {SimulationSpec} from '../SpecLoader';
 import {RogueDamageCalculator} from '../mechanics/RogueDamageCalculator';
 import {MeleeSimulator} from './MeleeSimulator';
 
-enum RogueAbility {
-   Extra = 'EXTRA',
-   Eviscerate = 'EVIS',
-   SinisterStrike = 'SS',
-   Backstab = 'BS',
-   Hemorrhage = 'HEMO',
+export enum RogueAbility {
+   Eviscerate = 'evis',
+   SinisterStrike = 'ss',
+   Backstab = 'bs',
+   Hemorrhage = 'hemo',
+   SliceAndDice = 'snd',
+   AddCombo = 'cp',
+   Set1Combo = 'cp1',
+   Set2Combo = 'cp2',
+   Set3Combo = 'cp3',
+   Set4Combo = 'cp4',
+   Set5Combo = 'cp5',
+   Energy1 = 'energy1',
+   Energy2 = 'energy2',
+   Energy3 = 'energy3',
+   Energy4 = 'energy4',
+   Energy5 = 'energy5',
 }
 
 export const ROGUE = {
@@ -34,7 +45,7 @@ export class RogueSimulator extends MeleeSimulator {
    override damageCalculator: RogueDamageCalculator;
    override events: (RogueDamageEvent | RogueBuffEvent | ProcEvent)[] = [];
    damageBreakdown: Map<string, number> = new Map();
-   setup: RogueSetup;
+   setup: SimulationSetup;
    talents: RogueTalents;
 
    constructor(spec: SimulationSpec) {
@@ -42,7 +53,7 @@ export class RogueSimulator extends MeleeSimulator {
       this.talents = spec.talents as RogueTalents;
       this.damageCalculator = new RogueDamageCalculator(spec, this);
       this.state = this.initializeState();
-      this.setup = spec.setup as RogueSetup ?? {
+      this.setup = spec.setup as SimulationSetup ?? {
          refreshSndSecondsAhead5Combo: 3,
       };
    }
@@ -78,7 +89,7 @@ export class RogueSimulator extends MeleeSimulator {
    }
 
    addEnergy(amount: number): void {
-      this.state.energy = Math.min(this.maxEnergy, this.state.energy + amount);
+      this.state.energy = Math.round(Math.min(this.maxEnergy, this.state.energy + amount));
    }
 
    getHasteMultiplier(): number {
@@ -237,11 +248,61 @@ export class RogueSimulator extends MeleeSimulator {
          this.talents.swordSpecialization > 0 &&
          this.spec.gearStats.mainHandWeapon.type === WeaponType.Sword &&
          Math.random() < (this.talents.swordSpecialization * 0.01)) {
-         this.addDamage(RogueAbility.Extra, result);
+         this.addDamage('EXTRA', result);
       }
    }
 
-   executeRotation(): void {
+   protected executeCommand(cmd: string): boolean {
+      switch (cmd) {
+         case RogueAbility.Eviscerate:
+            return this.castEviscerate();
+         case RogueAbility.SinisterStrike:
+            return this.castSinisterStrike();
+         case RogueAbility.Backstab:
+            return this.castBackstab();
+         case RogueAbility.Hemorrhage:
+            return this.castHemorrhage();
+         case RogueAbility.SliceAndDice:
+            return this.castSliceAndDice();
+         case RogueAbility.AddCombo:
+            this.addComboPoint();
+            return true;
+         case RogueAbility.Set1Combo:
+            this.state.comboPoints = 1;
+            return true;
+         case RogueAbility.Set2Combo:
+            this.state.comboPoints = 2;
+            return true;
+         case RogueAbility.Set3Combo:
+            this.state.comboPoints = 3;
+            return true;
+         case RogueAbility.Set4Combo:
+            this.state.comboPoints = 4;
+            return true;
+         case RogueAbility.Set5Combo:
+            this.state.comboPoints = 5;
+            return true;
+         case RogueAbility.Energy1:
+            this.state.energy = 20;
+            return true;
+         case RogueAbility.Energy2:
+            this.state.energy = 40;
+            return true;
+         case RogueAbility.Energy3:
+            this.state.energy = 60;
+            return true;
+         case RogueAbility.Energy4:
+            this.state.energy = 80;
+            return true;
+         case RogueAbility.Energy5:
+            this.state.energy = 100;
+            return true;
+         default:
+            return false;
+      }
+   }
+
+   executeHardcodedRotation(): void {
       if (!this.canCastAbility()) {
          return;
       }
@@ -270,7 +331,7 @@ export class RogueSimulator extends MeleeSimulator {
          return true;
       }
       const timeRemainingMs = this.getBuffTimeRemaining(Buffs.SnD);
-      const refreshThresholdMs = this.setup.refreshSndSecondsAhead5Combo * 1000;
+      const refreshThresholdMs = (this.setup.refreshSndSecondsAhead5Combo ?? 1) * 1000;
       return timeRemainingMs < refreshThresholdMs;
    }
 

@@ -1,4 +1,4 @@
-import {c, CharacterClass, colorByClass, RogueSetup, RogueTalents, WarriorTalents, WeaponType} from './types';
+import {c, CharacterClass, colorByClass, RogueTalents, SimulationSetup, WarriorTalents, WeaponType} from './types';
 import {WarriorSimulator} from './sim/WarriorSimulator';
 import {BaseSimulator} from './sim/BaseSimulator';
 import {SimulationSpec, SpecLoader} from './SpecLoader';
@@ -219,7 +219,7 @@ export class SimulationRunner {
             return;
         }
 
-        this.spec.rotation = this.options.rotationOverrides
+        this.spec.rotation = this.options.rotationOverrides.toLowerCase()
             .split(',')
             .map(ability => ability.trim())
             .filter(ability => ability.length > 0);
@@ -228,7 +228,7 @@ export class SimulationRunner {
     private createSimulator(): BaseSimulator {
         switch (this.spec.class) {
             case CharacterClass.Rogue:
-                return new RogueSimulator(this.spec as SimulationSpec & { talents: RogueTalents; setup?: RogueSetup });
+                return new RogueSimulator(this.spec as SimulationSpec & { talents: RogueTalents; setup?: SimulationSetup });
 
             case CharacterClass.Warrior:
                 return new WarriorSimulator(this.spec as SimulationSpec & { talents: WarriorTalents });

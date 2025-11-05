@@ -25,6 +25,8 @@ export abstract class BaseSimulator implements Simulator, BuffsProvider {
    protected events: SimulationEvent[] = [];
    protected damageBreakdown: Map<string, number> = new Map();
    protected lastAbilityTimestamp: Map<string, number> = new Map();
+   protected nextRotationCommandIndex = 0;
+
    statistics: SimulationStatistics = {
       critCount: 0,
       hitCount: 0,
@@ -39,15 +41,29 @@ export abstract class BaseSimulator implements Simulator, BuffsProvider {
    }
 
    protected abstract initializeState(): SimulationState;
-
    protected abstract processTimeStep(): void;
-
-   protected abstract executeRotation(): void;
-
    protected abstract updateBuffs(): void;
+   protected abstract executeHardcodedRotation(): void;
+   protected abstract executeCommand(cmd: string): boolean;
 
    protected advanceTime() {
       this.state.currentTime += 10;
+   }
+
+   executeRotation(): void {
+      if (this.spec.rotation) {
+         let originalIndex = this.nextRotationCommandIndex;
+         let result = false;
+         do {
+            result = this.executeCommand(this.spec.rotation[this.nextRotationCommandIndex]);
+            this.nextRotationCommandIndex++;
+            if (this.nextRotationCommandIndex == this.spec.rotation.length) {
+               this.nextRotationCommandIndex = 0;
+            }
+         } while (!result && originalIndex !== this.nextRotationCommandIndex);
+      } else {
+         this.executeHardcodedRotation();
+      }
    }
 
    protected addDamage(ability: string, attackResult: AttackResult, extra?: any): void {

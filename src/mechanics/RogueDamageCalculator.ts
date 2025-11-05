@@ -3,6 +3,10 @@ import {MeleeDamageCalculator} from './MeleeDamageCalculator';
 import {SimulationSpec} from '../SpecLoader';
 import {BuffsProvider} from "./DamageCalculator";
 
+const EVISCERATE_9 = [[224,332],[394,502],[564,672],[734,842],[904,1012]];
+const SINISTER_STRIKE_7 = 68;
+const BACKSTAB_9 = 225;
+
 export class RogueDamageCalculator extends MeleeDamageCalculator {
    protected talents: RogueTalents;
 
@@ -81,7 +85,7 @@ export class RogueDamageCalculator extends MeleeDamageCalculator {
       return 1 + (this.talents.opportunity * 0.04);
    }
 
-   get eviscerateMultiplier() {
+   get improvedEviscerateMultiplier() {
       if (this.talents.improvedEviscerate === 0) {
          return 1;
       }
@@ -98,7 +102,7 @@ export class RogueDamageCalculator extends MeleeDamageCalculator {
    calculateSinisterStrikeDamage(): AttackResult {
       const weapon = this.spec.gearStats.mainHandWeapon;
       const weaponDamage = this.getWeaponDamage(weapon);
-      const baseDamage = weaponDamage + 68;
+      const baseDamage = weaponDamage + SINISTER_STRIKE_7 + this.calcAttackPowerDamage(weapon);
 
       const multipliers = [
          this.aggressionMultiplier,
@@ -118,7 +122,8 @@ export class RogueDamageCalculator extends MeleeDamageCalculator {
    calculateBackstabDamage(): AttackResult {
       const weapon = this.spec.gearStats.mainHandWeapon;
       const weaponDamage = this.getWeaponDamage(weapon);
-      const baseDamage = (weaponDamage + 210) * 1.5;
+      const apBonus = this.calcAttackPowerDamage(weapon);
+      const baseDamage = (weaponDamage + BACKSTAB_9 + apBonus) * 1.5;
 
       const multipliers = [
          this.opportunityMultiplier,
@@ -139,7 +144,7 @@ export class RogueDamageCalculator extends MeleeDamageCalculator {
       const weapon = this.spec.gearStats.mainHandWeapon;
       const weaponDamage = this.getWeaponDamage(weapon);
       // todo: that's not what happens - it should actually appply a debuff
-      const baseDamage = weaponDamage + 3;
+      const baseDamage = weaponDamage + this.calcAttackPowerDamage(weapon);
 
       const multipliers = [
          this.lethalityMultiplier,
@@ -157,11 +162,12 @@ export class RogueDamageCalculator extends MeleeDamageCalculator {
 
    calculateEviscerateDamage(comboPoints: number): AttackResult {
       const weapon = this.spec.gearStats.mainHandWeapon;
-      const damagePerCP = [0, 223, 325, 427, 529, 631];
-      const baseDamage = (damagePerCP[comboPoints] || 0) + (0.03 * comboPoints);
+      const range = EVISCERATE_9[comboPoints];
+      const cpDamage = Math.random() * (range[1] - range[0]) + range[0];
+      const baseDamage = cpDamage + this.calcAttackPowerDamage(weapon);
 
       const multipliers = [
-         this.eviscerateMultiplier,
+         this.improvedEviscerateMultiplier,
          this.aggressionMultiplier,
          this.lethalityMultiplier,
          this.murderMultiplier,

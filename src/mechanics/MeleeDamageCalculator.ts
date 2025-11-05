@@ -55,6 +55,12 @@ export abstract class MeleeDamageCalculator extends DamageCalculator {
       return minDamage + Math.random() * (maxDamage - minDamage);
    }
 
+   /**
+    * Calc final damage according to attack table, armor and other multipliers.
+    *
+    * This func doesn't add attack power to baseDamage, since it's affected differently
+    * by special abilities, like a Rogue's backstab.
+    */
    protected calculateMeleeDamage(params: MeleeDamageParams): AttackResult {
       const {baseDamage, damageMultipliers = [], ability, isSpecialAttack, weapon} = params;
 
@@ -96,6 +102,10 @@ export abstract class MeleeDamageCalculator extends DamageCalculator {
       return 1;
    }
 
+   calcAttackPowerDamage(weapon: Weapon): number {
+      return (this.attackPower / 14) * weapon.speed;
+   }
+
    calculateAutoAttackDamage(isOffhand: boolean = false): AttackResult {
       const weapon = isOffhand ? this.spec.gearStats.offHandWeapon : this.spec.gearStats.mainHandWeapon;
       if (!weapon) {
@@ -108,8 +118,7 @@ export abstract class MeleeDamageCalculator extends DamageCalculator {
       }
 
       const weaponDamage = this.getWeaponDamage(weapon);
-      const apBonus = (this.attackPower / 14) * weapon.speed;
-      let baseDamage = weaponDamage + apBonus;
+      let baseDamage = weaponDamage + this.calcAttackPowerDamage(weapon);
 
       const multipliers = [
          this.autoAttackMultiplier,

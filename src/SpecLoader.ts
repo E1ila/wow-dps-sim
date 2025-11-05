@@ -2,11 +2,10 @@ import {readFileSync} from 'fs';
 import {
    CharacterClass,
    GearStats,
-   RogueSetup,
    RogueTalents,
    SimulationConfig,
+   SimulationSetup,
    TargetType,
-   WarriorSetup,
    WarriorTalents
 } from './types';
 import path from "node:path";
@@ -17,7 +16,7 @@ export interface SimulationSpec {
    class: CharacterClass;
    playerLevel: number;
    rotation?: string[];
-   setup?: RogueSetup | WarriorSetup;
+   setup?: SimulationSetup;
    talents: RogueTalents | WarriorTalents;
    gearStats: GearStats;
    simulationConfig: SimulationConfig;
