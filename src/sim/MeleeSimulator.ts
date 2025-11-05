@@ -67,7 +67,7 @@ export abstract class MeleeSimulator extends BaseSimulator {
    protected abstract handleResourceGeneration(): void;
 
    protected getHasteMultiplier(): number {
-      return 1;
+      return this.haste;
    }
 
    protected processAutoAttacks(

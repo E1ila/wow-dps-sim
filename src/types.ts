@@ -169,6 +169,8 @@ export interface WarriorTalents {
 }
 
 export interface SimulationSetup {
+   // general
+   wbs?: boolean; // apply world buffs
    // rogue
    refreshSndSecondsBeforeExpiry?: number;
    avoidEviscerate?: boolean;
@@ -290,4 +292,15 @@ const HitAttackTypes = [AttackType.Hit, AttackType.Crit, AttackType.Glancing];
 
 export function isHit(attackResult: AttackResult) {
    return HitAttackTypes.includes(attackResult.type);
+}
+
+export interface PlayerStatsProvider {
+   critChance(attack: Attack): number;
+   get weaponSkill(): number;
+   get attackPower(): number;
+   get hitChance(): number;
+   get playerLevel(): number;
+   get isDualWielding(): boolean;
+   get targetLevel(): number;
+   get haste(): number;
 }
