@@ -161,10 +161,13 @@ export class RogueDamageCalculator extends MeleeDamageCalculator {
    }
 
    calculateEviscerateDamage(comboPoints: number): AttackResult {
+      if (!comboPoints)
+         throw new Error(`Can't cast Eviscerate with 0 combo points`);
       const weapon = this.spec.gearStats.mainHandWeapon;
-      const range = EVISCERATE_9[comboPoints];
+      const range = EVISCERATE_9[comboPoints - 1];
       const cpDamage = Math.random() * (range[1] - range[0]) + range[0];
-      const baseDamage = cpDamage + this.calcAttackPowerDamage(weapon);
+      const apBonus = this.calcAttackPowerDamage(weapon) * comboPoints * 0.03;
+      const baseDamage = Math.round(cpDamage + apBonus);
 
       const multipliers = [
          this.improvedEviscerateMultiplier,

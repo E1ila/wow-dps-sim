@@ -188,19 +188,19 @@ export class SimulationRunner {
             const name = override.name;
             const value = override.value;
 
-            if (name.startsWith('mainHand.')) {
-                const prop = name.substring('mainHand.'.length);
+            if (name.startsWith('mh.')) {
+                const prop = name.substring('mh.'.length);
                 if (prop === 'type') {
                     this.spec.gearStats.mainHandWeapon.type = value as WeaponType;
                 } else {
                     (this.spec.gearStats.mainHandWeapon as any)[prop] = parseFloat(value);
                 }
-            } else if (name.startsWith('offHand.')) {
+            } else if (name.startsWith('oh.')) {
                 if (!this.spec.gearStats.offHandWeapon) {
                     console.warn(`Warning: No off-hand weapon in spec, cannot override "${name}"`);
                     continue;
                 }
-                const prop = name.substring('offHand.'.length);
+                const prop = name.substring('oh.'.length);
                 if (prop === 'type') {
                     this.spec.gearStats.offHandWeapon.type = value as WeaponType;
                 } else {

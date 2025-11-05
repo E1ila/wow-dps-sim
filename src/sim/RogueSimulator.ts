@@ -160,10 +160,9 @@ export class RogueSimulator extends MeleeSimulator {
    }
 
    castEviscerate(): boolean {
-      if (this.setup.avoidEviscerate || !this.spendEnergy(35)) {
+      if (this.setup.avoidEviscerate || !this.state.comboPoints || !this.spendEnergy(35)) {
          return false;
       }
-
       const cp = this.spendComboPoints();
       const result = this.damageCalculator.calculateEviscerateDamage(cp);
       this.addDamage(RogueAbility.Eviscerate, result, 0, cp);

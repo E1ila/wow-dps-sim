@@ -142,7 +142,7 @@ try {
    }
 
    printTable(results);
-} catch (error) {
-   console.error(`Error: ${(error as Error).message}`);
+} catch (error: any) {
+   console.error(error.stack ?? error);
    process.exit(1);
 }

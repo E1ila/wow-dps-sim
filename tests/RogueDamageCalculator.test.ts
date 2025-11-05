@@ -327,7 +327,9 @@ describe('RogueDamageCalculator', () => {
 
       Math.random = originalRandom;
 
-      expect(result.baseAmount).toBe(168);
+      // weaponDamage (100) + SINISTER_STRIKE_7 (68) + AP contribution (Math.round((1200/14)*2.0) = 171)
+      const expectedBase = 100 + 68 + Math.round((1200 / 14) * 2.0);
+      expect(result.baseAmount).toBe(expectedBase);
     });
 
     it('should apply aggression talent bonus to actual damage', () => {
@@ -414,7 +416,8 @@ describe('RogueDamageCalculator', () => {
 
       Math.random = originalRandom;
 
-      const expectedBase = (100 + 210) * 1.5;
+      // (weaponDamage (100) + BACKSTAB_9 (225) + AP contribution (Math.round((1200/14)*2.0) = 171)) * 1.5
+      const expectedBase = (100 + 225 + Math.round((1200 / 14) * 2.0)) * 1.5;
       expect(result.baseAmount).toBe(expectedBase);
     });
 
@@ -495,13 +498,18 @@ describe('RogueDamageCalculator', () => {
     it('should calculate base damage correctly for each combo point level', () => {
       const calculator = new RogueDamageCalculator(createTestSpec(baseStats, config, baseTalents), createMockBuffsProvider());
 
+      // EVISCERATE_9 = [[224,332],[394,502],[564,672],[734,842],[904,1012]]
+      // At Math.random = 0.5, cpDamage = min + 0.5 * (max - min) = min + 54
+      // apBonus = calcAttackPowerDamage(weapon) * comboPoints * 0.03
+      // calcAttackPowerDamage = Math.round((1200 / 14) * 2.0) = 171
+      const apPerPoint = Math.round((1200 / 14) * 2.0);
       const expectedBaseDamage = [
-        0,
-        223 + (0.03 * 1),
-        325 + (0.03 * 2),
-        427 + (0.03 * 3),
-        529 + (0.03 * 4),
-        631 + (0.03 * 5),
+        0, // dummy for index 0
+        Math.round(278 + apPerPoint * 1 * 0.03), // 1 CP: 278 + 5.13 = 283
+        Math.round(448 + apPerPoint * 2 * 0.03), // 2 CP: 448 + 10.26 = 458
+        Math.round(618 + apPerPoint * 3 * 0.03), // 3 CP: 618 + 15.39 = 633
+        Math.round(788 + apPerPoint * 4 * 0.03), // 4 CP: 788 + 20.52 = 809
+        Math.round(958 + apPerPoint * 5 * 0.03), // 5 CP: 958 + 25.65 = 984
       ];
 
       const originalRandom = Math.random;
@@ -509,7 +517,7 @@ describe('RogueDamageCalculator', () => {
 
       for (let cp = 1; cp <= 5; cp++) {
         const result = calculator.calculateEviscerateDamage(cp);
-        expect(result.baseAmount).toBeCloseTo(expectedBaseDamage[cp], 1);
+        expect(result.baseAmount).toBe(expectedBaseDamage[cp]);
       }
 
       Math.random = originalRandom;
@@ -645,10 +653,10 @@ describe('RogueDamageCalculator', () => {
       Math.random = originalRandom;
 
       const expectedWeaponDamage = 100;
-      const expectedAPBonus = (1200 / 14) * 2.0;
+      const expectedAPBonus = Math.round((1200 / 14) * 2.0);
       const expectedBase = expectedWeaponDamage + expectedAPBonus;
 
-      expect(result.baseAmount).toBeCloseTo(expectedBase, 1);
+      expect(result.baseAmount).toBe(expectedBase);
     });
 
     it('should apply dual wield penalty to mainhand final damage', () => {
@@ -685,10 +693,10 @@ describe('RogueDamageCalculator', () => {
       Math.random = originalRandom;
 
       const expectedWeaponDamage = 80;
-      const expectedAPBonus = (1200 / 14) * 1.5;
+      const expectedAPBonus = Math.round((1200 / 14) * 1.5);
       const expectedBase = expectedWeaponDamage + expectedAPBonus;
 
-      expect(result.baseAmount).toBeCloseTo(expectedBase, 1);
+      expect(result.baseAmount).toBe(expectedBase);
     });
 
     it('should benefit from dual wield specialization on mainhand', () => {
@@ -780,11 +788,11 @@ describe('RogueDamageCalculator', () => {
 
       Math.random = originalRandom;
 
-      const expectedAPBonus = 100;
       const weaponSpeed = 2.0;
-      const expectedDamageIncrease = (expectedAPBonus / 14) * weaponSpeed;
+      // With buff: Math.round((1300/14)*2.0) = 186, Without: Math.round((1200/14)*2.0) = 171
+      const expectedDamageIncrease = Math.round((1300 / 14) * weaponSpeed) - Math.round((1200 / 14) * weaponSpeed);
 
-      expect(resultWithBuff.baseAmount - resultWithoutBuff.baseAmount).toBeCloseTo(expectedDamageIncrease, 1);
+      expect(resultWithBuff.baseAmount - resultWithoutBuff.baseAmount).toBe(expectedDamageIncrease);
     });
 
     it('should increase Eviscerate damage when Crusader buff is active', () => {
@@ -800,8 +808,18 @@ describe('RogueDamageCalculator', () => {
 
       Math.random = originalRandom;
 
-      // Eviscerate doesn't scale with AP in the current implementation
-      expect(resultWithBuff.baseAmount).toBe(resultWithoutBuff.baseAmount);
+      // Crusader adds 100 AP
+      // Without: apBonus = 171 * 5 * 0.03 = 25.65, baseDamage = Math.round(958 + 25.65) = 984
+      // With: apBonus = 186 * 5 * 0.03 = 27.9, baseDamage = Math.round(958 + 27.9) = 986
+      // Difference = 2
+      const apWithout = Math.round((1200 / 14) * 2.0);
+      const apWith = Math.round((1300 / 14) * 2.0);
+      const cpDamage = 958; // at random 0.5 and 5 CP
+      const expectedWithout = Math.round(cpDamage + apWithout * comboPoints * 0.03);
+      const expectedWith = Math.round(cpDamage + apWith * comboPoints * 0.03);
+      const expectedDamageIncrease = expectedWith - expectedWithout;
+
+      expect(resultWithBuff.baseAmount - resultWithoutBuff.baseAmount).toBe(expectedDamageIncrease);
     });
 
     it('should not increase attack power when Crusader buff is not active', () => {

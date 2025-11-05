@@ -103,7 +103,7 @@ export abstract class MeleeDamageCalculator extends DamageCalculator {
    }
 
    calcAttackPowerDamage(weapon: Weapon): number {
-      return (this.attackPower / 14) * weapon.speed;
+      return Math.round((this.attackPower / 14) * weapon.speed);
    }
 
    calculateAutoAttackDamage(isOffhand: boolean = false): AttackResult {

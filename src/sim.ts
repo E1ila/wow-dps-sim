@@ -98,6 +98,6 @@ const simulationOptions: SimulationOptions = {
 
 const runner = new SimulationRunner(simulationOptions);
 runner.run().catch((error) => {
-   console.error(`Error: ${error.message}`);
+   console.error(error.stack);
    process.exit(1);
 });
