@@ -4,8 +4,10 @@ import {SimulationOptions, SimulationRunner} from './SimulationRunner';
 import * as fs from "node:fs";
 import path from "node:path";
 import {c} from './types';
+import {parseSpecString, SpecOverrides} from "./sim";
 
 interface SimulationResult {
+   name?: string;
    dps: number;
    talentOverrides: Record<string, number>;
    executionTimeMs: number;
@@ -32,44 +34,34 @@ interface SimulationResult {
    };
 }
 
-interface BuildResult extends SimulationResult {
-   buildName: string;
-}
-
-interface BuildConfig {
-   talents: string;
-   setup?: string;
-   gear?: string;
-   rotation?: string;
-}
-
-function runSimulation(baseOptions: SimulationOptions, buildConfig: BuildConfig): SimulationResult {
+function runSimulation(baseOptions: SimulationOptions, overrides: SpecOverrides): SimulationResult {
    try {
       const options = {...baseOptions};
-      options.talentOverrides = buildConfig.talents;
-      options.setupOverrides = buildConfig.setup;
-      options.gearOverrides = buildConfig.gear;
-      options.rotationOverrides = buildConfig.rotation;
+      options.talentOverrides = overrides.talents;
+      options.setupOverrides = overrides.setup;
+      options.gearOverrides = overrides.gear;
+      options.rotationOverrides = overrides.rotation;
 
       const runner = new SimulationRunner(options);
       return runner.runAndGetResults();
    } catch (error) {
-      console.error(`Error running simulation for build: ${buildConfig.talents}${buildConfig.setup ? ` | ${buildConfig.setup}` : ''}${buildConfig.gear ? ` | ${buildConfig.gear}` : ''}${buildConfig.rotation ? ` | ${buildConfig.rotation}` : ''}`);
+      console.error(`Error running simulation for spec: ${overrides.talents}${overrides.setup ? ` | ${overrides.setup}` : ''}${overrides.gear ? ` | ${overrides.gear}` : ''}${overrides.rotation ? ` | ${overrides.rotation}` : ''}`);
       throw error;
    }
 }
 
-function printTable(results: BuildResult[]): void {
+function printTable(results: SimulationResult[]): void {
    console.log('='.repeat(120));
-   console.log('Build Comparison Results');
+   console.log('Comparison Results');
    console.log('='.repeat(120));
    console.log(`Iterations: ${results[0].iterations}\n`);
 
-   console.log(`${'Build Name'.padEnd(20)} | ${'DPS'.padStart(10)} | Talents`);
+   console.log(`${'Spec'.padEnd(20)} | ${'DPS'.padStart(10)} | Talents`);
    console.log('-'.repeat(120));
 
    // Find the maximum DPS
    const maxDPS = Math.max(...results.map(r => r.dps));
+   let index = 1;
 
    for (const result of results) {
       const talentString = Object.entries(result.talentOverrides)
@@ -80,13 +72,14 @@ function printTable(results: BuildResult[]): void {
       const coloredDPS = result.dps === maxDPS ? `${c.brightGreen}${dpsString}${c.reset}` : dpsString;
 
       console.log(
-         `${result.buildName.padEnd(10)} | ${coloredDPS} | ${talentString}`
+         `${(result.name ?? `Spec ${index}`).padEnd(10)} | ${coloredDPS} | ${talentString}`
       );
+      index++;
    }
 }
 
-function parseBuilds(buildsArg?: string, specFile?: string): BuildConfig[] {
-   if (!buildsArg) {
+function parseSpecOverrides(specArg?: string, specFile?: string): SpecOverrides[] {
+   if (!specArg) {
       if (specFile) {
          specFile = path.join(__dirname, '..', 'specs', specFile + '.compare');
          if (fs.existsSync(specFile)) {
@@ -94,52 +87,25 @@ function parseBuilds(buildsArg?: string, specFile?: string): BuildConfig[] {
             return fileContent.split('\n')
                .filter(line => line && !line.trim().startsWith('#'))
                .filter(line => line.trim())
-               .map(line => parseBuildString(line.trim()));
+               .map(line => parseSpecString(line.trim()));
          }
       }
       return [];
    }
 
-   return buildsArg.split(';').map(build => parseBuildString(build.trim()));
-}
-
-function parseBuildString(buildStr: string): BuildConfig {
-   const parts = buildStr.split('|');
-   if (parts.length === 1) {
-      return { talents: parts[0].trim() };
-   } else if (parts.length === 2) {
-      return {
-         talents: parts[0].trim(),
-         setup: parts[1].trim() || undefined
-      };
-   } else if (parts.length === 3) {
-      return {
-         talents: parts[0].trim(),
-         setup: parts[1].trim() || undefined,
-         gear: parts[2].trim() || undefined
-      };
-   } else if (parts.length === 4) {
-      return {
-         talents: parts[0].trim(),
-         setup: parts[1].trim() || undefined,
-         gear: parts[2].trim() || undefined,
-         rotation: parts[3].trim() || undefined
-      };
-   } else {
-      throw new Error(`Invalid build format: ${buildStr}. Expected format: talents|setup|gear|rotation (setup, gear, and rotation optional)`);
-   }
+   return specArg.split(';').map(spec => parseSpecString(spec.trim()));
 }
 
 const program = new Command();
 
 program
    .name('wow-classic-compare')
-   .description('WoW Classic Era DPS Simulator - Build Comparison Tool')
+   .description('WoW Classic Era DPS Simulator - Comparison Tool')
    .version('1.0.0')
    .argument('<spec-file>', 'Path to spec file (e.g., specs/rogue/daggers)')
    .option(
-      '-b, --builds <builds>',
-      'Custom builds to compare (format: talents1|setup1|gear1|rotation1;talents2|setup2|gear2|rotation2, setup, gear, and rotation optional). Example: "sealFate:5|avoidEviscerate:1|attackPower:1500|backstab,sinisterStrike;sealFate:0"'
+      '-s, --specs <specs>',
+      'Custom specs to compare (format: talents1|setup1|gear1|rotation1;talents2|setup2|gear2|rotation2, setup, gear, and rotation optional). Example: "sealFate:5|avoidEviscerate:1|attackPower:1500|backstab,sinisterStrike;sealFate:0"'
    )
    .option(
       '-i, --iterations <number>',
@@ -157,26 +123,22 @@ const specFile = program.args[0];
 const opts = program.opts();
 
 try {
-   const builds = parseBuilds(opts.builds, specFile);
+   const specs = parseSpecOverrides(opts.spec, specFile);
 
-   console.log(`Running build comparison for: ${specFile}`);
+   console.log(`Running comparison for: ${specFile}`);
    console.log();
 
-   const results: BuildResult[] = [];
+   const results: SimulationResult[] = [];
 
-   for (let i = 0; i < builds.length; i++) {
-      const buildName = `Build ${i + 1}`;
-      console.log(`Running: ${buildName}...`);
+   for (let i = 0; i < specs.length; i++) {
+      console.log(`Running spec #${i}...`);
       const result = runSimulation({
          specFile,
          quiet: true,
          iterations: opts.iterations,
          fightLength: opts.fightLength,
-      }, builds[i]);
-      results.push({
-         ...result,
-         buildName,
-      });
+      }, specs[i]);
+      results.push(result);
    }
 
    printTable(results);

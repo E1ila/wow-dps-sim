@@ -2,37 +2,24 @@ import {Command} from 'commander';
 import {WeaponType} from './types';
 import {SimulationOptions, SimulationRunner} from './SimulationRunner';
 
-interface BuildConfig {
+export interface SpecOverrides {
    talents: string;
    setup?: string;
    gear?: string;
    rotation?: string;
 }
 
-function parseBuild(buildStr: string): BuildConfig {
-   const parts = buildStr.split('|');
-   if (parts.length === 1) {
-      return { talents: parts[0].trim() };
-   } else if (parts.length === 2) {
+export function parseSpecString(specStr: string): SpecOverrides {
+   const parts = specStr.split('|');
+   if (parts.length >= 1 &&  parts.length <= 4) {
       return {
          talents: parts[0].trim(),
-         setup: parts[1].trim() || undefined
-      };
-   } else if (parts.length === 3) {
-      return {
-         talents: parts[0].trim(),
-         setup: parts[1].trim() || undefined,
-         gear: parts[2].trim() || undefined
-      };
-   } else if (parts.length === 4) {
-      return {
-         talents: parts[0].trim(),
-         setup: parts[1].trim() || undefined,
-         gear: parts[2].trim() || undefined,
-         rotation: parts[3].trim() || undefined
+         setup: parts.length >= 1 && parts[1].trim() || undefined,
+         gear: parts.length >= 2 && parts[2].trim() || undefined,
+         rotation: parts.length >= 3 && parts[3].trim() || undefined
       };
    } else {
-      throw new Error(`Invalid build format: ${buildStr}. Expected format: talents|setup|gear|rotation (setup, gear, and rotation optional)`);
+      throw new Error(`Invalid spec format: ${specStr}. Expected format: talents|setup|gear|rotation (setup, gear, and rotation optional)`);
    }
 }
 
@@ -62,7 +49,7 @@ program
    .option('--iterations <number>', 'Number of iterations')
    .option('--post-res-gen <number>', 'Generate resource AFTER cycle, simulates a more realistic latency')
    .option('--speed <number>', 'Playback speed (0 = instant, 1 = real-time, 0.5 = half speed, etc.)')
-   .option('-b, --build <build>', 'Override build (format: talents|setup|gear|rotation, setup, gear, and rotation optional). Example: "sealFate:5|avoidEviscerate:1|attackPower:1500|backstab,sinisterStrike"')
+   .option('-s, --spec <spec>', 'Override simulation spec (format: talents|setup|gear|rotation, setup, gear, and rotation optional). Example: "sealFate:5|avoidEviscerate:1|attackPower:1500|backstab,sinisterStrike"')
    .option('-q, --quiet', 'Quiet mode: only print final average DPS')
    .parse(process.argv);
 
@@ -76,7 +63,7 @@ const weaponTypeMap: { [key: string]: WeaponType } = {
    'fist': WeaponType.Fist,
 };
 
-const buildConfig = opts.build ? parseBuild(opts.build) : undefined;
+const spec = opts.spec ? parseSpecString(opts.spec) : undefined;
 
 const simulationOptions: SimulationOptions = {
    specFile,
@@ -101,10 +88,10 @@ const simulationOptions: SimulationOptions = {
    fightLength: opts.length !== undefined ? parseInt(opts.length) : undefined,
    iterations: opts.iterations !== undefined ? parseInt(opts.iterations) : undefined,
    postCycleResourceGeneration: opts.postCycleResourceGeneration ? opts.postCycleResourceGeneration != '0' : false,
-   talentOverrides: buildConfig?.talents,
-   setupOverrides: buildConfig?.setup,
-   gearOverrides: buildConfig?.gear,
-   rotationOverrides: buildConfig?.rotation,
+   talentOverrides: spec?.talents,
+   setupOverrides: spec?.setup,
+   gearOverrides: spec?.gear,
+   rotationOverrides: spec?.rotation,
    playbackSpeed: opts.speed !== undefined ? parseFloat(opts.speed) : undefined,
    quiet: opts.quiet === true,
 };
