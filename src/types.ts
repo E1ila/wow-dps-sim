@@ -226,7 +226,7 @@ export interface BuffEvent {
    timestamp: number;
    buffName: string;
    duration: number;
-   eventType: 'buff';
+   eventType: 'buff++';
    hidden?: boolean
 }
 
@@ -241,7 +241,14 @@ export interface ProcEvent {
    hidden?: boolean
 }
 
-export type SimulationEvent = DamageEvent | BuffEvent | ProcEvent;
+export interface BuffFadeEvent {
+   timestamp: number;
+   buffName: string;
+   eventType: 'buff--';
+   hidden?: boolean
+}
+
+export type SimulationEvent = DamageEvent | BuffEvent | ProcEvent | BuffFadeEvent;
 
 export interface SimulationStatistics {
    critCount: number;

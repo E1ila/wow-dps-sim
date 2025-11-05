@@ -109,7 +109,7 @@ export abstract class BaseSimulator implements Simulator, BuffsProvider {
          timestamp: this.state.currentTime,
          buffName,
          duration,
-         eventType: 'buff' as const,
+         eventType: 'buff++' as const,
          ...extra,
       });
    }
@@ -120,6 +120,15 @@ export abstract class BaseSimulator implements Simulator, BuffsProvider {
          procName,
          eventType: 'proc' as const,
          hidden,
+      });
+   }
+
+   protected logBuffDrop(buffName: string, extra?: any): void {
+      this.events.push({
+         timestamp: this.state.currentTime,
+         buffName,
+         eventType: 'buff--' as const,
+         ...extra,
       });
    }
 
@@ -162,6 +171,13 @@ export abstract class BaseSimulator implements Simulator, BuffsProvider {
    }
 
    protected removeExpiredBuffs(): void {
+      // Log all buffs that are expiring
+      const expiredBuffs = this.state.activeBuffs.filter(buff => buff.expiry <= this.state.currentTime);
+      for (const buff of expiredBuffs) {
+         this.logBuffDrop(buff.name);
+      }
+
+      // Remove expired buffs
       this.state.activeBuffs = this.state.activeBuffs.filter(buff => buff.expiry > this.state.currentTime);
    }
 
@@ -302,12 +318,14 @@ export abstract class BaseSimulator implements Simulator, BuffsProvider {
       const timestampSeconds = event.timestamp / 1000;
       const timestamp = `${c.gray}[${timestampSeconds.toFixed(1)}s]${c.reset}`;
 
-      if (event.eventType === 'buff') {
+      if (event.eventType === 'buff++') {
          const extra = this.getPrintBuffEventExtra(event);
-         const durationStr = ` (${(event.duration / 1000).toFixed(1)}s)`;
-         console.log(`${timestamp} ${c.green}${event.buffName}${c.reset}${extra}${durationStr}`);
+         const durationStr = ` duration ${(event.duration / 1000).toFixed(1)}s`;
+         console.log(`${timestamp}${c.green} ++ ${event.buffName}${c.reset}${extra}${durationStr}`);
       } else if (event.eventType === 'proc') {
          console.log(`${timestamp} ${c.cyan}${event.procName}${c.reset}`);
+      } else if (event.eventType === 'buff--') {
+         console.log(`${timestamp}${c.red} -- ${event.buffName}${c.reset}`);
       } else {
          const extra = this.getPrintDamageEventExtra(event);
          const isWhiteDamage = event.ability === Ability.MainHand || event.ability === Ability.OffHand || event.ability === Ability.Extra;
@@ -318,13 +336,13 @@ export abstract class BaseSimulator implements Simulator, BuffsProvider {
             const lastTimestamp = this.lastAbilityTimestamp.get(event.ability);
             if (lastTimestamp !== undefined) {
                const timeSinceLast = (event.timestamp - lastTimestamp) / 1000;
-               timeSinceLastStr = ` ${c.gray}(+${timeSinceLast.toFixed(2)}s)${c.reset}`;
+               timeSinceLastStr = ` ${c.gray}${timeSinceLast.toFixed(2)}s${c.reset}`;
             }
             this.lastAbilityTimestamp.set(event.ability, event.timestamp);
          }
 
          if (event.amount === 0) {
-            console.log(`${timestamp} ${c.blue}${event.ability} ${c.red}${event.type.toUpperCase()}${c.reset}${extra}${timeSinceLastStr}`);
+            console.log(`${timestamp} ${c.blue}${event.ability} ${c.brightMagenta}${event.type.toUpperCase()}${c.reset}${extra}${timeSinceLastStr}`);
          } else {
             const critStr = event.type === AttackType.Crit ? ' (crit)' : (event.type === AttackType.Glancing ? ' (glancing)' : '');
             console.log(`${timestamp} ${c.blue}${event.ability} ${abilityColor}${event.amount}${c.reset}${critStr}${extra}${timeSinceLastStr}`);
