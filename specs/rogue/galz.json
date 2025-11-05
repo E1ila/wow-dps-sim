@@ -2,7 +2,7 @@
     "name": "PvE Combat Swords",
     "class": "Rogue",
     "setup": {
-        "refreshSndSecondsBeforeExpiry": 0.5
+        "refreshSndSecondsBeforeExpiry": 0.2
     },
     "talents": {
         "adrenalineRush": true,

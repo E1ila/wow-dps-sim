@@ -3,7 +3,7 @@
     "class": "rogue",
     "description": "Standard combat swords spec for PvE",
     "setup": {
-        "refreshSndSecondsBeforeExpiry": 3
+        "refreshSndSecondsBeforeExpiry": 0.2
     },
     "talents": {
         "malice": 5,

@@ -2,7 +2,7 @@
     "name": "PvE Combat Daggers",
     "class": "Rogue",
     "setup": {
-        "refreshSndSecondsBeforeExpiry": 3
+        "refreshSndSecondsBeforeExpiry": 0.2
     },
     "talents": {
         "adrenalineRush": true,

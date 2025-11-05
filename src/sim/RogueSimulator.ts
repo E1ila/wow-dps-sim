@@ -316,7 +316,7 @@ export class RogueSimulator extends MeleeSimulator {
       if (!this.isBuffActive(Buffs.SnD))
          return true;
       const timeRemainingMs = this.getBuffTimeRemaining(Buffs.SnD);
-      const timeBefore = this.setup.refreshSndSecondsBeforeExpiry ?? 1;
+      const timeBefore = this.setup.refreshSndSecondsBeforeExpiry ?? 0.2;
       const refreshThresholdMs = (timeBefore) * 1000;
       return timeRemainingMs < refreshThresholdMs;
    }
