@@ -55,7 +55,7 @@ function printTable(results: SimulationResult[]): void {
    console.log('='.repeat(120));
    console.log(`Iterations: ${results[0].iterations}\n`);
 
-   console.log(`${'Spec'.padEnd(20)} | ${'DPS'.padStart(10)} | Talents`);
+   console.log(`${'Spec'.padEnd(10)} | ${'DPS'.padStart(10)} | Talents`);
    console.log('-'.repeat(120));
 
    // Find the maximum DPS
@@ -137,6 +137,10 @@ try {
          iterations: opts.iterations,
          fightLength: opts.fightLength,
       }, specs[i]);
+      if (!results) {
+         console.log(`Failed running simulation!`);
+         process.exit(1);
+      }
       results.push(result);
    }
 
