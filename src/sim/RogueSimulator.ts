@@ -70,6 +70,8 @@ export class RogueSimulator extends MeleeSimulator {
 
    addEnergy(amount: number): void {
       this.state.energy = Math.round(Math.min(this.maxEnergy, this.state.energy + amount));
+      // we don't want special abilities to be cast in the next 200ms to mimic realistic latency
+      this.triggerLatencyCooldown();
    }
 
    getHasteMultiplier(): number {
@@ -154,8 +156,10 @@ export class RogueSimulator extends MeleeSimulator {
 
    castSinisterStrike(): boolean {
       let energyCost = 45;
-      const improvedSSCostReduction = this.talents.improvedSinisterStrike * 2;
-      energyCost -= improvedSSCostReduction;
+      if (this.talents.improvedSinisterStrike > 0) {
+         const improvedSSCostReduction = this.talents.improvedSinisterStrike == 1 ? 3 : 5;
+         energyCost -= improvedSSCostReduction;
+      }
 
       if (!this.spendEnergy(energyCost)) {
          return false;

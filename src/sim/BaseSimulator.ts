@@ -13,6 +13,8 @@ import {
 import {BuffsProvider, DamageCalculator} from "../mechanics/DamageCalculator";
 import {SimulationSpec} from '../SpecLoader';
 
+const LATENCY_LAG = 200;
+
 export interface Simulator {
    simulate(): SimulationResult;
    runMultipleIterations(): { results: SimulationResult[], executionTimeMs: number };
@@ -124,6 +126,10 @@ export abstract class BaseSimulator implements Simulator, BuffsProvider {
       this.state.globalCooldownExpiry = this.state.currentTime + 1500;
    }
 
+   protected triggerLatencyCooldown(): void {
+      this.state.globalCooldownExpiry = this.state.currentTime + LATENCY_LAG;
+   }
+
    protected canCastAbility(): boolean {
       return this.state.currentTime >= this.state.globalCooldownExpiry;
    }
@@ -202,8 +208,8 @@ export abstract class BaseSimulator implements Simulator, BuffsProvider {
       console.log('=== Starting Playback ===\n');
       console.log('\n'); // Reserve space for the floating bar
 
-      await this.waitForGameTime(100, speed);
       this.updateFloatingBar();
+      await this.waitForGameTime(1000, speed);
 
       const fightLengthMs = this.spec.fightLength * 1000;
       while (this.state.currentTime < fightLengthMs) {
