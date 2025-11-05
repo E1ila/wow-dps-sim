@@ -74,7 +74,7 @@ export abstract class BaseSimulator implements Simulator, BuffsProvider {
          timestamp: this.state.currentTime,
          ability,
          eventType: 'damage' as const,
-         whiteDamage: ['MH', 'OH'].includes(ability),
+         whiteDamage: [Ability.MainHand, Ability.OffHand, Ability.Extra].includes(ability as Ability),
          ...extra,
       });
 
@@ -299,7 +299,7 @@ export abstract class BaseSimulator implements Simulator, BuffsProvider {
          console.log(`${timestamp} ${c.cyan}${event.procName}${c.reset}`);
       } else {
          const extra = this.getPrintDamageEventExtra(event);
-         const isWhiteDamage = event.ability === 'MH' || event.ability === 'OH' || event.ability === 'EXTRA';
+         const isWhiteDamage = event.ability === Ability.MainHand || event.ability === Ability.OffHand || event.ability === Ability.Extra;
          const abilityColor = isWhiteDamage ? c.white : c.brightYellow;
 
          let timeSinceLastStr = '';

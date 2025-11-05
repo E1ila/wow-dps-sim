@@ -1,4 +1,5 @@
 import {
+   Ability,
    AttackResult,
    AttackType,
    Buffs,
@@ -14,25 +15,6 @@ import {
 import {SimulationSpec} from '../SpecLoader';
 import {RogueDamageCalculator} from '../mechanics/RogueDamageCalculator';
 import {MeleeSimulator} from './MeleeSimulator';
-
-export enum RogueAbility {
-   Eviscerate = 'evis',
-   SinisterStrike = 'ss',
-   Backstab = 'bs',
-   Hemorrhage = 'hemo',
-   SliceAndDice = 'snd',
-   AddCombo = 'cp',
-   Set1Combo = 'cp1',
-   Set2Combo = 'cp2',
-   Set3Combo = 'cp3',
-   Set4Combo = 'cp4',
-   Set5Combo = 'cp5',
-   Energy1 = 'energy1',
-   Energy2 = 'energy2',
-   Energy3 = 'energy3',
-   Energy4 = 'energy4',
-   Energy5 = 'energy5',
-}
 
 export const ROGUE = {
    maxEnergy: 100,
@@ -163,8 +145,9 @@ export class RogueSimulator extends MeleeSimulator {
       }
       const cp = this.spendComboPoints();
       const result = this.damageCalculator.calculateEviscerateDamage(cp);
-      this.addDamage(RogueAbility.Eviscerate, result, 0, cp);
+      this.addDamage(Ability.Eviscerate, result, 0, cp);
       this.onFinishingMove();
+      this.onMainHandHit(result); // MH triggers
       this.triggerGlobalCooldown();
       return true;
    }
@@ -182,7 +165,8 @@ export class RogueSimulator extends MeleeSimulator {
       this.refundIfNeeded(result, energyCost);
 
       const comboPointsGained = this.handleComboPointGeneration(result);
-      this.addDamage(RogueAbility.SinisterStrike, result, comboPointsGained);
+      this.addDamage(Ability.SinisterStrike, result, comboPointsGained);
+      this.onMainHandHit(result); // MH triggers
       this.triggerGlobalCooldown();
       return true;
    }
@@ -198,7 +182,8 @@ export class RogueSimulator extends MeleeSimulator {
       this.refundIfNeeded(result, energyCost);
 
       const comboPointsGained = this.handleComboPointGeneration(result);
-      this.addDamage(RogueAbility.Backstab, result, comboPointsGained);
+      this.addDamage(Ability.Backstab, result, comboPointsGained);
+      this.onMainHandHit(result); // MH triggers
       this.triggerGlobalCooldown();
       return true;
    }
@@ -214,7 +199,8 @@ export class RogueSimulator extends MeleeSimulator {
       this.refundIfNeeded(result, energyCost);
 
       const comboPointsGained = this.handleComboPointGeneration(result);
-      this.addDamage(RogueAbility.Hemorrhage, result, comboPointsGained);
+      this.addDamage(Ability.Hemorrhage, result, comboPointsGained);
+      this.onMainHandHit(result); // MH triggers
       this.triggerGlobalCooldown();
       return true;
    }
@@ -245,53 +231,53 @@ export class RogueSimulator extends MeleeSimulator {
          this.talents.swordSpecialization > 0 &&
          this.spec.gearStats.mainHandWeapon.type === WeaponType.Sword &&
          Math.random() < (this.talents.swordSpecialization * 0.01)) {
-         this.addDamage('EXTRA', result);
+         this.addDamage(Ability.Extra, result);
       }
    }
 
    protected executeCommand(cmd: string): boolean {
       switch (cmd) {
-         case RogueAbility.Eviscerate:
+         case Ability.Eviscerate:
             return this.castEviscerate();
-         case RogueAbility.SinisterStrike:
+         case Ability.SinisterStrike:
             return this.castSinisterStrike();
-         case RogueAbility.Backstab:
+         case Ability.Backstab:
             return this.castBackstab();
-         case RogueAbility.Hemorrhage:
+         case Ability.Hemorrhage:
             return this.castHemorrhage();
-         case RogueAbility.SliceAndDice:
+         case Ability.SliceAndDice:
             return this.castSliceAndDice();
-         case RogueAbility.AddCombo:
+         case Ability.AddCombo:
             this.addComboPoint();
             return true;
-         case RogueAbility.Set1Combo:
+         case Ability.Set1Combo:
             this.state.comboPoints = 1;
             return true;
-         case RogueAbility.Set2Combo:
+         case Ability.Set2Combo:
             this.state.comboPoints = 2;
             return true;
-         case RogueAbility.Set3Combo:
+         case Ability.Set3Combo:
             this.state.comboPoints = 3;
             return true;
-         case RogueAbility.Set4Combo:
+         case Ability.Set4Combo:
             this.state.comboPoints = 4;
             return true;
-         case RogueAbility.Set5Combo:
+         case Ability.Set5Combo:
             this.state.comboPoints = 5;
             return true;
-         case RogueAbility.Energy1:
+         case Ability.Energy1:
             this.state.energy = 20;
             return true;
-         case RogueAbility.Energy2:
+         case Ability.Energy2:
             this.state.energy = 40;
             return true;
-         case RogueAbility.Energy3:
+         case Ability.Energy3:
             this.state.energy = 60;
             return true;
-         case RogueAbility.Energy4:
+         case Ability.Energy4:
             this.state.energy = 80;
             return true;
-         case RogueAbility.Energy5:
+         case Ability.Energy5:
             this.state.energy = 100;
             return true;
          default:

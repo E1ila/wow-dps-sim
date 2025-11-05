@@ -109,11 +109,24 @@ export enum WeaponType {
 export enum Ability {
    MainHand = 'MH',
    OffHand = 'OH',
+   Test = 'Test',
+   Extra = 'EXTRA',
+   Eviscerate = 'Evis',
    SinisterStrike = 'SS',
    Backstab = 'BS',
-   Hemorrhage = 'HEMO',
-   Eviscerate = 'EVIS',
-   Test = 'Test',
+   Hemorrhage = 'Hemo',
+   SliceAndDice = 'SnD',
+   AddCombo = 'cp',
+   Set1Combo = 'cp1',
+   Set2Combo = 'cp2',
+   Set3Combo = 'cp3',
+   Set4Combo = 'cp4',
+   Set5Combo = 'cp5',
+   Energy1 = 'energy1',
+   Energy2 = 'energy2',
+   Energy3 = 'energy3',
+   Energy4 = 'energy4',
+   Energy5 = 'energy5',
 }
 
 export interface Attack {
@@ -261,4 +274,10 @@ export interface AttackTableResult {
 export interface AttackResult extends AttackTableResult {
    baseAmount: number;
    amount: number;
+}
+
+const HitAttackTypes = [AttackType.Hit, AttackType.Crit, AttackType.Glancing];
+
+export function isHit(attackResult: AttackResult) {
+   return HitAttackTypes.includes(attackResult.type);
 }
