@@ -70,7 +70,7 @@ export abstract class BaseSimulator implements Simulator, BuffsProvider {
       }
    }
 
-   protected addDamage(ability: string, attackResult: AttackResult, extra?: any): void {
+   protected logDamage(ability: string, attackResult: AttackResult, extra?: any): void {
       this.events.push({
          ...attackResult,
          timestamp: this.state.currentTime,
@@ -104,7 +104,7 @@ export abstract class BaseSimulator implements Simulator, BuffsProvider {
       }
    }
 
-   protected addBuff(buffName: string, duration: number, extra?: any): void {
+   protected logBuff(buffName: string, duration: number, extra?: any): void {
       this.events.push({
          timestamp: this.state.currentTime,
          buffName,
@@ -114,11 +114,12 @@ export abstract class BaseSimulator implements Simulator, BuffsProvider {
       });
    }
 
-   protected addProc(procName: string): void {
+   protected addProc(procName: string, hidden?: boolean): void {
       this.events.push({
          timestamp: this.state.currentTime,
          procName,
          eventType: 'proc' as const,
+         hidden,
       });
    }
 
@@ -134,7 +135,7 @@ export abstract class BaseSimulator implements Simulator, BuffsProvider {
       return this.state.currentTime >= this.state.globalCooldownExpiry;
    }
 
-   protected activateBuff(name: string, duration: number): void {
+   protected activateBuff(name: string, duration: number, extra?: any): void {
       const existingBuff = this.state.activeBuffs.find(buff => buff.name === name);
       const expiry = this.state.currentTime + duration;
 
@@ -143,6 +144,9 @@ export abstract class BaseSimulator implements Simulator, BuffsProvider {
       } else {
          this.state.activeBuffs.push({name, expiry});
       }
+
+      // Add buff event for logging
+      this.logBuff(name, duration, extra);
    }
 
    protected isBuffActive(name: string): boolean {
@@ -224,7 +228,8 @@ export abstract class BaseSimulator implements Simulator, BuffsProvider {
 
             const newEvents = this.events.slice(eventsBefore);
             for (const event of newEvents) {
-               this.printEvent(event);
+               if (!event.hidden)
+                  this.printEvent(event);
             }
 
             this.updateFloatingBar();

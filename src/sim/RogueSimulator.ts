@@ -56,16 +56,15 @@ export class RogueSimulator extends MeleeSimulator {
       return this.talents.vigor ? ROGUE.maxEnergyVigor : ROGUE.maxEnergy;
    }
 
-   override addDamage(ability: string, attackResult: AttackResult, comboPointsGained: number = 0, comboPointsSpent: number = 0): void {
-      super.addDamage(ability, attackResult, {
+   override logDamage(ability: string, attackResult: AttackResult, comboPointsGained: number = 0, comboPointsSpent: number = 0): void {
+      super.logDamage(ability, attackResult, {
          comboPointsGained,
          comboPointsSpent,
       });
    }
 
-   addRogueBuff(buffName: string, duration: number, comboPointsUsed: number): void {
-      super.addBuff(buffName, duration, { comboPointsUsed });
-      this.activateBuff(buffName, duration);
+   override activateBuff(buffName: string, duration: number, comboPointsUsed: number): void {
+      super.activateBuff(buffName, duration, { comboPointsUsed });
    }
 
    addEnergy(amount: number): void {
@@ -135,7 +134,7 @@ export class RogueSimulator extends MeleeSimulator {
       const durationSeconds = baseDuration * (1 + improvedSndBonus);
       const durationMs = durationSeconds * 1000;
 
-      this.addRogueBuff(Buffs.SnD, durationMs, cp);
+      this.activateBuff(Buffs.SnD, durationMs, cp);
       this.onFinishingMove();
       this.triggerGlobalCooldown();
       return true;
@@ -147,7 +146,7 @@ export class RogueSimulator extends MeleeSimulator {
       }
       const cp = this.spendComboPoints();
       const result = this.damageCalculator.calculateEviscerateDamage(cp);
-      this.addDamage(Ability.Eviscerate, result, 0, cp);
+      this.logDamage(Ability.Eviscerate, result, 0, cp);
       this.onFinishingMove();
       this.onMainHandHit(result); // MH triggers
       this.triggerGlobalCooldown();
@@ -169,7 +168,7 @@ export class RogueSimulator extends MeleeSimulator {
       this.refundIfNeeded(result, energyCost);
 
       const comboPointsGained = this.handleComboPointGeneration(result);
-      this.addDamage(Ability.SinisterStrike, result, comboPointsGained);
+      this.logDamage(Ability.SinisterStrike, result, comboPointsGained);
       this.onMainHandHit(result); // MH triggers
       this.triggerGlobalCooldown();
       return true;
@@ -186,7 +185,7 @@ export class RogueSimulator extends MeleeSimulator {
       this.refundIfNeeded(result, energyCost);
 
       const comboPointsGained = this.handleComboPointGeneration(result);
-      this.addDamage(Ability.Backstab, result, comboPointsGained);
+      this.logDamage(Ability.Backstab, result, comboPointsGained);
       this.onMainHandHit(result); // MH triggers
       this.triggerGlobalCooldown();
       return true;
@@ -203,7 +202,7 @@ export class RogueSimulator extends MeleeSimulator {
       this.refundIfNeeded(result, energyCost);
 
       const comboPointsGained = this.handleComboPointGeneration(result);
-      this.addDamage(Ability.Hemorrhage, result, comboPointsGained);
+      this.logDamage(Ability.Hemorrhage, result, comboPointsGained);
       this.onMainHandHit(result); // MH triggers
       this.triggerGlobalCooldown();
       return true;
@@ -235,7 +234,7 @@ export class RogueSimulator extends MeleeSimulator {
          this.talents.swordSpecialization > 0 &&
          this.spec.gearStats.mainHandWeapon.type === WeaponType.Sword &&
          Math.random() < (this.talents.swordSpecialization * 0.01)) {
-         this.addDamage(Ability.Extra, result);
+         this.logDamage(Ability.Extra, result);
       }
    }
 

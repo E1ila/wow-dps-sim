@@ -214,6 +214,7 @@ export interface DamageEvent extends AttackResult {
    timestamp: number;
    ability: string;
    eventType: 'damage';
+   hidden?: boolean
 }
 
 export interface RogueDamageEvent extends DamageEvent {
@@ -226,6 +227,7 @@ export interface BuffEvent {
    buffName: string;
    duration: number;
    eventType: 'buff';
+   hidden?: boolean
 }
 
 export interface RogueBuffEvent extends BuffEvent {
@@ -236,6 +238,7 @@ export interface ProcEvent {
    timestamp: number;
    procName: string;
    eventType: 'proc';
+   hidden?: boolean
 }
 
 export type SimulationEvent = DamageEvent | BuffEvent | ProcEvent;

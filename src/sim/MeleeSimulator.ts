@@ -17,11 +17,11 @@ export abstract class MeleeSimulator extends BaseSimulator {
       this.processAutoAttacks(
          (result) => {
             this.onMainHandHit(result);
-            this.addDamage('MH', result);
+            this.logDamage('MH', result);
          },
          (result) => {
             this.onOffHandHit(result);
-            this.addDamage('OH', result);
+            this.logDamage('OH', result);
          }
       );
    }
@@ -46,7 +46,7 @@ export abstract class MeleeSimulator extends BaseSimulator {
       if (weapon.enchant === WeaponEnchant.Crusader) {
          const procChance = weapon.speed / 60;
          if (Math.random() < procChance) {
-            this.addProc(Buffs.Crusader);
+            this.addProc(Buffs.Crusader, true);
             this.activateBuff(Buffs.Crusader, 15000); // 15 seconds duration
          }
       }
