@@ -676,6 +676,145 @@ describe('Rogue Talents', () => {
       });
    });
 
+   describe('Sword Specialization', () => {
+
+      it('should proc extra attacks at 1% per talent point', () => {
+         const swordStats: GearStats = {
+            ...baseStats,
+            mainHandWeapon: {
+               minDamage: 100,
+               maxDamage: 100,
+               speed: 2.0,
+               type: WeaponType.Sword,
+               enchant: WeaponEnchant.None
+            },
+         };
+
+         const testCases = [
+            {swordSpecialization: 1, expectedProcRate: 0.01},
+            {swordSpecialization: 2, expectedProcRate: 0.02},
+            {swordSpecialization: 3, expectedProcRate: 0.03},
+            {swordSpecialization: 4, expectedProcRate: 0.04},
+            {swordSpecialization: 5, expectedProcRate: 0.05},
+         ];
+
+         testCases.forEach(({swordSpecialization, expectedProcRate}) => {
+            const talents: RogueTalents = {
+               ...baseTalents,
+               swordSpecialization,
+            };
+
+            const simulator = new RogueSimulator(createTestSpec(swordStats, config, talents));
+
+            const iterations = 1000;
+            let totalExtraAttacks = 0;
+            let totalTriggerableHits = 0;
+
+            for (let i = 0; i < iterations; i++) {
+               const result = simulator.simulate();
+
+               const extraAttacks = result.events.filter(e =>
+                  e.eventType === 'damage' &&
+                  'ability' in e &&
+                  e.ability === 'EXTRA' &&
+                  e.amount > 0
+               );
+               totalExtraAttacks += extraAttacks.length;
+
+               const triggerableHits = result.events.filter(e =>
+                  e.eventType === 'damage' &&
+                  'ability' in e &&
+                  ['MH', 'SS', 'BS', 'Evis', 'Hemo'].includes(e.ability) &&
+                  e.amount > 0
+               );
+               totalTriggerableHits += triggerableHits.length;
+            }
+
+            const actualProcRate = totalExtraAttacks / totalTriggerableHits;
+
+            expect(actualProcRate).toBeGreaterThan(expectedProcRate * 0.9);
+            expect(actualProcRate).toBeLessThan(expectedProcRate * 1.1);
+         });
+      });
+
+      it('should NOT proc when using non-sword weapons', () => {
+         const talents: RogueTalents = {
+            ...baseTalents,
+            swordSpecialization: 5,
+         };
+
+         const simulator = new RogueSimulator(createTestSpec(baseStats, config, talents));
+
+         const iterations = 100;
+         let totalExtraAttacks = 0;
+
+         for (let i = 0; i < iterations; i++) {
+            const result = simulator.simulate();
+
+            const extraAttacks = result.events.filter(e =>
+               e.eventType === 'damage' &&
+               'ability' in e &&
+               e.ability === 'EXTRA' &&
+               e.amount > 0
+            );
+            totalExtraAttacks += extraAttacks.length;
+         }
+
+         expect(totalExtraAttacks).toBe(0);
+      });
+
+      it('should only proc on hits that deal damage', () => {
+         const swordStats: GearStats = {
+            ...baseStats,
+            hitChance: 0,
+            mainHandWeapon: {
+               minDamage: 100,
+               maxDamage: 100,
+               speed: 2.0,
+               type: WeaponType.Sword,
+               enchant: WeaponEnchant.None
+            },
+         };
+
+         const talents: RogueTalents = {
+            ...baseTalents,
+            swordSpecialization: 5,
+         };
+
+         const simulator = new RogueSimulator(createTestSpec(swordStats, config, talents));
+
+         const iterations = 100;
+         let totalExtraAttacks = 0;
+
+         for (let i = 0; i < iterations; i++) {
+            const result = simulator.simulate();
+
+            const extraAttacks = result.events.filter(e =>
+               e.eventType === 'damage' &&
+               'ability' in e &&
+               e.ability === 'EXTRA'
+            );
+            totalExtraAttacks += extraAttacks.length;
+
+            const missedMHAttacks = result.events.filter(e =>
+               e.eventType === 'damage' &&
+               'ability' in e &&
+               e.ability === 'MH' &&
+               e.amount === 0
+            );
+
+            if (missedMHAttacks.length > 0) {
+               expect(extraAttacks.length).toBeLessThanOrEqual(result.events.filter(e =>
+                  e.eventType === 'damage' &&
+                  'ability' in e &&
+                  e.ability === 'MH' &&
+                  e.amount > 0
+               ).length);
+            }
+         }
+      });
+   });
+
    describe('Weapon Expertise', () => {
 
       it('should increase weapon skill by 3 per point for daggers', () => {
