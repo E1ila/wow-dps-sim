@@ -152,10 +152,8 @@ describe('Procs', () => {
             // Check if buff is active after this proc
             const procTime = event.timestamp;
             const buffActive = result.events.some(e =>
-              e.eventType === 'buff' &&
-              'buffName' in e &&
-              e.buffName === 'Crusader' &&
-              e.timestamp === procTime
+              e.eventType === 'buff++' && 'buffName' in e &&
+              e.buffName === 'Crusader' && e.timestamp === procTime
             );
 
             if (buffActive) {
@@ -210,15 +208,14 @@ describe('Procs', () => {
         const result = simulator.simulate();
 
         const buffEvents = result.events.filter(e =>
-          e.eventType === 'buff' &&
-          'buffName' in e &&
+          e.eventType === 'buff++' && 'buffName' in e &&
           e.buffName === 'Crusader'
         );
 
         if (buffEvents.length > 0) {
           const buffEvent = buffEvents[0];
           // Check that duration is 15000ms (15 seconds)
-          if (buffEvent.eventType === 'buff' && 'duration' in buffEvent) {
+          if (buffEvent.eventType === 'buff++' && 'duration' in buffEvent) {
             expect(buffEvent.duration).toBe(15000);
             foundCorrectDuration = true;
           }
