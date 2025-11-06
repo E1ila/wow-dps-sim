@@ -239,6 +239,37 @@ export class RogueSimulator extends MeleeSimulator {
       }
    }
 
+   protected checkCondition(cond: string): boolean {
+      switch (cond) {
+         case 'sndw':
+            return this.shouldRefreshSliceAndDice(true);
+         case 'snd':
+            return this.shouldRefreshSliceAndDice();
+         case 'cp0':
+            return this.state.comboPoints === 0;
+         case 'cp1':
+            return this.state.comboPoints === 1;
+         case 'cp2':
+            return this.state.comboPoints === 2;
+         case 'cp3':
+            return this.state.comboPoints === 3;
+         case 'cp4':
+            return this.state.comboPoints === 4;
+         case 'cp5':
+            return this.state.comboPoints === 5;
+         case 'cp1+':
+            return this.state.comboPoints >= 1;
+         case 'cp2+':
+            return this.state.comboPoints >= 2;
+         case 'cp3+':
+            return this.state.comboPoints >= 3;
+         case 'cp4+':
+            return this.state.comboPoints >= 4;
+         default:
+            return false;
+      }
+   }
+
    protected executeCommand(cmd: string): boolean {
       switch (cmd) {
          case Ability.Eviscerate:
@@ -283,6 +314,8 @@ export class RogueSimulator extends MeleeSimulator {
             return true;
          case Ability.Energy5:
             this.state.energy = 100;
+            return true;
+         case Ability.Skip:
             return true;
          default:
             return false;

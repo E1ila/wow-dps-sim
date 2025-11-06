@@ -3,7 +3,8 @@ import {readFileSync} from 'fs';
 import {SimulationOptions, SimulationRunner} from './SimulationRunner';
 import * as fs from "node:fs";
 import path from "node:path";
-import {c, parseSpecString, SpecOverrides} from './types';
+import {SpecOverrides} from './types';
+import {c, parseSpecString} from "./globals";
 
 interface SimulationResult {
    name?: string;

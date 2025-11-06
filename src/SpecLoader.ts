@@ -58,6 +58,11 @@ export class SpecLoader {
          spec.iterations = spec.iterations ?? spec.simulationConfig?.iterations ?? 1000;
          spec.postCycleResourceGeneration = spec.postCycleResourceGeneration ?? spec.simulationConfig?.postCycleResourceGeneration ?? false;
 
+         // Parse rotation string into array
+         if (spec.rotation && typeof spec.rotation === 'string') {
+            spec.rotation = spec.rotation.split(',').map((instruction: string) => instruction.trim());
+         }
+
         const classMap: { [key: string]: CharacterClass } = {
             'rogue': CharacterClass.Rogue,
             'warrior': CharacterClass.Warrior,

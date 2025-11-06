@@ -5,6 +5,7 @@
         "wbs": 1,
         "waitForSndExpiry": 1.6
     },
+    "rotation": "snd?snd:sndw?skip:cp5?evis:ss",
     "talents": {
         "adrenalineRush": true,
         "aggression": 3,

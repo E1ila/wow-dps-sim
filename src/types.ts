@@ -66,13 +66,18 @@ export enum WeaponType {
 export enum Ability {
    MainHand = 'MH',
    OffHand = 'OH',
-   Test = 'Test',
+   Test = 'test',
    Extra = 'EXTRA',
-   Eviscerate = 'Evis',
-   SinisterStrike = 'SS',
-   Backstab = 'BS',
-   Hemorrhage = 'Hemo',
-   SliceAndDice = 'SnD',
+   Skip = 'skip',
+
+   // rogue
+   Eviscerate = 'evis',
+   SinisterStrike = 'ss',
+   Backstab = 'bs',
+   Hemorrhage = 'hemo',
+   SliceAndDice = 'snd',
+
+   // custom rogue ops
    AddCombo = 'cp',
    Set1Combo = 'cp1',
    Set2Combo = 'cp2',

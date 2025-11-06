@@ -49,9 +49,30 @@ export abstract class BaseSimulator implements Simulator, BuffsProvider, PlayerS
    protected abstract updateBuffs(): void;
    protected abstract executeHardcodedRotation(): void;
    protected abstract executeCommand(cmd: string): boolean;
+   protected abstract checkCondition(cond: string): boolean;
 
    protected advanceTime() {
       this.state.currentTime += 10;
+   }
+
+   protected executeInstructionWithCondition(instruction: string): boolean {
+      if (!instruction.includes('?')) {
+         return this.executeCommand(instruction);
+      }
+
+      const questionMarkIndex = instruction.indexOf('?');
+      const condition = instruction.substring(0, questionMarkIndex);
+      const rest = instruction.substring(questionMarkIndex + 1);
+
+      const colonIndex = rest.indexOf(':');
+      const trueBranch = rest.substring(0, colonIndex);
+      const falseBranch = rest.substring(colonIndex + 1);
+
+      if (this.checkCondition(condition)) {
+         return this.executeCommand(trueBranch);
+      } else {
+         return this.executeInstructionWithCondition(falseBranch);
+      }
    }
 
    executeRotation(): void {
@@ -61,7 +82,8 @@ export abstract class BaseSimulator implements Simulator, BuffsProvider, PlayerS
          let originalIndex = this.nextRotationCommandIndex;
          let result = false;
          do {
-            result = this.executeCommand(this.spec.rotation[this.nextRotationCommandIndex]);
+            const instructions = this.spec.rotation[this.nextRotationCommandIndex];
+            result = this.executeInstructionWithCondition(instructions);
             this.nextRotationCommandIndex++;
             if (this.nextRotationCommandIndex == this.spec.rotation.length) {
                this.nextRotationCommandIndex = 0;
@@ -344,10 +366,10 @@ export abstract class BaseSimulator implements Simulator, BuffsProvider, PlayerS
          }
 
          if (event.amount === 0) {
-            console.log(`${timestamp} ${c.blue}${event.ability} ${c.brightMagenta}${event.type.toUpperCase()}${c.reset}${extra}${timeSinceLastStr}`);
+            console.log(`${timestamp} ${c.blue}${event.ability.toUpperCase()} ${c.brightMagenta}${event.type.toUpperCase()}${c.reset}${extra}${timeSinceLastStr}`);
          } else {
             const critStr = event.type === AttackType.Crit ? ' (crit)' : (event.type === AttackType.Glancing ? ' (glancing)' : '');
-            console.log(`${timestamp} ${c.blue}${event.ability} ${abilityColor}${event.amount}${c.reset}${critStr}${extra}${timeSinceLastStr}`);
+            console.log(`${timestamp} ${c.blue}${event.ability.toUpperCase()} ${abilityColor}${event.amount}${c.reset}${critStr}${extra}${timeSinceLastStr}`);
          }
       }
    }
