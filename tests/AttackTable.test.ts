@@ -1,41 +1,7 @@
-import {GearStats, PlayerStatsProvider, WeaponEnchant, WeaponType} from '../src/types';
 import {AttackTable} from '../src/mechanics/AttackTable';
+import {createTestStats, wrapStats} from './fixtures';
 
 describe('Attack Table Mechanics', () => {
-  const createTestStats = (weaponSkill: number, hasOffHand: boolean = true): GearStats => ({
-    attackPower: 1000,
-    critChance: 30,
-    hitChance: 0,
-    agility: 300,
-    strength: 100,
-    weaponSkill,
-    mainHandWeapon: {
-      minDamage: 100,
-      maxDamage: 150,
-      speed: 2.0,
-      type: WeaponType.Sword,
-      enchant: WeaponEnchant.None,
-    },
-    offHandWeapon: hasOffHand ? {
-      minDamage: 80,
-      maxDamage: 120,
-      speed: 2.0,
-      type: WeaponType.Sword,
-      enchant: WeaponEnchant.None,
-    } : undefined,
-  });
-
-  const wrapStats = (gearStats: GearStats, targetLevel: number): PlayerStatsProvider => ({
-    critChance: () => gearStats.critChance,
-    get weaponSkill() { return gearStats.weaponSkill; },
-    get attackPower() { return gearStats.attackPower; },
-    get hitChance() { return gearStats.hitChance; },
-    get playerLevel() { return 60; },
-    get targetLevel() { return targetLevel; },
-    get isDualWielding() { return gearStats.offHandWeapon !== undefined; },
-    get haste() { return 1; }
-  });
-
   describe('Single-Wield against Level 63 Raid Boss', () => {
     it('should have 8.0% miss and 40% glancing (65% damage) with 300 skill', () => {
       const stats = createTestStats(300, false);

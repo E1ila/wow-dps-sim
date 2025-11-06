@@ -1,90 +1,29 @@
-import {
-   Ability,
-   AttackType,
-   CharacterClass,
-   GearStats,
-   RogueTalents,
-   SimulationConfig,
-   WeaponEnchant,
-   WeaponType
-} from '../src/types';
+import {Ability, AttackType, GearStats, RogueTalents, WeaponEnchant, WeaponType} from '../src/types';
 import {AttackTable} from '../src/mechanics/AttackTable';
 import {RogueSimulator} from '../src/sim/RogueSimulator';
-import {SimulationSpec} from '../src/SpecLoader';
+import {baseStats, baseTalents, config, createTestSpec} from './fixtures';
 
-const baseStats: GearStats = {
-   attackPower: 1200,
-   critChance: 30,
-   hitChance: 9,
-   agility: 300,
-   strength: 100,
-   weaponSkill: 300,
+// RogueSimulator tests use different weapon damages and speeds
+const rogueSimulatorBaseStats = {
+   ...baseStats,
    mainHandWeapon: {
+      ...baseStats.mainHandWeapon,
       minDamage: 76,
       maxDamage: 142,
       speed: 1.7,
-      type: WeaponType.Dagger,
-      enchant: WeaponEnchant.None
    },
    offHandWeapon: {
+      ...baseStats.offHandWeapon!,
       minDamage: 68,
       maxDamage: 132,
-      speed: 1.5,
-      type: WeaponType.Dagger,
-      enchant: WeaponEnchant.None
    },
 };
 
-const config: SimulationConfig = {
-   fightLength: 60,
-   targetLevel: 63,
+// RogueSimulator tests use different armor
+const rogueSimulatorConfig = {
+   ...config,
    targetArmor: 4000,
-   iterations: 1,
 };
-
-const baseTalents: RogueTalents = {
-   malice: 0,
-   murder: 0,
-   improvedSinisterStrike: 0,
-   improvedEviscerate: 0,
-   relentlessStrikes: false,
-   ruthlessness: 0,
-   lethality: 0,
-   sealFate: 0,
-   coldBlood: false,
-   improvedSliceAndDice: 0,
-   daggerSpecialization: 0,
-   swordSpecialization: 0,
-   maceSpecialization: 0,
-   fistWeaponSpecialization: 0,
-   bladeFurry: false,
-   adrenalineRush: false,
-   aggression: 0,
-   dualWieldSpecialization: 0,
-   opportunity: 0,
-   improvedBackstab: 0,
-   hemorrhage: false,
-   precision: 0,
-   weaponExpertise: 0,
-   vigor: false,
-};
-
-function createTestSpec(stats: GearStats, config: SimulationConfig, talents: RogueTalents): SimulationSpec {
-   return {
-      name: 'test',
-      description: 'test spec',
-      class: CharacterClass.Rogue,
-      playerLevel: 60,
-      gearStats: stats,
-      simulationConfig: config,
-      talents,
-      fightLength: config.fightLength ?? 60,
-      targetLevel: config.targetLevel,
-      targetArmor: config.targetArmor,
-      iterations: config.iterations ?? 1,
-      postCycleResourceGeneration: config.postCycleResourceGeneration ?? false,
-   };
-}
 
 describe('Rogue Talents', () => {
 
@@ -106,12 +45,12 @@ describe('Rogue Talents', () => {
                malice,
             };
 
-            const simulator = new RogueSimulator(createTestSpec(baseStats, config, talents));
+            const simulator = new RogueSimulator(createTestSpec(rogueSimulatorBaseStats, rogueSimulatorConfig, talents));
 
             expect(simulator.critChance({
                ability: Ability.MainHand,
                isSpecialAttack: false,
-               weapon: baseStats.mainHandWeapon
+               weapon: rogueSimulatorBaseStats.mainHandWeapon
             })).toBe(expectedCritChance);
          });
       });
@@ -129,7 +68,7 @@ describe('Rogue Talents', () => {
                malice,
             };
 
-            const simulator = new RogueSimulator(createTestSpec(baseStats, config, talents));
+            const simulator = new RogueSimulator(createTestSpec(rogueSimulatorBaseStats, rogueSimulatorConfig, talents));
             const attackTable = new AttackTable(simulator);
 
             const numRolls = 100000;
@@ -139,7 +78,7 @@ describe('Rogue Talents', () => {
                const result = attackTable.roll({
                   ability: Ability.Test,
                   isSpecialAttack: true,
-                  weapon: baseStats.mainHandWeapon
+                  weapon: rogueSimulatorBaseStats.mainHandWeapon
                });
                if (result.type === AttackType.Crit) {
                   crits++;
@@ -169,7 +108,7 @@ describe('Rogue Talents', () => {
             };
 
             const simulator = new RogueSimulator(createTestSpec({
-                  ...baseStats,
+                  ...rogueSimulatorBaseStats,
                   critChance: baseCritChance,
                   hitChance,
                }, config, talents));
@@ -182,7 +121,7 @@ describe('Rogue Talents', () => {
                const result = attackTable.roll({
                   ability: Ability.MainHand,
                   isSpecialAttack: false,
-                  weapon: baseStats.mainHandWeapon
+                  weapon: rogueSimulatorBaseStats.mainHandWeapon
                });
                if (result.type === AttackType.Crit) {
                   crits++;
@@ -215,19 +154,19 @@ describe('Rogue Talents', () => {
                daggerSpecialization,
             };
 
-            const simulator = new RogueSimulator(createTestSpec(baseStats, config, talents));
+            const simulator = new RogueSimulator(createTestSpec(rogueSimulatorBaseStats, rogueSimulatorConfig, talents));
 
             expect(simulator.critChance({
                ability: Ability.MainHand,
                isSpecialAttack: false,
-               weapon: baseStats.mainHandWeapon
+               weapon: rogueSimulatorBaseStats.mainHandWeapon
             })).toBe(expectedCritChance);
          });
       });
 
       it('should NOT increase crit chance when using non-dagger weapons', () => {
          const swordStats: GearStats = {
-            ...baseStats,
+            ...rogueSimulatorBaseStats,
             mainHandWeapon: {
                minDamage: 76,
                maxDamage: 142,
@@ -242,7 +181,7 @@ describe('Rogue Talents', () => {
             daggerSpecialization: 5,
          };
 
-         const simulator = new RogueSimulator(createTestSpec(swordStats, config, talents));
+         const simulator = new RogueSimulator(createTestSpec(swordStats, rogueSimulatorConfig, talents));
 
          expect(simulator.critChance({
             ability: Ability.MainHand,
@@ -264,7 +203,7 @@ describe('Rogue Talents', () => {
                daggerSpecialization,
             };
 
-            const simulator = new RogueSimulator(createTestSpec(baseStats, config, talents));
+            const simulator = new RogueSimulator(createTestSpec(rogueSimulatorBaseStats, rogueSimulatorConfig, talents));
             const attackTable = new AttackTable(simulator);
 
             const numRolls = 100000;
@@ -274,7 +213,7 @@ describe('Rogue Talents', () => {
                const result = attackTable.roll({
                   ability: Ability.Test,
                   isSpecialAttack: true,
-                  weapon: baseStats.mainHandWeapon
+                  weapon: rogueSimulatorBaseStats.mainHandWeapon
                });
                if (result.type === AttackType.Crit) {
                   crits++;
@@ -298,7 +237,7 @@ describe('Rogue Talents', () => {
          };
 
          const swordStats: GearStats = {
-            ...baseStats,
+            ...rogueSimulatorBaseStats,
             mainHandWeapon: swordWeapon,
          };
 
@@ -307,7 +246,7 @@ describe('Rogue Talents', () => {
             daggerSpecialization: 5,
          };
 
-         const simulator = new RogueSimulator(createTestSpec(swordStats, config, talents));
+         const simulator = new RogueSimulator(createTestSpec(swordStats, rogueSimulatorConfig, talents));
          const attackTable = new AttackTable(simulator);
 
          const numRolls = 100000;
@@ -337,12 +276,12 @@ describe('Rogue Talents', () => {
             daggerSpecialization: 5,
          };
 
-         const simulator = new RogueSimulator(createTestSpec(baseStats, config, talents));
+         const simulator = new RogueSimulator(createTestSpec(rogueSimulatorBaseStats, rogueSimulatorConfig, talents));
 
          expect(simulator.critChance({
             ability: Ability.Backstab,
             isSpecialAttack: true,
-            weapon: baseStats.mainHandWeapon
+            weapon: rogueSimulatorBaseStats.mainHandWeapon
          })).toBe(40);
       });
 
@@ -353,7 +292,7 @@ describe('Rogue Talents', () => {
             daggerSpecialization: 5,
          };
 
-         const simulator = new RogueSimulator(createTestSpec(baseStats, config, talents));
+         const simulator = new RogueSimulator(createTestSpec(rogueSimulatorBaseStats, rogueSimulatorConfig, talents));
          const attackTable = new AttackTable(simulator);
 
          const numRolls = 100000;
@@ -363,7 +302,7 @@ describe('Rogue Talents', () => {
             const result = attackTable.roll({
                ability: Ability.Test,
                isSpecialAttack: true,
-               weapon: baseStats.mainHandWeapon
+               weapon: rogueSimulatorBaseStats.mainHandWeapon
             });
             if (result.type === AttackType.Crit) {
                crits++;
@@ -395,7 +334,7 @@ describe('Rogue Talents', () => {
                precision,
             };
 
-            const simulator = new RogueSimulator(createTestSpec(baseStats, config, talents));
+            const simulator = new RogueSimulator(createTestSpec(rogueSimulatorBaseStats, rogueSimulatorConfig, talents));
 
             expect(simulator.hitChance).toBe(expectedHitChance);
          });
@@ -415,11 +354,11 @@ describe('Rogue Talents', () => {
             };
 
             const testStats: GearStats = {
-               ...baseStats,
+               ...rogueSimulatorBaseStats,
                hitChance: baseHitChance,
             };
 
-            const simulator = new RogueSimulator(createTestSpec(testStats, config, talents));
+            const simulator = new RogueSimulator(createTestSpec(testStats, rogueSimulatorConfig, talents));
             const attackTable = new AttackTable(simulator);
 
             const numRolls = 100000;
@@ -429,7 +368,7 @@ describe('Rogue Talents', () => {
                const result = attackTable.roll({
                   ability: Ability.Test,
                   isSpecialAttack: true,
-                  weapon: baseStats.mainHandWeapon
+                  weapon: rogueSimulatorBaseStats.mainHandWeapon
                });
                if (result.type === AttackType.Miss) {
                   misses++;
@@ -451,7 +390,7 @@ describe('Rogue Talents', () => {
             ...baseTalents,
             relentlessStrikes: true,
          };
-         const simulator = new RogueSimulator(createTestSpec(baseStats, config, talents));
+         const simulator = new RogueSimulator(createTestSpec(rogueSimulatorBaseStats, rogueSimulatorConfig, talents));
          const originalRandom = Math.random;
          Math.random = () => 0.99;
 
@@ -472,7 +411,7 @@ describe('Rogue Talents', () => {
             ...baseTalents,
             relentlessStrikes: false,
          };
-         const simulator = new RogueSimulator(createTestSpec(baseStats, config, talents));
+         const simulator = new RogueSimulator(createTestSpec(rogueSimulatorBaseStats, rogueSimulatorConfig, talents));
          const originalRandom = Math.random;
          Math.random = () => 0.99;
 
@@ -493,7 +432,7 @@ describe('Rogue Talents', () => {
 
       it('should proc extra attacks at 1% per talent point', () => {
          const swordStats: GearStats = {
-            ...baseStats,
+            ...rogueSimulatorBaseStats,
             mainHandWeapon: {
                minDamage: 100,
                maxDamage: 100,
@@ -517,7 +456,7 @@ describe('Rogue Talents', () => {
                swordSpecialization,
             };
 
-            const simulator = new RogueSimulator(createTestSpec(swordStats, config, talents));
+            const simulator = new RogueSimulator(createTestSpec(swordStats, rogueSimulatorConfig, talents));
 
             const iterations = 1000;
             let totalExtraAttacks = 0;
@@ -556,7 +495,7 @@ describe('Rogue Talents', () => {
             swordSpecialization: 5,
          };
 
-         const simulator = new RogueSimulator(createTestSpec(baseStats, config, talents));
+         const simulator = new RogueSimulator(createTestSpec(rogueSimulatorBaseStats, rogueSimulatorConfig, talents));
 
          const iterations = 100;
          let totalExtraAttacks = 0;
@@ -578,7 +517,7 @@ describe('Rogue Talents', () => {
 
       it('should only proc on hits that deal damage', () => {
          const swordStats: GearStats = {
-            ...baseStats,
+            ...rogueSimulatorBaseStats,
             hitChance: 0,
             mainHandWeapon: {
                minDamage: 100,
@@ -594,7 +533,7 @@ describe('Rogue Talents', () => {
             swordSpecialization: 5,
          };
 
-         const simulator = new RogueSimulator(createTestSpec(swordStats, config, talents));
+         const simulator = new RogueSimulator(createTestSpec(swordStats, rogueSimulatorConfig, talents));
 
          const iterations = 100;
          let totalExtraAttacks = 0;
@@ -643,7 +582,7 @@ describe('Rogue Talents', () => {
                weaponExpertise,
             };
 
-            const simulator = new RogueSimulator(createTestSpec(baseStats, config, talents));
+            const simulator = new RogueSimulator(createTestSpec(rogueSimulatorBaseStats, rogueSimulatorConfig, talents));
 
             expect(simulator.weaponSkill).toBe(expectedWeaponSkill);
          });
@@ -651,7 +590,7 @@ describe('Rogue Talents', () => {
 
       it('should increase weapon skill by 3 per point for swords', () => {
          const swordStats: GearStats = {
-            ...baseStats,
+            ...rogueSimulatorBaseStats,
             mainHandWeapon: {
                minDamage: 76,
                maxDamage: 142,
@@ -673,7 +612,7 @@ describe('Rogue Talents', () => {
                weaponExpertise,
             };
 
-            const simulator = new RogueSimulator(createTestSpec(swordStats, config, talents));
+            const simulator = new RogueSimulator(createTestSpec(swordStats, rogueSimulatorConfig, talents));
 
             expect(simulator.weaponSkill).toBe(expectedWeaponSkill);
          });
@@ -696,7 +635,7 @@ describe('Rogue Talents', () => {
             weaponExpertise: 5,
          };
 
-         const simulator = new RogueSimulator(createTestSpec(maceStats, config, talents));
+         const simulator = new RogueSimulator(createTestSpec(maceStats, rogueSimulatorConfig, talents));
 
          expect(simulator.weaponSkill).toBe(300);
       });
@@ -718,8 +657,8 @@ describe('Rogue Talents', () => {
             weaponSkill: 300,
          };
 
-         const simulator0 = new RogueSimulator(createTestSpec(testStats, config, talents0));
-         const simulator5 = new RogueSimulator(createTestSpec(testStats, config, talents5));
+         const simulator0 = new RogueSimulator(createTestSpec(testStats, rogueSimulatorConfig, talents0));
+         const simulator5 = new RogueSimulator(createTestSpec(testStats, rogueSimulatorConfig, talents5));
          const attackTable0 = new AttackTable(simulator0);
          const attackTable5 = new AttackTable(simulator5);
 
@@ -731,7 +670,7 @@ describe('Rogue Talents', () => {
             const result0 = attackTable0.roll({
                ability: Ability.Test,
                isSpecialAttack: true,
-               weapon: baseStats.mainHandWeapon
+               weapon: rogueSimulatorBaseStats.mainHandWeapon
             });
             if (result0.type === AttackType.Miss) {
                misses0++;
@@ -740,7 +679,7 @@ describe('Rogue Talents', () => {
             const result5 = attackTable5.roll({
                ability: Ability.Test,
                isSpecialAttack: true,
-               weapon: baseStats.mainHandWeapon
+               weapon: rogueSimulatorBaseStats.mainHandWeapon
             });
             if (result5.type === AttackType.Miss) {
                misses5++;
@@ -768,12 +707,12 @@ describe('Rogue Talents', () => {
             };
 
             const testStats: GearStats = {
-               ...baseStats,
+               ...rogueSimulatorBaseStats,
                hitChance: 0,
                weaponSkill: 300,
             };
 
-            const simulator = new RogueSimulator(createTestSpec(testStats, config, talents));
+            const simulator = new RogueSimulator(createTestSpec(testStats, rogueSimulatorConfig, talents));
             const attackTable = new AttackTable(simulator);
 
             expect(simulator.weaponSkill).toBe(expectedWeaponSkill);
@@ -800,7 +739,7 @@ describe('Rogue Talents', () => {
                const result = attackTable.roll({
                   ability: Ability.Test,
                   isSpecialAttack: true,
-                  weapon: baseStats.mainHandWeapon
+                  weapon: rogueSimulatorBaseStats.mainHandWeapon
                });
                if (result.type === AttackType.Miss) {
                   misses++;
