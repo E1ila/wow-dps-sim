@@ -1,5 +1,6 @@
 import {BaseSimulator} from './BaseSimulator';
-import {AttackResult, Buffs, isHit, MeleeSimulationState, Weapon, WeaponEnchant} from '../types';
+import {AttackResult, Buff, MeleeSimulationState, Weapon, WeaponEnchant} from '../types';
+import {isHit} from '../globals';
 import {MeleeDamageCalculator} from "../mechanics/MeleeDamageCalculator";
 
 export enum MeleeAbility {
@@ -46,8 +47,8 @@ export abstract class MeleeSimulator extends BaseSimulator {
       if (weapon.enchant === WeaponEnchant.Crusader) {
          const procChance = weapon.speed / 60;
          if (Math.random() < procChance) {
-            this.addProc(Buffs.Crusader, true);
-            this.activateBuff(Buffs.Crusader, 15000); // 15 seconds duration
+            this.addProc(Buff.Crusader, true);
+            this.activateBuff(Buff.Crusader, 15000); // 15 seconds duration
          }
       }
    }

@@ -1,4 +1,5 @@
-import {c, CharacterClass, colorByClass, RogueTalents, SimulationSetup, WarriorTalents, WeaponType} from './types';
+import {CharacterClass, RogueTalents, SimulationSetup, WarriorTalents, WeaponType} from './types';
+import {c, colorByClass} from './globals';
 import {WarriorSimulator} from './sim/WarriorSimulator';
 import {BaseSimulator} from './sim/BaseSimulator';
 import {SimulationSpec, SpecLoader} from './SpecLoader';

@@ -1,6 +1,7 @@
 import {Command} from 'commander';
-import {parseSpecString, WeaponType} from './types';
+import {WeaponType} from './types';
 import {SimulationOptions, SimulationRunner} from './SimulationRunner';
+import {parseSpecString} from "./globals";
 
 const program = new Command();
 

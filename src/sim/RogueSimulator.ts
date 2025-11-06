@@ -3,8 +3,7 @@ import {
    Attack,
    AttackResult,
    AttackType,
-   Buffs,
-   c,
+   Buff,
    ProcEvent,
    RogueBuffEvent,
    RogueDamageEvent,
@@ -13,6 +12,7 @@ import {
    SimulationSetup,
    WeaponType,
 } from '../types';
+import {c} from '../globals';
 import {SimulationSpec} from '../SpecLoader';
 import {RogueDamageCalculator} from '../mechanics/RogueDamageCalculator';
 import {MeleeSimulator} from './MeleeSimulator';
@@ -75,7 +75,7 @@ export class RogueSimulator extends MeleeSimulator {
    }
 
    getHasteMultiplier(): number {
-      return this.isBuffActive(Buffs.SnD) ? 1 + ROGUE.slnDiceIAS : 1;
+      return this.isBuffActive(Buff.SnD) ? 1 + ROGUE.slnDiceIAS : 1;
    }
 
    spendEnergy(amount: number): boolean {
@@ -135,7 +135,7 @@ export class RogueSimulator extends MeleeSimulator {
       const durationSeconds = baseDuration * (1 + improvedSndBonus);
       const durationMs = durationSeconds * 1000;
 
-      this.activateBuff(Buffs.SnD, durationMs, cp);
+      this.activateBuff(Buff.SnD, durationMs, cp);
       this.onFinishingMove();
       this.triggerGlobalCooldown();
       return true;
@@ -313,9 +313,9 @@ export class RogueSimulator extends MeleeSimulator {
    shouldRefreshSliceAndDice(waitCheck?: boolean): boolean {
       if (this.state.comboPoints == 0)
          return false;
-      if (!this.isBuffActive(Buffs.SnD))
+      if (!this.isBuffActive(Buff.SnD))
          return true;
-      const timeRemainingMs = this.getBuffTimeRemaining(Buffs.SnD);
+      const timeRemainingMs = this.getBuffTimeRemaining(Buff.SnD);
       let timeBefore = this.setup.refreshSndSecondsBeforeExpiry ?? 0.2;
       if (waitCheck && this.setup.waitForSndExpiry)
          timeBefore = this.setup.waitForSndExpiry;
@@ -397,7 +397,7 @@ export class RogueSimulator extends MeleeSimulator {
 
    get attackPower(): number {
       let attackPower = this.spec.gearStats.attackPower;
-      if (this.hasBuff(Buffs.Crusader)) {
+      if (this.hasBuff(Buff.Crusader)) {
          attackPower += 100; // 1 Strength = 1 AP for Rogues
       }
       return attackPower;

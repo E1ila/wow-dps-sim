@@ -4,7 +4,6 @@ import {
    AttackResult,
    AttackType,
    BuffEvent,
-   c,
    DamageEvent,
    PlayerStatsProvider,
    SimulationEvent,
@@ -12,6 +11,7 @@ import {
    SimulationState,
    SimulationStatistics
 } from '../types';
+import {c} from '../globals';
 import {BuffsProvider, DamageCalculator} from "../mechanics/DamageCalculator";
 import {SimulationSpec} from '../SpecLoader';
 

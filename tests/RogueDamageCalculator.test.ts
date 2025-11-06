@@ -1,7 +1,7 @@
 import {
   Ability,
   AttackType,
-  Buffs,
+  Buff,
   CharacterClass,
   GearStats,
   RogueTalents,
@@ -780,7 +780,7 @@ describe('RogueDamageCalculator', () => {
       const originalRandom = Math.random;
       Math.random = () => 0.5;
 
-      const calcWithBuff = new RogueDamageCalculator(createTestSpec(baseStats, config, baseTalents), createMockBuffsProvider([Buffs.Crusader]));
+      const calcWithBuff = new RogueDamageCalculator(createTestSpec(baseStats, config, baseTalents), createMockBuffsProvider([Buff.Crusader]));
       const resultWithBuff = calcWithBuff.calculateAutoAttackDamage(false);
 
       const calcWithoutBuff = new RogueDamageCalculator(createTestSpec(baseStats, config, baseTalents), createMockBuffsProvider());
@@ -800,7 +800,7 @@ describe('RogueDamageCalculator', () => {
       Math.random = () => 0.5;
 
       const comboPoints = 5;
-      const calcWithBuff = new RogueDamageCalculator(createTestSpec(baseStats, config, baseTalents), createMockBuffsProvider([Buffs.Crusader]));
+      const calcWithBuff = new RogueDamageCalculator(createTestSpec(baseStats, config, baseTalents), createMockBuffsProvider([Buff.Crusader]));
       const resultWithBuff = calcWithBuff.calculateEviscerateDamage(comboPoints);
 
       const calcWithoutBuff = new RogueDamageCalculator(createTestSpec(baseStats, config, baseTalents), createMockBuffsProvider());

@@ -1,46 +1,3 @@
-export const c = {
-   black: '\x1b[30m',
-   red: '\x1b[31m',
-   green: '\x1b[32m',
-   yellow: '\x1b[33m',
-   blue: '\x1b[34m',
-   magenta: '\x1b[35m',
-   cyan: '\x1b[36m',
-   white: '\x1b[37m',
-   gray: '\x1b[90m',
-   brightRed: '\x1b[91m',
-   brightGreen: '\x1b[92m',
-   brightYellow: '\x1b[93m',
-   brightBlue: '\x1b[94m',
-   brightMagenta: '\x1b[95m',
-   brightCyan: '\x1b[96m',
-   brightWhite: '\x1b[97m',
-   reset: '\x1b[0m',
-} as const;
-
-export function colorByClass(characterClass: CharacterClass): string {
-   switch (characterClass) {
-      case CharacterClass.Rogue:
-         return c.yellow;
-      case CharacterClass.Warrior:
-         return c.red;
-   }
-}
-
-export function parseSpecString(specStr: string): SpecOverrides {
-   const parts = specStr.split('|');
-   if (parts.length >= 1 &&  parts.length <= 4) {
-      return {
-         talents: parts[0].trim(),
-         setup: parts.length >= 2 && parts[1].trim() || undefined,
-         gear: parts.length >= 3 && parts[2].trim() || undefined,
-         rotation: parts.length >= 4 && parts[3].trim() || undefined
-      };
-   } else {
-      throw new Error(`Invalid spec format: ${specStr}. Expected format: talents|setup|gear|rotation (setup, gear, and rotation optional)`);
-   }
-}
-
 export interface SpecOverrides {
    talents: string;
    setup?: string;
@@ -48,7 +5,7 @@ export interface SpecOverrides {
    rotation?: string;
 }
 
-export enum Buffs {
+export enum Buff {
    SnD = 'SnD',
    Crusader = 'Crusader',
 }
@@ -180,16 +137,11 @@ export interface SimulationSetup {
    prefer5EvisOverSnd?: boolean;
 }
 
-export interface Buff {
-   name: string;
-   expiry: number;
-}
-
 export interface SimulationState {
    currentTime: number;
    targetHealth: number;
    globalCooldownExpiry: number;
-   activeBuffs: Buff[];
+   activeBuffs: ActiveBuff[];
 }
 
 export interface MeleeSimulationState extends SimulationState {
@@ -210,6 +162,11 @@ export interface SimulationConfig {
    fightLength?: number;
    iterations?: number;
    postCycleResourceGeneration?: boolean;
+}
+
+export interface ActiveBuff {
+   name: string;
+   expiry: number;
 }
 
 export interface DamageEvent extends AttackResult {
@@ -286,12 +243,6 @@ export interface AttackTableResult {
 export interface AttackResult extends AttackTableResult {
    baseAmount: number;
    amount: number;
-}
-
-const HitAttackTypes = [AttackType.Hit, AttackType.Crit, AttackType.Glancing];
-
-export function isHit(attackResult: AttackResult) {
-   return HitAttackTypes.includes(attackResult.type);
 }
 
 export interface PlayerStatsProvider {
