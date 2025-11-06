@@ -1,9 +1,9 @@
 import {
-  Ability,
   AttackType,
   Buff,
   CharacterClass,
   GearStats,
+  PlayerStatsProvider,
   RogueTalents,
   SimulationConfig,
   TargetType,
@@ -17,6 +17,32 @@ import {BuffsProvider} from '../src/mechanics/DamageCalculator';
 const createMockBuffsProvider = (activeBuffs: string[] = []): BuffsProvider => ({
   hasBuff: (name: string) => activeBuffs.includes(name)
 });
+
+const createMockStatsProvider = (spec: SimulationSpec, buffsProvider: BuffsProvider): PlayerStatsProvider => {
+  const baseAttackPower = spec.gearStats.attackPower;
+  return {
+    critChance: () => spec.gearStats.critChance,
+    get weaponSkill() { return spec.gearStats.weaponSkill; },
+    get attackPower() {
+      let ap = baseAttackPower;
+      if (buffsProvider.hasBuff(Buff.Crusader)) {
+        ap += 100;
+      }
+      return ap;
+    },
+    get hitChance() { return spec.gearStats.hitChance; },
+    get playerLevel() { return spec.playerLevel; },
+    get isDualWielding() { return spec.gearStats.offHandWeapon !== undefined; },
+    get targetLevel() { return spec.targetLevel; },
+    get haste() { return 1; }
+  };
+};
+
+// Helper to create calculator with standard mocks
+const createCalculator = (spec: SimulationSpec, activeBuffs: string[] = []): RogueDamageCalculator => {
+  const buffs = createMockBuffsProvider(activeBuffs);
+  return new RogueDamageCalculator(spec, buffs, createMockStatsProvider(spec, buffs));
+};
 
 const baseStats: GearStats = {
   attackPower: 1200,
@@ -94,207 +120,6 @@ function createTestSpec(stats: GearStats, config: SimulationConfig, talents: Rog
 }
 
 describe('RogueDamageCalculator', () => {
-  describe('Precision Talent', () => {
-    it('should increase hit chance by 1% per point', () => {
-      const testCases = [
-        {precision: 0, expectedHit: 9},
-        {precision: 1, expectedHit: 10},
-        {precision: 2, expectedHit: 11},
-        {precision: 3, expectedHit: 12},
-        {precision: 4, expectedHit: 13},
-        {precision: 5, expectedHit: 14},
-      ];
-
-      testCases.forEach(({precision, expectedHit}) => {
-        const talents = {...baseTalents, precision};
-        const calculator = new RogueDamageCalculator(createTestSpec(baseStats, config, talents), createMockBuffsProvider());
-
-        expect(calculator.hitChance).toBe(expectedHit);
-      });
-    });
-  });
-
-  describe('Weapon Expertise Talent', () => {
-    it('should increase weapon skill by 3 for 1 point with daggers', () => {
-      const talents = {...baseTalents, weaponExpertise: 1};
-      const calculator = new RogueDamageCalculator(createTestSpec(baseStats, config, talents), createMockBuffsProvider());
-
-      expect(calculator.weaponSkill).toBe(303);
-    });
-
-    it('should increase weapon skill by 5 for 2 points with daggers', () => {
-      const talents = {...baseTalents, weaponExpertise: 2};
-      const calculator = new RogueDamageCalculator(createTestSpec(baseStats, config, talents), createMockBuffsProvider());
-
-      expect(calculator.weaponSkill).toBe(305);
-    });
-
-    it('should increase weapon skill by 3 for 1 point with swords', () => {
-      const swordStats = {
-        ...baseStats,
-        mainHandWeapon: {...baseStats.mainHandWeapon, type: WeaponType.Sword},
-      };
-      const talents = {...baseTalents, weaponExpertise: 1};
-      const calculator = new RogueDamageCalculator(createTestSpec(swordStats, config, talents), createMockBuffsProvider());
-
-      expect(calculator.weaponSkill).toBe(303);
-    });
-
-    it('should increase weapon skill by 3 for 1 point with fist weapons', () => {
-      const fistStats = {
-        ...baseStats,
-        mainHandWeapon: {...baseStats.mainHandWeapon, type: WeaponType.Fist},
-      };
-      const talents = {...baseTalents, weaponExpertise: 1};
-      const calculator = new RogueDamageCalculator(createTestSpec(fistStats, config, talents), createMockBuffsProvider());
-
-      expect(calculator.weaponSkill).toBe(303);
-    });
-
-    it('should NOT increase weapon skill with maces', () => {
-      const maceStats = {
-        ...baseStats,
-        mainHandWeapon: {...baseStats.mainHandWeapon, type: WeaponType.Mace},
-      };
-      const talents = {...baseTalents, weaponExpertise: 2};
-      const calculator = new RogueDamageCalculator(createTestSpec(maceStats, config, talents), createMockBuffsProvider());
-
-      expect(calculator.weaponSkill).toBe(300);
-    });
-  });
-
-  describe('Malice Talent', () => {
-    it('should increase crit chance by 1% per point', () => {
-      const testCases = [
-        {malice: 0, expectedCrit: 30},
-        {malice: 1, expectedCrit: 31},
-        {malice: 3, expectedCrit: 33},
-        {malice: 5, expectedCrit: 35},
-      ];
-
-      testCases.forEach(({malice, expectedCrit}) => {
-        const talents = {...baseTalents, malice};
-        const calculator = new RogueDamageCalculator(createTestSpec(baseStats, config, talents), createMockBuffsProvider());
-
-        const critChance = calculator.critChance({
-          ability: Ability.MainHand,
-          isSpecialAttack: false,
-          weapon: baseStats.mainHandWeapon,
-        });
-
-        expect(critChance).toBe(expectedCrit);
-      });
-    });
-  });
-
-  describe('Dagger Specialization Talent', () => {
-    it('should increase crit chance by 1% per point for dagger attacks', () => {
-      const testCases = [
-        {daggerSpec: 0, expectedCrit: 30},
-        {daggerSpec: 1, expectedCrit: 31},
-        {daggerSpec: 3, expectedCrit: 33},
-        {daggerSpec: 5, expectedCrit: 35},
-      ];
-
-      testCases.forEach(({daggerSpec, expectedCrit}) => {
-        const talents = {...baseTalents, daggerSpecialization: daggerSpec};
-        const calculator = new RogueDamageCalculator(createTestSpec(baseStats, config, talents), createMockBuffsProvider());
-
-        const critChance = calculator.critChance({
-          ability: Ability.Backstab,
-          isSpecialAttack: true,
-          weapon: baseStats.mainHandWeapon,
-        });
-
-        expect(critChance).toBe(expectedCrit);
-      });
-    });
-
-    it('should NOT increase crit chance for non-dagger attacks', () => {
-      const swordStats = {
-        ...baseStats,
-        mainHandWeapon: {...baseStats.mainHandWeapon, type: WeaponType.Sword},
-      };
-      const talents = {...baseTalents, daggerSpecialization: 5};
-      const calculator = new RogueDamageCalculator(createTestSpec(swordStats, config, talents), createMockBuffsProvider());
-
-      const critChance = calculator.critChance({
-        ability: Ability.SinisterStrike,
-        isSpecialAttack: true,
-        weapon: swordStats.mainHandWeapon,
-      });
-
-      expect(critChance).toBe(30);
-    });
-
-    it('should stack with malice talent', () => {
-      const talents = {...baseTalents, malice: 5, daggerSpecialization: 5};
-      const calculator = new RogueDamageCalculator(createTestSpec(baseStats, config, talents), createMockBuffsProvider());
-
-      const critChance = calculator.critChance({
-        ability: Ability.Backstab,
-        isSpecialAttack: true,
-        weapon: baseStats.mainHandWeapon,
-      });
-
-      expect(critChance).toBe(40);
-    });
-  });
-
-  describe('Improved Backstab Talent', () => {
-    it('should increase backstab crit chance by 10% per point', () => {
-      const testCases = [
-        {improvedBS: 0, expectedCrit: 30},
-        {improvedBS: 1, expectedCrit: 40},
-        {improvedBS: 2, expectedCrit: 50},
-        {improvedBS: 3, expectedCrit: 60},
-      ];
-
-      testCases.forEach(({improvedBS, expectedCrit}) => {
-        const talents = {...baseTalents, improvedBackstab: improvedBS};
-        const calculator = new RogueDamageCalculator(createTestSpec(baseStats, config, talents), createMockBuffsProvider());
-
-        const critChance = calculator.critChance({
-          ability: Ability.Backstab,
-          isSpecialAttack: true,
-          weapon: baseStats.mainHandWeapon,
-        });
-
-        expect(critChance).toBe(expectedCrit);
-      });
-    });
-
-    it('should NOT affect other abilities', () => {
-      const talents = {...baseTalents, improvedBackstab: 3};
-      const calculator = new RogueDamageCalculator(createTestSpec(baseStats, config, talents), createMockBuffsProvider());
-
-      const critChance = calculator.critChance({
-        ability: Ability.SinisterStrike,
-        isSpecialAttack: true,
-        weapon: baseStats.mainHandWeapon,
-      });
-
-      expect(critChance).toBe(30);
-    });
-
-    it('should stack with malice and dagger specialization', () => {
-      const talents = {
-        ...baseTalents,
-        malice: 5,
-        daggerSpecialization: 5,
-        improvedBackstab: 3,
-      };
-      const calculator = new RogueDamageCalculator(createTestSpec(baseStats, config, talents), createMockBuffsProvider());
-
-      const critChance = calculator.critChance({
-        ability: Ability.Backstab,
-        isSpecialAttack: true,
-        weapon: baseStats.mainHandWeapon,
-      });
-
-      expect(critChance).toBe(70);
-    });
-  });
 
   describe('Dual Wield Specialization', () => {
     it('should return correct bonus percentage', () => {
@@ -309,7 +134,7 @@ describe('RogueDamageCalculator', () => {
 
       testCases.forEach(({dwSpec, expectedBonus}) => {
         const talents = {...baseTalents, dualWieldSpecialization: dwSpec};
-        const calculator = new RogueDamageCalculator(createTestSpec(baseStats, config, talents), createMockBuffsProvider());
+        const calculator = createCalculator(createTestSpec(baseStats, config, talents));
 
         expect(calculator.dualWieldSpecBonus).toBeCloseTo(expectedBonus, 5);
       });
@@ -318,7 +143,7 @@ describe('RogueDamageCalculator', () => {
 
   describe('Sinister Strike', () => {
     it('should calculate base damage correctly', () => {
-      const calculator = new RogueDamageCalculator(createTestSpec(baseStats, config, baseTalents), createMockBuffsProvider());
+      const calculator = createCalculator(createTestSpec(baseStats, config, baseTalents));
 
       const originalRandom = Math.random;
       Math.random = () => 0.5;
@@ -336,8 +161,8 @@ describe('RogueDamageCalculator', () => {
       const talentsNoAggro = {...baseTalents, aggression: 0};
       const talentsWithAggro = {...baseTalents, aggression: 3};
 
-      const calcNoAggro = new RogueDamageCalculator(createTestSpec(baseStats, config, talentsNoAggro), createMockBuffsProvider());
-      const calcWithAggro = new RogueDamageCalculator(createTestSpec(baseStats, config, talentsWithAggro), createMockBuffsProvider());
+      const calcNoAggro = createCalculator(createTestSpec(baseStats, config, talentsNoAggro));
+      const calcWithAggro = createCalculator(createTestSpec(baseStats, config, talentsWithAggro));
 
       const numTrials = 5000;
       let totalNoAggro = 0;
@@ -360,8 +185,8 @@ describe('RogueDamageCalculator', () => {
       const talentsNoLeth = {...baseTalents, lethality: 0};
       const talentsWithLeth = {...baseTalents, lethality: 5};
 
-      const calcNoLeth = new RogueDamageCalculator(createTestSpec(baseStats, config, talentsNoLeth), createMockBuffsProvider());
-      const calcWithLeth = new RogueDamageCalculator(createTestSpec(baseStats, config, talentsWithLeth), createMockBuffsProvider());
+      const calcNoLeth = createCalculator(createTestSpec(baseStats, config, talentsNoLeth));
+      const calcWithLeth = createCalculator(createTestSpec(baseStats, config, talentsWithLeth));
 
       const numTrials = 5000;
       let totalNoLeth = 0;
@@ -384,8 +209,8 @@ describe('RogueDamageCalculator', () => {
       const talentsNone = {...baseTalents};
       const talentsBoth = {...baseTalents, aggression: 5, lethality: 5};
 
-      const calcNone = new RogueDamageCalculator(createTestSpec(baseStats, config, talentsNone), createMockBuffsProvider());
-      const calcBoth = new RogueDamageCalculator(createTestSpec(baseStats, config, talentsBoth), createMockBuffsProvider());
+      const calcNone = createCalculator(createTestSpec(baseStats, config, talentsNone));
+      const calcBoth = createCalculator(createTestSpec(baseStats, config, talentsBoth));
 
       const numTrials = 5000;
       let totalNone = 0;
@@ -407,7 +232,7 @@ describe('RogueDamageCalculator', () => {
 
   describe('Backstab', () => {
     it('should calculate base damage correctly', () => {
-      const calculator = new RogueDamageCalculator(createTestSpec(baseStats, config, baseTalents), createMockBuffsProvider());
+      const calculator = createCalculator(createTestSpec(baseStats, config, baseTalents));
 
       const originalRandom = Math.random;
       Math.random = () => 0.5;
@@ -425,8 +250,8 @@ describe('RogueDamageCalculator', () => {
       const talentsNoOpp = {...baseTalents, opportunity: 0};
       const talentsWithOpp = {...baseTalents, opportunity: 5};
 
-      const calcNoOpp = new RogueDamageCalculator(createTestSpec(baseStats, config, talentsNoOpp), createMockBuffsProvider());
-      const calcWithOpp = new RogueDamageCalculator(createTestSpec(baseStats, config, talentsWithOpp), createMockBuffsProvider());
+      const calcNoOpp = createCalculator(createTestSpec(baseStats, config, talentsNoOpp));
+      const calcWithOpp = createCalculator(createTestSpec(baseStats, config, talentsWithOpp));
 
       const numTrials = 5000;
       let totalNoOpp = 0;
@@ -449,8 +274,8 @@ describe('RogueDamageCalculator', () => {
       const talentsNoLeth = {...baseTalents, lethality: 0};
       const talentsWithLeth = {...baseTalents, lethality: 5};
 
-      const calcNoLeth = new RogueDamageCalculator(createTestSpec(baseStats, config, talentsNoLeth), createMockBuffsProvider());
-      const calcWithLeth = new RogueDamageCalculator(createTestSpec(baseStats, config, talentsWithLeth), createMockBuffsProvider());
+      const calcNoLeth = createCalculator(createTestSpec(baseStats, config, talentsNoLeth));
+      const calcWithLeth = createCalculator(createTestSpec(baseStats, config, talentsWithLeth));
 
       const numTrials = 5000;
       let totalNoLeth = 0;
@@ -473,8 +298,8 @@ describe('RogueDamageCalculator', () => {
       const talentsNone = {...baseTalents};
       const talentsBoth = {...baseTalents, opportunity: 5, lethality: 5};
 
-      const calcNone = new RogueDamageCalculator(createTestSpec(baseStats, config, talentsNone), createMockBuffsProvider());
-      const calcBoth = new RogueDamageCalculator(createTestSpec(baseStats, config, talentsBoth), createMockBuffsProvider());
+      const calcNone = createCalculator(createTestSpec(baseStats, config, talentsNone));
+      const calcBoth = createCalculator(createTestSpec(baseStats, config, talentsBoth));
 
       const numTrials = 5000;
       let totalNone = 0;
@@ -496,7 +321,7 @@ describe('RogueDamageCalculator', () => {
 
   describe('Eviscerate', () => {
     it('should calculate base damage correctly for each combo point level', () => {
-      const calculator = new RogueDamageCalculator(createTestSpec(baseStats, config, baseTalents), createMockBuffsProvider());
+      const calculator = createCalculator(createTestSpec(baseStats, config, baseTalents));
 
       // EVISCERATE_9 = [[224,332],[394,502],[564,672],[734,842],[904,1012]]
       // At Math.random = 0.5, cpDamage = min + 0.5 * (max - min) = min + 54
@@ -527,8 +352,8 @@ describe('RogueDamageCalculator', () => {
       const talentsNoImp = {...baseTalents, improvedEviscerate: 0};
       const talentsWithImp = {...baseTalents, improvedEviscerate: 3};
 
-      const calcNoImp = new RogueDamageCalculator(createTestSpec(baseStats, config, talentsNoImp), createMockBuffsProvider());
-      const calcWithImp = new RogueDamageCalculator(createTestSpec(baseStats, config, talentsWithImp), createMockBuffsProvider());
+      const calcNoImp = createCalculator(createTestSpec(baseStats, config, talentsNoImp));
+      const calcWithImp = createCalculator(createTestSpec(baseStats, config, talentsWithImp));
 
       const numTrials = 5000;
       let totalNoImp = 0;
@@ -551,8 +376,8 @@ describe('RogueDamageCalculator', () => {
       const talentsNoAggro = {...baseTalents, aggression: 0};
       const talentsWithAggro = {...baseTalents, aggression: 5};
 
-      const calcNoAggro = new RogueDamageCalculator(createTestSpec(baseStats, config, talentsNoAggro), createMockBuffsProvider());
-      const calcWithAggro = new RogueDamageCalculator(createTestSpec(baseStats, config, talentsWithAggro), createMockBuffsProvider());
+      const calcNoAggro = createCalculator(createTestSpec(baseStats, config, talentsNoAggro));
+      const calcWithAggro = createCalculator(createTestSpec(baseStats, config, talentsWithAggro));
 
       const numTrials = 5000;
       let totalNoAggro = 0;
@@ -575,8 +400,8 @@ describe('RogueDamageCalculator', () => {
       const talentsNoLeth = {...baseTalents, lethality: 0};
       const talentsWithLeth = {...baseTalents, lethality: 5};
 
-      const calcNoLeth = new RogueDamageCalculator(createTestSpec(baseStats, config, talentsNoLeth), createMockBuffsProvider());
-      const calcWithLeth = new RogueDamageCalculator(createTestSpec(baseStats, config, talentsWithLeth), createMockBuffsProvider());
+      const calcNoLeth = createCalculator(createTestSpec(baseStats, config, talentsNoLeth));
+      const calcWithLeth = createCalculator(createTestSpec(baseStats, config, talentsWithLeth));
 
       const numTrials = 5000;
       let totalNoLeth = 0;
@@ -604,8 +429,8 @@ describe('RogueDamageCalculator', () => {
         lethality: 5,
       };
 
-      const calcNone = new RogueDamageCalculator(createTestSpec(baseStats, config, talentsNone), createMockBuffsProvider());
-      const calcAll = new RogueDamageCalculator(createTestSpec(baseStats, config, talentsAll), createMockBuffsProvider());
+      const calcNone = createCalculator(createTestSpec(baseStats, config, talentsNone));
+      const calcAll = createCalculator(createTestSpec(baseStats, config, talentsAll));
 
       const numTrials = 5000;
       let totalNone = 0;
@@ -625,7 +450,7 @@ describe('RogueDamageCalculator', () => {
     });
 
     it('should scale linearly with combo points', () => {
-      const calculator = new RogueDamageCalculator(createTestSpec(baseStats, config, baseTalents), createMockBuffsProvider());
+      const calculator = createCalculator(createTestSpec(baseStats, config, baseTalents));
 
       const originalRandom = Math.random;
       Math.random = () => 0.5;
@@ -643,7 +468,7 @@ describe('RogueDamageCalculator', () => {
 
   describe('Auto Attack', () => {
     it('should calculate mainhand auto attack base damage', () => {
-      const calculator = new RogueDamageCalculator(createTestSpec(baseStats, config, baseTalents), createMockBuffsProvider());
+      const calculator = createCalculator(createTestSpec(baseStats, config, baseTalents));
 
       const originalRandom = Math.random;
       Math.random = () => 0.5;
@@ -660,7 +485,7 @@ describe('RogueDamageCalculator', () => {
     });
 
     it('should apply dual wield penalty to mainhand final damage', () => {
-      const calculator = new RogueDamageCalculator(createTestSpec(baseStats, config, baseTalents), createMockBuffsProvider());
+      const calculator = createCalculator(createTestSpec(baseStats, config, baseTalents));
 
       const numTrials = 5000;
       let totalDamage = 0;
@@ -683,7 +508,7 @@ describe('RogueDamageCalculator', () => {
     });
 
     it('should NOT apply dual wield penalty to offhand', () => {
-      const calculator = new RogueDamageCalculator(createTestSpec(baseStats, config, baseTalents), createMockBuffsProvider());
+      const calculator = createCalculator(createTestSpec(baseStats, config, baseTalents));
 
       const originalRandom = Math.random;
       Math.random = () => 0.5;
@@ -703,8 +528,8 @@ describe('RogueDamageCalculator', () => {
       const talentsNoDW = {...baseTalents, dualWieldSpecialization: 0};
       const talentsWithDW = {...baseTalents, dualWieldSpecialization: 5};
 
-      const calcNoDW = new RogueDamageCalculator(createTestSpec(baseStats, config, talentsNoDW), createMockBuffsProvider());
-      const calcWithDW = new RogueDamageCalculator(createTestSpec(baseStats, config, talentsWithDW), createMockBuffsProvider());
+      const calcNoDW = createCalculator(createTestSpec(baseStats, config, talentsNoDW));
+      const calcWithDW = createCalculator(createTestSpec(baseStats, config, talentsWithDW));
 
       const numTrials = 5000;
       let totalNoDW = 0;
@@ -728,7 +553,7 @@ describe('RogueDamageCalculator', () => {
         ...baseStats,
         offHandWeapon: undefined,
       };
-      const calculator = new RogueDamageCalculator(createTestSpec(statsNoOffhand, config, baseTalents), createMockBuffsProvider());
+      const calculator = createCalculator(createTestSpec(statsNoOffhand, config, baseTalents));
 
       const result = calculator.calculateAutoAttackDamage(true);
 
@@ -742,8 +567,8 @@ describe('RogueDamageCalculator', () => {
       const lowArmorConfig = {...config, targetArmor: 0};
       const highArmorConfig = {...config, targetArmor: 5000};
 
-      const calcLowArmor = new RogueDamageCalculator(createTestSpec(baseStats, lowArmorConfig, baseTalents), createMockBuffsProvider());
-      const calcHighArmor = new RogueDamageCalculator(createTestSpec(baseStats, highArmorConfig, baseTalents), createMockBuffsProvider());
+      const calcLowArmor = createCalculator(createTestSpec(baseStats, lowArmorConfig, baseTalents));
+      const calcHighArmor = createCalculator(createTestSpec(baseStats, highArmorConfig, baseTalents));
 
       const originalRandom = Math.random;
       Math.random = () => 0.5;
@@ -760,8 +585,8 @@ describe('RogueDamageCalculator', () => {
       const lowArmorConfig = {...config, targetArmor: 0};
       const highArmorConfig = {...config, targetArmor: 5000};
 
-      const calcLowArmor = new RogueDamageCalculator(createTestSpec(baseStats, lowArmorConfig, baseTalents), createMockBuffsProvider());
-      const calcHighArmor = new RogueDamageCalculator(createTestSpec(baseStats, highArmorConfig, baseTalents), createMockBuffsProvider());
+      const calcLowArmor = createCalculator(createTestSpec(baseStats, lowArmorConfig, baseTalents));
+      const calcHighArmor = createCalculator(createTestSpec(baseStats, highArmorConfig, baseTalents));
 
       const originalRandom = Math.random;
       Math.random = () => 0.5;
@@ -780,10 +605,10 @@ describe('RogueDamageCalculator', () => {
       const originalRandom = Math.random;
       Math.random = () => 0.5;
 
-      const calcWithBuff = new RogueDamageCalculator(createTestSpec(baseStats, config, baseTalents), createMockBuffsProvider([Buff.Crusader]));
+      const calcWithBuff = createCalculator(createTestSpec(baseStats, config, baseTalents), [Buff.Crusader]);
       const resultWithBuff = calcWithBuff.calculateAutoAttackDamage(false);
 
-      const calcWithoutBuff = new RogueDamageCalculator(createTestSpec(baseStats, config, baseTalents), createMockBuffsProvider());
+      const calcWithoutBuff = createCalculator(createTestSpec(baseStats, config, baseTalents));
       const resultWithoutBuff = calcWithoutBuff.calculateAutoAttackDamage(false);
 
       Math.random = originalRandom;
@@ -800,10 +625,10 @@ describe('RogueDamageCalculator', () => {
       Math.random = () => 0.5;
 
       const comboPoints = 5;
-      const calcWithBuff = new RogueDamageCalculator(createTestSpec(baseStats, config, baseTalents), createMockBuffsProvider([Buff.Crusader]));
+      const calcWithBuff = createCalculator(createTestSpec(baseStats, config, baseTalents), [Buff.Crusader]);
       const resultWithBuff = calcWithBuff.calculateEviscerateDamage(comboPoints);
 
-      const calcWithoutBuff = new RogueDamageCalculator(createTestSpec(baseStats, config, baseTalents), createMockBuffsProvider());
+      const calcWithoutBuff = createCalculator(createTestSpec(baseStats, config, baseTalents));
       const resultWithoutBuff = calcWithoutBuff.calculateEviscerateDamage(comboPoints);
 
       Math.random = originalRandom;
@@ -826,7 +651,7 @@ describe('RogueDamageCalculator', () => {
       const originalRandom = Math.random;
       Math.random = () => 0.5;
 
-      const calculator = new RogueDamageCalculator(createTestSpec(baseStats, config, baseTalents), createMockBuffsProvider());
+      const calculator = createCalculator(createTestSpec(baseStats, config, baseTalents));
       const result1 = calculator.calculateAutoAttackDamage(false);
       const result2 = calculator.calculateAutoAttackDamage(false);
 
@@ -856,7 +681,7 @@ describe('RogueDamageCalculator', () => {
       testCases.forEach(({murder, expectedMultiplier, targetType}) => {
         const talents = {...baseTalents, murder};
         const configWithTarget = {...config, targetType};
-        const calculator = new RogueDamageCalculator(createTestSpec(baseStats, configWithTarget, talents), createMockBuffsProvider());
+        const calculator = createCalculator(createTestSpec(baseStats, configWithTarget, talents));
 
         expect(calculator.autoAttackMultiplier).toBe(expectedMultiplier);
       });
@@ -867,8 +692,8 @@ describe('RogueDamageCalculator', () => {
       const talentsWithMurder = {...baseTalents, murder: 2};
       const configWithTarget = {...config, targetType: TargetType.Humanoid};
 
-      const calcNoMurder = new RogueDamageCalculator(createTestSpec(baseStats, configWithTarget, talentsNoMurder), createMockBuffsProvider());
-      const calcWithMurder = new RogueDamageCalculator(createTestSpec(baseStats, configWithTarget, talentsWithMurder), createMockBuffsProvider());
+      const calcNoMurder = createCalculator(createTestSpec(baseStats, configWithTarget, talentsNoMurder));
+      const calcWithMurder = createCalculator(createTestSpec(baseStats, configWithTarget, talentsWithMurder));
 
       const numTrials = 20000;
       let totalNoMurder = 0;
@@ -891,4 +716,118 @@ describe('RogueDamageCalculator', () => {
       expect(totalWithMurder / totalNoMurder).toBeLessThan(expectedMultiplier + 0.005);
     });
   });
+
+  describe('Opportunity', () => {
+
+    it('should increase backstab damage by 4% per point in opportunity', () => {
+      const testCases = [
+        {opportunity: 1, expectedMultiplier: 1.04},
+        {opportunity: 3, expectedMultiplier: 1.12},
+        {opportunity: 5, expectedMultiplier: 1.20},
+      ];
+
+      testCases.forEach(({opportunity, expectedMultiplier}) => {
+        const talents: RogueTalents = {
+          ...baseTalents,
+          opportunity,
+        };
+
+        const calculator = createCalculator(createTestSpec(baseStats, config, talents));
+
+        const numRolls = 5000;
+        let totalDamage = 0;
+        let hitCount = 0;
+
+        for (let i = 0; i < numRolls; i++) {
+          const result = calculator.calculateBackstabDamage();
+          if (result.type === 'Hit') {
+            totalDamage += result.amount;
+            hitCount++;
+          }
+        }
+
+        const talentsWithoutOpportunity: RogueTalents = {
+          ...baseTalents,
+          opportunity: 0,
+        };
+        const calculatorNoOpportunity = createCalculator(createTestSpec(baseStats, config, talentsWithoutOpportunity));
+
+        let totalDamageNoOpportunity = 0;
+        let hitCountNoOpportunity = 0;
+        for (let i = 0; i < numRolls; i++) {
+          const result = calculatorNoOpportunity.calculateBackstabDamage();
+          if (result.type === 'Hit') {
+            totalDamageNoOpportunity += result.amount;
+            hitCountNoOpportunity++;
+          }
+        }
+
+        const avgDamage = totalDamage / hitCount;
+        const avgDamageNoOpportunity = totalDamageNoOpportunity / hitCountNoOpportunity;
+        const actualMultiplier = avgDamage / avgDamageNoOpportunity;
+
+        expect(actualMultiplier).toBeGreaterThan(expectedMultiplier - 0.02);
+        expect(actualMultiplier).toBeLessThan(expectedMultiplier + 0.02);
+      });
+    });
+
+    it('should apply opportunity only to backstab, not other abilities', () => {
+      const talentsWithOpportunity: RogueTalents = {
+        ...baseTalents,
+        opportunity: 5,
+      };
+
+      const calculator = createCalculator(createTestSpec(baseStats, config, talentsWithOpportunity));
+      const calculatorNoOpportunity = createCalculator(createTestSpec(baseStats, config, baseTalents));
+
+      const originalRandom = Math.random;
+      const fixedRandomValue = 0.5;
+      Math.random = () => fixedRandomValue;
+
+      const ssResult = calculator.calculateSinisterStrikeDamage();
+      const ssResultNoOpportunity = calculatorNoOpportunity.calculateSinisterStrikeDamage();
+
+      Math.random = originalRandom;
+
+      expect(ssResult.baseAmount).toBe(ssResultNoOpportunity.baseAmount);
+    });
+
+    it('should calculate backstab damage correctly with maximum opportunity (5 points)', () => {
+      const talents: RogueTalents = {
+        ...baseTalents,
+        opportunity: 5,
+      };
+
+      const calculator = createCalculator(createTestSpec(baseStats, config, talents));
+      const calculatorNoOpportunity = createCalculator(createTestSpec(baseStats, config, baseTalents));
+
+      const numRolls = 10000;
+      let totalDamageWithOpportunity = 0;
+      let totalDamageWithoutOpportunity = 0;
+      let hitCountWith = 0;
+      let hitCountWithout = 0;
+
+      for (let i = 0; i < numRolls; i++) {
+        const resultWith = calculator.calculateBackstabDamage();
+        if (resultWith.type === 'Hit') {
+          totalDamageWithOpportunity += resultWith.amount;
+          hitCountWith++;
+        }
+
+        const resultWithout = calculatorNoOpportunity.calculateBackstabDamage();
+        if (resultWithout.type === 'Hit') {
+          totalDamageWithoutOpportunity += resultWithout.amount;
+          hitCountWithout++;
+        }
+      }
+
+      const avgDamageWith = totalDamageWithOpportunity / hitCountWith;
+      const avgDamageWithout = totalDamageWithoutOpportunity / hitCountWithout;
+      const damageIncrease = avgDamageWith / avgDamageWithout;
+
+      expect(damageIncrease).toBeGreaterThan(1.18);
+      expect(damageIncrease).toBeLessThan(1.22);
+    });
+  });
+
 });

@@ -1,5 +1,5 @@
-import {GearStats, WeaponEnchant, WeaponType} from '../src/types';
-import {AttackTable, PlayerStatsProvider} from '../src/mechanics/AttackTable';
+import {GearStats, PlayerStatsProvider, WeaponEnchant, WeaponType} from '../src/types';
+import {AttackTable} from '../src/mechanics/AttackTable';
 
 describe('Attack Table Mechanics', () => {
   const createTestStats = (weaponSkill: number, hasOffHand: boolean = true): GearStats => ({
@@ -28,10 +28,12 @@ describe('Attack Table Mechanics', () => {
   const wrapStats = (gearStats: GearStats, targetLevel: number): PlayerStatsProvider => ({
     critChance: () => gearStats.critChance,
     get weaponSkill() { return gearStats.weaponSkill; },
+    get attackPower() { return gearStats.attackPower; },
     get hitChance() { return gearStats.hitChance; },
     get playerLevel() { return 60; },
     get targetLevel() { return targetLevel; },
     get isDualWielding() { return gearStats.offHandWeapon !== undefined; },
+    get haste() { return 1; }
   });
 
   describe('Single-Wield against Level 63 Raid Boss', () => {
