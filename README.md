@@ -24,19 +24,19 @@ npm run build
 Run a simulation using a spec file:
 
 ```bash
-npm start specs/rogue/daggers.json
+npm start -- rogue/daggers
 ```
 
 Run with playback mode (real-time visualization):
 
 ```bash
-npm start specs/rogue/swords.json -d 1
+npm start -- rogue/swords -d 1
 ```
 
 Run in quiet mode (DPS only):
 
 ```bash
-npm start specs/rogue/galz.json -q
+npm start -- rogue/galz -q
 ```
 
 ## Spec File Structure
@@ -215,7 +215,7 @@ Use `-s` or `--spec` to override multiple values:
 Format: `talents|setup|gear|rotation`
 
 ```bash
-npm start specs/rogue/daggers.json -s "sealFate:5|avoidEviscerate:1|attackPower:1500"
+npm start -- rogue/daggers -s "sealFate:5|avoidEviscerate:1|attackPower:1500"
 ```
 
 ## Examples
@@ -223,31 +223,31 @@ npm start specs/rogue/daggers.json -s "sealFate:5|avoidEviscerate:1|attackPower:
 ### Basic Simulation
 
 ```bash
-npm start specs/rogue/swords.json
+npm start -- rogue/swords
 ```
 
 ### Test Gear Changes
 
 ```bash
-npm start specs/rogue/daggers.json --ap 1500 --crit 40
+npm start -- rogue/daggers --ap 1500 --crit 40
 ```
 
 ### Test Different Rotation
 
 ```bash
-npm start specs/rogue/daggers.json -s "|||cp5?evis:bs"
+npm start -- rogue/daggers -s "|||cp5?evis:bs"
 ```
 
 ### Quick DPS Check
 
 ```bash
-npm start specs/rogue/galz.json -q --iterations 5000
+npm start -- rogue/galz -q --iterations 5000
 ```
 
 ### Watch Combat in Slow Motion
 
 ```bash
-npm start specs/rogue/swords.json -d 2
+npm start -- rogue/swords -d 2
 ```
 
 ## Development
@@ -267,34 +267,13 @@ npm test
 ### Run in Development Mode
 
 ```bash
-npm run dev specs/rogue/daggers.json
+npm run dev -- rogue/daggers
 ```
 
 ### Compare Specs
 
 ```bash
 npm run compare
-```
-
-## Project Structure
-
-```
-src/
-  sim/
-    BaseSimulator.ts       # Base simulation logic
-    RogueSimulator.ts      # Rogue-specific implementation
-    WarriorSimulator.ts    # Warrior implementation (WIP)
-    MeleeSimulator.ts      # Shared melee mechanics
-  mechanics/
-    DamageCalculator.ts    # Combat calculations
-    RogueDamageCalculator.ts
-  types.ts                 # Type definitions
-  SpecLoader.ts            # Spec file loader
-  SimulationRunner.ts      # Main simulation runner
-  sim.ts                   # CLI entry point
-specs/
-  rogue/                   # Rogue spec files
-  warrior/                 # Warrior spec files
 ```
 
 ## Contributing
