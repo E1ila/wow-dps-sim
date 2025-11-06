@@ -172,12 +172,12 @@ export interface SimulationSetup {
    // general
    wbs?: boolean; // apply world buffs
    // rogue
+   waitForSndExpiry?: number;
    refreshSndSecondsBeforeExpiry?: number;
    avoidEviscerate?: boolean;
    veiledShadowsSet?: boolean;
    disableAutoAttacks?: boolean;
    prefer5EvisOverSnd?: boolean;
-   maxSnd2?: boolean;
 }
 
 export interface Buff {

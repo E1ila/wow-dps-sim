@@ -2,7 +2,8 @@
     "name": "PvE Combat Daggers",
     "class": "Rogue",
     "setup": {
-        "refreshSndSecondsBeforeExpiry": 0.2
+        "refreshSndSecondsBeforeExpiry": 0.2,
+        "waitForSndExpiry": 1.6
     },
     "talents": {
         "adrenalineRush": true,
@@ -31,7 +32,7 @@
     "gearStats": {
         "level": 60,
         "attackPower": 844,
-        "critChance": 19,
+        "critChance": 20,
         "hitChance": 9,
         "agility": 393,
         "strength": 151,

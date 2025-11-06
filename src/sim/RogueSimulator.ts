@@ -297,8 +297,9 @@ export class RogueSimulator extends MeleeSimulator {
             this.castEviscerate();
          }
       } else {
-         if (this.shouldRefreshSliceAndDice()) {
-            this.castSliceAndDice();
+         if (this.shouldRefreshSliceAndDice(true)) {
+            if (this.shouldRefreshSliceAndDice())
+               this.castSliceAndDice();
          } else if (this.talents.hemorrhage) {
             this.castHemorrhage();
          } else if (this.spec.gearStats.mainHandWeapon.type === WeaponType.Dagger) {
@@ -309,15 +310,15 @@ export class RogueSimulator extends MeleeSimulator {
       }
    }
 
-   shouldRefreshSliceAndDice(): boolean {
+   shouldRefreshSliceAndDice(waitCheck?: boolean): boolean {
       if (this.state.comboPoints == 0)
-         return false;
-      if (this.setup.maxSnd2 && this.state.comboPoints > 2)
          return false;
       if (!this.isBuffActive(Buffs.SnD))
          return true;
       const timeRemainingMs = this.getBuffTimeRemaining(Buffs.SnD);
-      const timeBefore = this.setup.refreshSndSecondsBeforeExpiry ?? 0.2;
+      let timeBefore = this.setup.refreshSndSecondsBeforeExpiry ?? 0.2;
+      if (waitCheck && this.setup.waitForSndExpiry)
+         timeBefore = this.setup.waitForSndExpiry;
       const refreshThresholdMs = (timeBefore) * 1000;
       return timeRemainingMs < refreshThresholdMs;
    }
