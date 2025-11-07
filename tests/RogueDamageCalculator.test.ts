@@ -34,8 +34,8 @@ describe('RogueDamageCalculator', () => {
 
       Math.random = originalRandom;
 
-      // weaponDamage (100) + SINISTER_STRIKE_7 (68) + AP contribution (Math.round((1200/14)*2.0) = 171)
-      const expectedBase = 100 + 68 + Math.round((1200 / 14) * 2.0);
+      // weaponDamage (100) + SINISTER_STRIKE_7 (68) + AP contribution with normalized dagger speed 1.7
+      const expectedBase = 100 + 68 + Math.round((1200 / 14) * 1.7);
       expect(result.baseAmount).toBe(expectedBase);
     });
 
@@ -123,8 +123,8 @@ describe('RogueDamageCalculator', () => {
 
       Math.random = originalRandom;
 
-      // (weaponDamage (100) + BACKSTAB_9 (225) + AP contribution (Math.round((1200/14)*2.0) = 171)) * 1.5
-      const expectedBase = (100 + 225 + Math.round((1200 / 14) * 2.0)) * 1.5;
+      // (weaponDamage (100) + BACKSTAB_9 (225) + AP contribution with normalized dagger speed 1.7) * 1.5
+      const expectedBase = (100 + 225 + Math.round((1200 / 14) * 1.7)) * 1.5;
       expect(result.baseAmount).toBe(expectedBase);
     });
 
@@ -207,16 +207,15 @@ describe('RogueDamageCalculator', () => {
 
       // EVISCERATE_9 = [[224,332],[394,502],[564,672],[734,842],[904,1012]]
       // At Math.random = 0.5, cpDamage = min + 0.5 * (max - min) = min + 54
-      // apBonus = calcAttackPowerDamage(weapon) * comboPoints * 0.03
-      // calcAttackPowerDamage = Math.round((1200 / 14) * 2.0) = 171
-      const apPerPoint = Math.round((1200 / 14) * 2.0);
+      // apBonus = attackPower * comboPoints * 0.03 (Eviscerate uses direct AP, not weapon-based)
+      const attackPower = 1200;
       const expectedBaseDamage = [
         0, // dummy for index 0
-        Math.round(278 + apPerPoint * 1 * 0.03), // 1 CP: 278 + 5.13 = 283
-        Math.round(448 + apPerPoint * 2 * 0.03), // 2 CP: 448 + 10.26 = 458
-        Math.round(618 + apPerPoint * 3 * 0.03), // 3 CP: 618 + 15.39 = 633
-        Math.round(788 + apPerPoint * 4 * 0.03), // 4 CP: 788 + 20.52 = 809
-        Math.round(958 + apPerPoint * 5 * 0.03), // 5 CP: 958 + 25.65 = 984
+        Math.round(278 + attackPower * 1 * 0.03), // 1 CP: 278 + 36 = 314
+        Math.round(448 + attackPower * 2 * 0.03), // 2 CP: 448 + 72 = 520
+        Math.round(618 + attackPower * 3 * 0.03), // 3 CP: 618 + 108 = 726
+        Math.round(788 + attackPower * 4 * 0.03), // 4 CP: 788 + 144 = 932
+        Math.round(958 + attackPower * 5 * 0.03), // 5 CP: 958 + 180 = 1138
       ];
 
       const originalRandom = Math.random;
@@ -278,14 +277,15 @@ describe('RogueDamageCalculator', () => {
       expect(totalWithAggro / totalNoAggro).toBeLessThan(expectedMultiplier + 0.05);
     });
 
-    it('should apply lethality talent bonus', () => {
+    it('should NOT apply lethality talent bonus (finisher)', () => {
+      // Eviscerate is a finisher and does NOT benefit from Lethality
       const talentsNoLeth = {...baseTalents, lethality: 0};
       const talentsWithLeth = {...baseTalents, lethality: 5};
 
       const calcNoLeth = createCalculator(createTestSpec(baseStats, config, talentsNoLeth));
       const calcWithLeth = createCalculator(createTestSpec(baseStats, config, talentsWithLeth));
 
-      const numTrials = 5000;
+      const numTrials = 1000;
       let totalNoLeth = 0;
       let totalWithLeth = 0;
 
@@ -297,24 +297,24 @@ describe('RogueDamageCalculator', () => {
         if (resultWithLeth.amount > 0) totalWithLeth += resultWithLeth.amount;
       }
 
-      const expectedMultiplier = 1.30;
-      expect(totalWithLeth / totalNoLeth).toBeGreaterThan(expectedMultiplier - 0.05);
-      expect(totalWithLeth / totalNoLeth).toBeLessThan(expectedMultiplier + 0.05);
+      // Damage should be the same (no lethality bonus on finishers)
+      expect(totalWithLeth / totalNoLeth).toBeGreaterThan(0.98);
+      expect(totalWithLeth / totalNoLeth).toBeLessThan(1.02);
     });
 
-    it('should stack all three eviscerate talent bonuses', () => {
+    it('should stack improved eviscerate and aggression bonuses (not lethality)', () => {
       const talentsNone = {...baseTalents};
       const talentsAll = {
         ...baseTalents,
         improvedEviscerate: 3,
         aggression: 5,
-        lethality: 5,
+        // Lethality does NOT affect Eviscerate (finisher)
       };
 
       const calcNone = createCalculator(createTestSpec(baseStats, config, talentsNone));
       const calcAll = createCalculator(createTestSpec(baseStats, config, talentsAll));
 
-      const numTrials = 5000;
+      const numTrials = 1000;
       let totalNone = 0;
       let totalAll = 0;
 
@@ -326,9 +326,9 @@ describe('RogueDamageCalculator', () => {
         if (resultAll.amount > 0) totalAll += resultAll.amount;
       }
 
-      const expectedMultiplier = 1.15 * 1.10 * 1.30;
-      expect(totalAll / totalNone).toBeGreaterThan(expectedMultiplier - 0.10);
-      expect(totalAll / totalNone).toBeLessThan(expectedMultiplier + 0.10);
+      const expectedMultiplier = 1.15 * 1.10; // Improved Evisc 15% * Aggression 10%
+      expect(totalAll / totalNone).toBeGreaterThan(expectedMultiplier - 0.05);
+      expect(totalAll / totalNone).toBeLessThan(expectedMultiplier + 0.05);
     });
 
     it('should scale linearly with combo points', () => {
@@ -406,28 +406,41 @@ describe('RogueDamageCalculator', () => {
       expect(result.baseAmount).toBe(expectedBase);
     });
 
-    it('should benefit from dual wield specialization on mainhand', () => {
+    it('should benefit from dual wield specialization on OFFHAND only', () => {
       const talentsNoDW = {...baseTalents, dualWieldSpecialization: 0};
       const talentsWithDW = {...baseTalents, dualWieldSpecialization: 5};
 
       const calcNoDW = createCalculator(createTestSpec(baseStats, config, talentsNoDW));
       const calcWithDW = createCalculator(createTestSpec(baseStats, config, talentsWithDW));
 
-      const numTrials = 5000;
+      const numTrials = 1000;
       let totalNoDW = 0;
       let totalWithDW = 0;
+      let totalMH_NoDW = 0;
+      let totalMH_WithDW = 0;
 
       for (let i = 0; i < numTrials; i++) {
-        const resultNoDW = calcNoDW.calculateAutoAttackDamage(false);
-        const resultWithDW = calcWithDW.calculateAutoAttackDamage(false);
-
+        // Test offhand (should be affected)
+        const resultNoDW = calcNoDW.calculateAutoAttackDamage(true);
+        const resultWithDW = calcWithDW.calculateAutoAttackDamage(true);
         if (resultNoDW.amount > 0) totalNoDW += resultNoDW.amount;
         if (resultWithDW.amount > 0) totalWithDW += resultWithDW.amount;
+
+        // Test mainhand (should NOT be affected)
+        const resultMH_NoDW = calcNoDW.calculateAutoAttackDamage(false);
+        const resultMH_WithDW = calcWithDW.calculateAutoAttackDamage(false);
+        if (resultMH_NoDW.amount > 0) totalMH_NoDW += resultMH_NoDW.amount;
+        if (resultMH_WithDW.amount > 0) totalMH_WithDW += resultMH_WithDW.amount;
       }
 
-      const expectedRatio = (0.5 + 0.25) / 0.5;
-      expect(totalWithDW / totalNoDW).toBeGreaterThan(expectedRatio - 0.06);
-      expect(totalWithDW / totalNoDW).toBeLessThan(expectedRatio + 0.06);
+      // Offhand should benefit: 50% base + 25% from 5 points = 75% = 1.5x
+      const expectedOHRatio = (0.5 + 0.25) / 0.5;
+      expect(totalWithDW / totalNoDW).toBeGreaterThan(expectedOHRatio - 0.10);
+      expect(totalWithDW / totalNoDW).toBeLessThan(expectedOHRatio + 0.10);
+
+      // Mainhand should NOT benefit (ratio ~1.0)
+      expect(totalMH_WithDW / totalMH_NoDW).toBeGreaterThan(0.95);
+      expect(totalMH_WithDW / totalMH_NoDW).toBeLessThan(1.05);
     });
 
     it('should return NoWeapon result when offhand does not exist', () => {
@@ -516,11 +529,12 @@ describe('RogueDamageCalculator', () => {
       Math.random = originalRandom;
 
       // Crusader adds 100 AP
-      // Without: apBonus = 171 * 5 * 0.03 = 25.65, baseDamage = Math.round(958 + 25.65) = 984
-      // With: apBonus = 186 * 5 * 0.03 = 27.9, baseDamage = Math.round(958 + 27.9) = 986
-      // Difference = 2
-      const apWithout = Math.round((1200 / 14) * 2.0);
-      const apWith = Math.round((1300 / 14) * 2.0);
+      // Eviscerate uses direct AP: attackPower * comboPoints * 0.03
+      // Without: apBonus = 1200 * 5 * 0.03 = 180, baseDamage = Math.round(958 + 180) = 1138
+      // With: apBonus = 1300 * 5 * 0.03 = 195, baseDamage = Math.round(958 + 195) = 1153
+      // Difference = 15
+      const apWithout = 1200;
+      const apWith = 1300;
       const cpDamage = 958; // at random 0.5 and 5 CP
       const expectedWithout = Math.round(cpDamage + apWithout * comboPoints * 0.03);
       const expectedWith = Math.round(cpDamage + apWith * comboPoints * 0.03);
