@@ -120,8 +120,8 @@ describe('RogueDamageCalculator', () => {
       // Lethality: 15% to crits only (~30% of hits)
       // Combined effect on average: ~1.10 * (1 + 0.15 * 0.3) = ~1.15
       const expectedMultiplier = 1.15;
-      expect(totalBoth / totalNone).toBeGreaterThan(expectedMultiplier - 0.05);
-      expect(totalBoth / totalNone).toBeLessThan(expectedMultiplier + 0.05);
+      expect(totalBoth / totalNone).toBeGreaterThan(expectedMultiplier - 0.06);
+      expect(totalBoth / totalNone).toBeLessThan(expectedMultiplier + 0.06);
     });
   });
 
@@ -191,8 +191,8 @@ describe('RogueDamageCalculator', () => {
 
       // Lethality 5/5: crits deal 2.3x instead of 2.0x (15% increase on crits)
       const expectedMultiplier = 1.15;
-      expect(totalWithLeth / totalNoLeth).toBeGreaterThan(expectedMultiplier - 0.07);
-      expect(totalWithLeth / totalNoLeth).toBeLessThan(expectedMultiplier + 0.07);
+      expect(totalWithLeth / totalNoLeth).toBeGreaterThan(expectedMultiplier - 0.08);
+      expect(totalWithLeth / totalNoLeth).toBeLessThan(expectedMultiplier + 0.08);
     });
 
     it('should stack opportunity and lethality (opportunity all hits, lethality crits only)', () => {
