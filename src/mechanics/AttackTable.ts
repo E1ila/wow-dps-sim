@@ -29,14 +29,18 @@ export class AttackTable {
          baseMissChance = 0.05 + (defenseSkillDiff * 0.001);
       }
 
-      const missReduction = this.stats.hitChance / 100;
-      let missChance = baseMissChance - missReduction;
-
       if (this.stats.isDualWielding) {
-         // Dual wielding adds a 19% miss penalty to both main and offhand weapons.
-         // https://wowpedia.fandom.com/wiki/Dual_wield
-         missChance = (missChance * 0.8) + 0.2;
+         baseMissChance += 0.19;
       }
+
+      let missReduction = this.stats.hitChance / 100;
+
+      // When skill deficit > 10, the first 1% of hit is "suppressed" and doesn't reduce miss
+      if (defenseSkillDiff > 10) {
+         missReduction = Math.max(0, missReduction - 0.01);
+      }
+
+      const missChance = baseMissChance - missReduction;
 
       return Math.max(0, missChance);
    }
