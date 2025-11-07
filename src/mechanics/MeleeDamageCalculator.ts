@@ -102,8 +102,25 @@ export abstract class MeleeDamageCalculator extends DamageCalculator {
       return 1;
    }
 
-   calcAttackPowerDamage(weapon: Weapon): number {
-      return Math.round((this.statsProvider.attackPower / 14) * weapon.speed);
+   calcAttackPowerDamage(weapon: Weapon, normalize: boolean = true): number {
+      let speed = weapon.speed;
+
+      if (normalize) {
+         switch (weapon.type) {
+            case 'Dagger':
+               speed = 1.7;
+               break;
+            case 'Sword':
+            case 'Mace':
+            case 'Fist':
+               speed = 2.4;
+               break;
+            default:
+               speed = 2.4;
+         }
+      }
+
+      return Math.round((this.statsProvider.attackPower / 14) * speed);
    }
 
    calculateAutoAttackDamage(isOffhand: boolean = false): AttackResult {
