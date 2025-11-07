@@ -133,7 +133,8 @@ export abstract class MeleeDamageCalculator extends DamageCalculator {
       }
 
       const weaponDamage = this.getWeaponDamage(weapon);
-      let baseDamage = weaponDamage + this.calcAttackPowerDamage(weapon);
+      // Auto-attacks use actual weapon speed, NOT normalized speed
+      let baseDamage = weaponDamage + this.calcAttackPowerDamage(weapon, false);
 
       const multipliers = [
          this.autoAttackMultiplier,

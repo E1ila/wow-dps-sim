@@ -102,8 +102,8 @@ export class RogueDamageCalculator extends MeleeDamageCalculator {
    calculateHemorrhageDamage(): AttackResult {
       const weapon = this.spec.gearStats.mainHandWeapon;
       const weaponDamage = this.getWeaponDamage(weapon);
-      // todo: that's not what happens - it should actually appply a debuff
-      const baseDamage = weaponDamage + this.calcAttackPowerDamage(weapon);
+      // Hemorrhage uses actual weapon speed, NOT normalized speed
+      const baseDamage = weaponDamage + this.calcAttackPowerDamage(weapon, false);
 
       const multipliers = [
          this.lethalityMultiplier,
@@ -125,13 +125,13 @@ export class RogueDamageCalculator extends MeleeDamageCalculator {
       const weapon = this.spec.gearStats.mainHandWeapon;
       const range = EVISCERATE_9[comboPoints - 1];
       const cpDamage = Math.random() * (range[1] - range[0]) + range[0];
-      const apBonus = this.calcAttackPowerDamage(weapon) * comboPoints * 0.03;
+      // Eviscerate uses 3% of AP per combo point, NOT weapon damage
+      const apBonus = this.statsProvider.attackPower * comboPoints * 0.03;
       const baseDamage = Math.round(cpDamage + apBonus);
 
       const multipliers = [
          this.improvedEviscerateMultiplier,
          this.aggressionMultiplier,
-         this.lethalityMultiplier,
          this.murderMultiplier,
       ];
 
