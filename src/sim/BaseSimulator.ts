@@ -526,7 +526,25 @@ export abstract class BaseSimulator implements Simulator, BuffsProvider, PlayerS
    // -- player stats provider
 
    critChance(attack: Attack): number {
-      return this.spec.gearStats.critChance;
+      const targetDefense = this.spec.targetLevel * 5;
+      const weaponSkill = this.weaponSkill;
+      const playerMaxSkill = this.spec.playerLevel * 5;
+
+      // Weapon skill from gear/racials reduces crit
+      const extraWeaponSkill = Math.max(0, weaponSkill - playerMaxSkill);
+      let critChance = this.spec.gearStats.critChance - (extraWeaponSkill * 0.04);
+
+      // Apply skill differential effects
+      const cappedWeaponSkill = Math.min(weaponSkill, playerMaxSkill);
+      const skillDiff = cappedWeaponSkill - targetDefense;
+
+      if (skillDiff < 0) {
+         critChance += skillDiff * 0.2;
+      } else {
+         critChance += skillDiff * 0.04;
+      }
+
+      return critChance;
    }
 
    get haste(): number {

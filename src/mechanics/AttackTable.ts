@@ -46,11 +46,13 @@ export class AttackTable {
    }
 
    private calculateDodgeChance(): number {
-      const baseDodge = this.stats.targetLevel === 63 ? 0.065 : 0.05;
-      const weaponSkillOver300 = Math.max(0, this.stats.weaponSkill - 300);
-      const dodgeReduction = weaponSkillOver300 * 0.0004;
+      const targetDefense = this.stats.targetLevel * 5;
+      const weaponSkill = this.stats.weaponSkill;
+      const skillDiff = targetDefense - weaponSkill;
 
-      return Math.max(0, baseDodge - dodgeReduction);
+      const dodgeChance = 0.05 + (skillDiff * 0.001);
+
+      return Math.max(0, dodgeChance);
    }
 
    private calculateGlancingChance(): number {
@@ -74,25 +76,16 @@ export class AttackTable {
       const weaponSkill = this.stats.weaponSkill;
       const targetLevel = this.stats.targetLevel;
       const targetDefense = targetLevel * 5;
+      const skillDiff = targetDefense - weaponSkill;
 
       if (targetLevel <= this.stats.playerLevel) {
          return 0.95;
       }
 
-      if (weaponSkill >= 308) {
-         return 0.95;
-      } else if (weaponSkill >= 305) {
-         return 0.85;
-      } else if (weaponSkill >= 300) {
-         return 0.65;
-      }
+      const lowEnd = Math.min(1.3 - 0.05 * skillDiff, 0.91);
+      const highEnd = Math.max(Math.min(1.2 - 0.03 * skillDiff, 0.99), 0.2);
 
-      const lowEnd = 0.01;
-      const highEnd = 0.05;
-      const skillDiff = targetDefense - weaponSkill;
-      const penalty = Math.min(0.6, skillDiff * 0.015);
-
-      return Math.max(lowEnd, highEnd + 0.6 - penalty);
+      return (lowEnd + highEnd) / 2;
    }
 
    roll(attack: Attack): AttackTableResult {
