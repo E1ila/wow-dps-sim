@@ -250,7 +250,7 @@ export abstract class BaseSimulator implements Simulator, BuffsProvider, PlayerS
       const stateUpdateInterval = 100;
 
       console.log('=== Starting Playback ===\n');
-      console.log('\n'); // Reserve space for the floating bar
+      this.spec.rotation && console.log(`Rotation: ${this.spec.rotation}\n`);
 
       this.updateFloatingBar();
       await this.waitForGameTime(1000, speed);
@@ -289,7 +289,7 @@ export abstract class BaseSimulator implements Simulator, BuffsProvider, PlayerS
 
       const result = this.getSimulationResult();
       console.log('\n=== Playback Complete ===');
-      console.log(`DPS: ${result.dps.toFixed(2)}`);
+      console.log(` ${c.green}**  ${c.brightGreen}DPS ${result.dps.toFixed(2)} ${c.green}**${c.reset}`);
    }
 
    protected abstract getStateText(): string;

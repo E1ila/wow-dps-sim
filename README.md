@@ -151,7 +151,7 @@ If 5 combo points, cast Eviscerate; otherwise cast Sinister Strike.
 
 **Multiple rotation steps:**
 ```
-"rotation": "snd?snd:skip, cp5?evis:ss"
+"rotation": "snd?snd:skip,cp5?evis:ss"
 ```
 Two rotation instructions that cycle. First checks SnD, second handles combo builders/finishers.
 

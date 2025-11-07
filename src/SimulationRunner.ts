@@ -255,7 +255,6 @@ export class SimulationRunner {
 
     private async runWithPlayback(simulator: BaseSimulator): Promise<void> {
         await simulator.simulateWithPlayback(this.options.playbackSpeed!);
-        console.log('\nSimulation complete!');
     }
 
     private runMultipleIterations(simulator: BaseSimulator): void {

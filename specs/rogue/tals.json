@@ -5,6 +5,7 @@
         "refreshSndSecondsBeforeExpiry": 0.2,
         "waitForSndExpiry": 1.6
     },
+    "rotation": "snd?snd:sndw?skip:cp5?evis:bs",
     "talents": {
         "adrenalineRush": true,
         "aggression": 0,
