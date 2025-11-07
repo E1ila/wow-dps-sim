@@ -138,7 +138,7 @@ export abstract class MeleeDamageCalculator extends DamageCalculator {
       const multipliers = [
          this.autoAttackMultiplier,
       ];
-      if (!isOffhand) {
+      if (isOffhand) {
          const dualWieldPenalty = 0.5;
          multipliers.push(dualWieldPenalty + this.dualWieldSpecBonus);
       }

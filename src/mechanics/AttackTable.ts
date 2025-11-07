@@ -5,19 +5,19 @@ import {Attack, AttackTableResult, AttackType, PlayerStatsProvider} from '../typ
  * based on https://bookdown.org/marrowwar/marrow_compendium/mechanics.html
  */
 export class AttackTable {
-   private readonly missChance: number;
+   private readonly baseMissChance: number;
    private readonly dodgeChance: number;
    private readonly glancingChance: number;
 
    constructor(
       private stats: PlayerStatsProvider,
    ) {
-      this.missChance = this.calculateMissChance();
+      this.baseMissChance = this.calculateBaseMissChance();
       this.dodgeChance = this.calculateDodgeChance();
       this.glancingChance = this.calculateGlancingChance();
    }
 
-   private calculateMissChance(): number {
+   private calculateBaseMissChance(): number {
       const targetDefense = this.stats.targetLevel * 5;
       const weaponSkill = this.stats.weaponSkill;
       const defenseSkillDiff = targetDefense - weaponSkill;
@@ -29,20 +29,24 @@ export class AttackTable {
          baseMissChance = 0.05 + (defenseSkillDiff * 0.001);
       }
 
-      if (this.stats.isDualWielding) {
-         baseMissChance += 0.19;
-      }
-
       let missReduction = this.stats.hitChance / 100;
 
-      // When skill deficit > 10, the first 1% of hit is "suppressed" and doesn't reduce miss
+      // Hit suppression: when skill deficit > 10, hit is less effective
       if (defenseSkillDiff > 10) {
-         missReduction = Math.max(0, missReduction - 0.01);
+         const hitSuppression = (defenseSkillDiff - 10) * 0.002;
+         missReduction = Math.max(0, missReduction - hitSuppression);
       }
 
       const missChance = baseMissChance - missReduction;
 
       return Math.max(0, missChance);
+   }
+
+   private getMissChance(isWhiteAttack: boolean): number {
+      if (isWhiteAttack && this.stats.isDualWielding) {
+         return Math.max(0, this.baseMissChance + 0.19);
+      }
+      return this.baseMissChance;
    }
 
    private calculateDodgeChance(): number {
@@ -58,15 +62,14 @@ export class AttackTable {
    private calculateGlancingChance(): number {
       const targetLevel = this.stats.targetLevel;
       const playerLevel = this.stats.playerLevel;
-      const weaponSkill = this.stats.weaponSkill;
 
       if (targetLevel < playerLevel) {
          return 0;
       }
 
       const targetDefense = targetLevel * 5;
-      const effectiveSkill = Math.min(playerLevel * 5, weaponSkill);
-      const skillDiff = targetDefense - effectiveSkill;
+      const baseWeaponSkill = playerLevel * 5;
+      const skillDiff = targetDefense - baseWeaponSkill;
 
       const glancingChance = 0.1 + (skillDiff * 0.02);
       return Math.max(0, Math.min(0.4, glancingChance));
@@ -92,7 +95,10 @@ export class AttackTable {
       const roll = Math.random();
       let cumulative = 0;
 
-      cumulative += this.missChance;
+      const isWhiteAttack = !attack.isSpecialAttack;
+      const missChance = this.getMissChance(isWhiteAttack);
+
+      cumulative += missChance;
       if (roll < cumulative) {
          return {type: AttackType.Miss, amountModifier: 0};
       }
