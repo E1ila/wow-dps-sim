@@ -527,20 +527,18 @@ export abstract class BaseSimulator implements Simulator, BuffsProvider, PlayerS
 
    critChance(attack: Attack): number {
       const targetDefense = this.spec.targetLevel * 5;
-      const weaponSkill = this.weaponSkill;
-      const playerMaxSkill = this.spec.playerLevel * 5;
+      const baseWeaponSkill = this.spec.playerLevel * 5;
 
-      // Weapon skill from gear/racials reduces crit
-      const extraWeaponSkill = Math.max(0, weaponSkill - playerMaxSkill);
-      let critChance = this.spec.gearStats.critChance - (extraWeaponSkill * 0.04);
+      let critChance = this.spec.gearStats.critChance;
 
-      // Apply skill differential effects
-      const cappedWeaponSkill = Math.min(weaponSkill, playerMaxSkill);
-      const skillDiff = cappedWeaponSkill - targetDefense;
+      // Crit suppression uses base weapon skill (not including +skill from gear/racials)
+      const skillDiff = baseWeaponSkill - targetDefense;
 
       if (skillDiff < 0) {
+         // Target defense > base skill: suppression = 0.2% per point
          critChance += skillDiff * 0.2;
       } else {
+         // Base skill >= target defense: bonus = 0.04% per point
          critChance += skillDiff * 0.04;
       }
 
