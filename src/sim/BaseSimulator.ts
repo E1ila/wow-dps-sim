@@ -542,6 +542,11 @@ export abstract class BaseSimulator implements Simulator, BuffsProvider, PlayerS
          critChance += skillDiff * 0.04;
       }
 
+      // Additional 1.8% suppression for +3 level targets
+      if (this.spec.targetLevel - this.spec.playerLevel >= 3) {
+         critChance -= 1.8;
+      }
+
       return critChance;
    }
 
