@@ -23,11 +23,18 @@ export class RogueDamageCalculator extends MeleeDamageCalculator {
       return this.murderMultiplier;
    }
 
-   get lethalityMultiplier() {
+   /**
+    * Lethality increases CRIT damage bonus by 6% per point (not all damage).
+    * Normal crit: 2.0x (100% base + 100% crit bonus)
+    * With 5/5 Lethality: 2.3x (100% base + 130% crit bonus)
+    * Additional multiplier on crits: 2.3 / 2.0 = 1.15
+    */
+   get lethalityCritMultiplier() {
       if (this.talents.lethality === 0) {
-         return 1;
+         return undefined;
       }
-      return 1 + (this.talents.lethality * 0.06);
+      // Each point adds 6% to crit bonus, which is 3% when applied after base 2.0x crit
+      return 1 + (this.talents.lethality * 0.03);
    }
 
    get aggressionMultiplier() {
@@ -65,7 +72,6 @@ export class RogueDamageCalculator extends MeleeDamageCalculator {
 
       const multipliers = [
          this.aggressionMultiplier,
-         this.lethalityMultiplier,
          this.murderMultiplier,
       ];
 
@@ -75,6 +81,7 @@ export class RogueDamageCalculator extends MeleeDamageCalculator {
          ability: Ability.SinisterStrike,
          isSpecialAttack: true,
          weapon,
+         critMultiplier: this.lethalityCritMultiplier,
       });
    }
 
@@ -86,7 +93,6 @@ export class RogueDamageCalculator extends MeleeDamageCalculator {
 
       const multipliers = [
          this.opportunityMultiplier,
-         this.lethalityMultiplier,
          this.murderMultiplier,
       ];
 
@@ -96,6 +102,7 @@ export class RogueDamageCalculator extends MeleeDamageCalculator {
          ability: Ability.Backstab,
          isSpecialAttack: true,
          weapon,
+         critMultiplier: this.lethalityCritMultiplier,
       });
    }
 
@@ -106,7 +113,6 @@ export class RogueDamageCalculator extends MeleeDamageCalculator {
       const baseDamage = weaponDamage + this.calcAttackPowerDamage(weapon, false);
 
       const multipliers = [
-         this.lethalityMultiplier,
          this.murderMultiplier,
       ];
 
@@ -116,6 +122,7 @@ export class RogueDamageCalculator extends MeleeDamageCalculator {
          ability: Ability.Hemorrhage,
          isSpecialAttack: true,
          weapon,
+         critMultiplier: this.lethalityCritMultiplier,
       });
    }
 

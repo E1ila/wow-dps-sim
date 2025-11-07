@@ -10,6 +10,7 @@ interface MeleeDamageParams {
    isSpecialAttack: boolean;
    isOffhand?: boolean;
    weapon: Weapon;
+   critMultiplier?: number; // Additional crit multiplier for talents like Lethality
 }
 
 export abstract class MeleeDamageCalculator extends DamageCalculator {
@@ -60,7 +61,7 @@ export abstract class MeleeDamageCalculator extends DamageCalculator {
     * by special abilities, like a Rogue's backstab.
     */
    protected calculateMeleeDamage(params: MeleeDamageParams): AttackResult {
-      const {baseDamage, damageMultipliers = [], ability, isSpecialAttack, weapon} = params;
+      const {baseDamage, damageMultipliers = [], ability, isSpecialAttack, weapon, critMultiplier} = params;
 
       let damage = baseDamage;
 
@@ -86,6 +87,12 @@ export abstract class MeleeDamageCalculator extends DamageCalculator {
       }
 
       damage *= attackTableResult.amountModifier;
+
+      // Apply additional crit multiplier (e.g., Lethality) if it's a crit
+      if (attackTableResult.type === AttackType.Crit && critMultiplier) {
+         damage *= critMultiplier;
+      }
+
       damage = Math.floor(this.applyArmorReduction(damage));
 
       return {

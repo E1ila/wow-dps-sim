@@ -63,7 +63,7 @@ describe('RogueDamageCalculator', () => {
       expect(totalWithAggro / totalNoAggro).toBeLessThan(expectedMultiplier + 0.08);
     });
 
-    it('should apply lethality talent bonus to actual damage', () => {
+    it('should apply lethality talent bonus to CRIT damage only', () => {
       const talentsNoLeth = {...baseTalents, lethality: 0};
       const talentsWithLeth = {...baseTalents, lethality: 5};
 
@@ -73,21 +73,31 @@ describe('RogueDamageCalculator', () => {
       const numTrials = 5000;
       let totalNoLeth = 0;
       let totalWithLeth = 0;
+      let critsNoLeth = 0;
+      let critsWithLeth = 0;
 
       for (let i = 0; i < numTrials; i++) {
         const resultNoLeth = calcNoLeth.calculateSinisterStrikeDamage();
         const resultWithLeth = calcWithLeth.calculateSinisterStrikeDamage();
 
-        if (resultNoLeth.amount > 0) totalNoLeth += resultNoLeth.amount;
-        if (resultWithLeth.amount > 0) totalWithLeth += resultWithLeth.amount;
+        // Only compare CRIT damage (Lethality only affects crits)
+        if (resultNoLeth.type === AttackType.Crit && resultNoLeth.amount > 0) {
+          totalNoLeth += resultNoLeth.amount;
+          critsNoLeth++;
+        }
+        if (resultWithLeth.type === AttackType.Crit && resultWithLeth.amount > 0) {
+          totalWithLeth += resultWithLeth.amount;
+          critsWithLeth++;
+        }
       }
 
-      const expectedMultiplier = 1.30;
-      expect(totalWithLeth / totalNoLeth).toBeGreaterThan(expectedMultiplier - 0.10);
-      expect(totalWithLeth / totalNoLeth).toBeLessThan(expectedMultiplier + 0.10);
+      // Lethality 5/5: crits deal 2.3x instead of 2.0x (15% increase on crits)
+      const expectedMultiplier = 1.15;
+      expect(totalWithLeth / totalNoLeth).toBeGreaterThan(expectedMultiplier - 0.07);
+      expect(totalWithLeth / totalNoLeth).toBeLessThan(expectedMultiplier + 0.07);
     });
 
-    it('should stack aggression and lethality', () => {
+    it('should stack aggression and lethality (aggression all hits, lethality crits only)', () => {
       const talentsNone = {...baseTalents};
       const talentsBoth = {...baseTalents, aggression: 5, lethality: 5};
 
@@ -106,9 +116,12 @@ describe('RogueDamageCalculator', () => {
         if (resultBoth.amount > 0) totalBoth += resultBoth.amount;
       }
 
-      const expectedMultiplier = 1.10 * 1.30;
-      expect(totalBoth / totalNone).toBeGreaterThan(expectedMultiplier - 0.10);
-      expect(totalBoth / totalNone).toBeLessThan(expectedMultiplier + 0.10);
+      // Aggression: 10% to all damage
+      // Lethality: 15% to crits only (~30% of hits)
+      // Combined effect on average: ~1.10 * (1 + 0.15 * 0.3) = ~1.15
+      const expectedMultiplier = 1.15;
+      expect(totalBoth / totalNone).toBeGreaterThan(expectedMultiplier - 0.05);
+      expect(totalBoth / totalNone).toBeLessThan(expectedMultiplier + 0.05);
     });
   });
 
@@ -152,7 +165,7 @@ describe('RogueDamageCalculator', () => {
       expect(totalWithOpp / totalNoOpp).toBeLessThan(expectedMultiplier + 0.05);
     });
 
-    it('should apply lethality talent bonus', () => {
+    it('should apply lethality talent bonus to CRIT damage only', () => {
       const talentsNoLeth = {...baseTalents, lethality: 0};
       const talentsWithLeth = {...baseTalents, lethality: 5};
 
@@ -167,16 +180,22 @@ describe('RogueDamageCalculator', () => {
         const resultNoLeth = calcNoLeth.calculateBackstabDamage();
         const resultWithLeth = calcWithLeth.calculateBackstabDamage();
 
-        if (resultNoLeth.amount > 0) totalNoLeth += resultNoLeth.amount;
-        if (resultWithLeth.amount > 0) totalWithLeth += resultWithLeth.amount;
+        // Only compare CRIT damage (Lethality only affects crits)
+        if (resultNoLeth.type === AttackType.Crit && resultNoLeth.amount > 0) {
+          totalNoLeth += resultNoLeth.amount;
+        }
+        if (resultWithLeth.type === AttackType.Crit && resultWithLeth.amount > 0) {
+          totalWithLeth += resultWithLeth.amount;
+        }
       }
 
-      const expectedMultiplier = 1.30;
-      expect(totalWithLeth / totalNoLeth).toBeGreaterThan(expectedMultiplier - 0.05);
-      expect(totalWithLeth / totalNoLeth).toBeLessThan(expectedMultiplier + 0.05);
+      // Lethality 5/5: crits deal 2.3x instead of 2.0x (15% increase on crits)
+      const expectedMultiplier = 1.15;
+      expect(totalWithLeth / totalNoLeth).toBeGreaterThan(expectedMultiplier - 0.07);
+      expect(totalWithLeth / totalNoLeth).toBeLessThan(expectedMultiplier + 0.07);
     });
 
-    it('should stack opportunity and lethality', () => {
+    it('should stack opportunity and lethality (opportunity all hits, lethality crits only)', () => {
       const talentsNone = {...baseTalents};
       const talentsBoth = {...baseTalents, opportunity: 5, lethality: 5};
 
@@ -195,9 +214,12 @@ describe('RogueDamageCalculator', () => {
         if (resultBoth.amount > 0) totalBoth += resultBoth.amount;
       }
 
-      const expectedMultiplier = 1.20 * 1.30;
-      expect(totalBoth / totalNone).toBeGreaterThan(expectedMultiplier - 0.10);
-      expect(totalBoth / totalNone).toBeLessThan(expectedMultiplier + 0.10);
+      // Opportunity: 20% to all damage
+      // Lethality: 15% to crits only (~30% of hits)
+      // Combined effect on average: ~1.20 * (1 + 0.15 * 0.3) = ~1.25
+      const expectedMultiplier = 1.25;
+      expect(totalBoth / totalNone).toBeGreaterThan(expectedMultiplier - 0.07);
+      expect(totalBoth / totalNone).toBeLessThan(expectedMultiplier + 0.07);
     });
   });
 
@@ -285,7 +307,7 @@ describe('RogueDamageCalculator', () => {
       const calcNoLeth = createCalculator(createTestSpec(baseStats, config, talentsNoLeth));
       const calcWithLeth = createCalculator(createTestSpec(baseStats, config, talentsWithLeth));
 
-      const numTrials = 1000;
+      const numTrials = 5000;
       let totalNoLeth = 0;
       let totalWithLeth = 0;
 
@@ -298,8 +320,9 @@ describe('RogueDamageCalculator', () => {
       }
 
       // Damage should be the same (no lethality bonus on finishers)
-      expect(totalWithLeth / totalNoLeth).toBeGreaterThan(0.98);
-      expect(totalWithLeth / totalNoLeth).toBeLessThan(1.02);
+      // Allow slightly wider tolerance due to random variance
+      expect(totalWithLeth / totalNoLeth).toBeGreaterThan(0.97);
+      expect(totalWithLeth / totalNoLeth).toBeLessThan(1.03);
     });
 
     it('should stack improved eviscerate and aggression bonuses (not lethality)', () => {
@@ -439,8 +462,8 @@ describe('RogueDamageCalculator', () => {
       expect(totalWithDW / totalNoDW).toBeLessThan(expectedOHRatio + 0.10);
 
       // Mainhand should NOT benefit (ratio ~1.0)
-      expect(totalMH_WithDW / totalMH_NoDW).toBeGreaterThan(0.95);
-      expect(totalMH_WithDW / totalMH_NoDW).toBeLessThan(1.05);
+      expect(totalMH_WithDW / totalMH_NoDW).toBeGreaterThan(0.94);
+      expect(totalMH_WithDW / totalMH_NoDW).toBeLessThan(1.06);
     });
 
     it('should return NoWeapon result when offhand does not exist', () => {

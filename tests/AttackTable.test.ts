@@ -109,7 +109,7 @@ describe('Attack Table Mechanics', () => {
           { hitPercent: 0, expectedMissMin: 24, expectedMissMax: 26 },
           { hitPercent: 3, expectedMissMin: 21, expectedMissMax: 23 },
           { hitPercent: 6, expectedMissMin: 18, expectedMissMax: 20 },
-          { hitPercent: 9, expectedMissMin: 15, expectedMissMax: 18 },
+          { hitPercent: 9, expectedMissMin: 19, expectedMissMax: 19 }, // Hits DW floor (19%)
         ];
 
         testCases.forEach(({ hitPercent, expectedMissMin, expectedMissMax }) => {
@@ -131,7 +131,7 @@ describe('Attack Table Mechanics', () => {
           { hitPercent: 0, expectedMissMin: 24, expectedMissMax: 26 },
           { hitPercent: 3, expectedMissMin: 21, expectedMissMax: 23 },
           { hitPercent: 6, expectedMissMin: 18, expectedMissMax: 20 },
-          { hitPercent: 9, expectedMissMin: 15, expectedMissMax: 18 },
+          { hitPercent: 9, expectedMissMin: 19, expectedMissMax: 19 }, // Hits DW floor (19%)
         ];
 
         testCases.forEach(({ hitPercent, expectedMissMin, expectedMissMax }) => {
