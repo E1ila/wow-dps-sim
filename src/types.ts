@@ -16,11 +16,22 @@ export enum Buff {
    DeepWounds = 'DeepWounds',
    Rend = 'Rend',
    SweepingStrikes = 'SweepingStrikes',
+   // Mage buffs
+   ArcanePower = 'ArcanePower',
+   Combustion = 'Combustion',
+   Clearcast = 'Clearcast',
+   PresenceOfMind = 'PresenceOfMind',
+   IceArmor = 'IceArmor',
+   MageArmor = 'MageArmor',
+   IceBarrier = 'IceBarrier',
+   Ignite = 'Ignite',
+   ImprovedScorch = 'ImprovedScorch',
 }
 
 export enum CharacterClass {
    Rogue = 'rogue',
    Warrior = 'warrior',
+   Mage = 'mage',
 }
 
 export enum TargetType {
@@ -44,6 +55,14 @@ export interface GearStats {
 
    mainHandWeapon: Weapon;
    offHandWeapon?: Weapon;
+
+   // Mage stats
+   spellPower?: number;
+   spellCrit?: number;
+   spellHit?: number;
+   intellect?: number;
+   spirit?: number;
+   mana?: number;
 }
 
 export interface Weapon {
@@ -114,6 +133,18 @@ export enum Ability {
    BattleStance = 'batstance',
    DefensiveStance = 'defstand',
    BerserkerStance = 'berstance',
+
+   // mage
+   Fireball = 'fb',
+   Frostbolt = 'frostb',
+   Scorch = 'scorch',
+   FireBlast = 'fireblast',
+   ArcaneMissiles = 'am',
+   ArcaneExplosion = 'ae',
+   Evocation = 'evoc',
+   ArcanePower = 'ap',
+   PresenceOfMind = 'pom',
+   Combustion = 'combustion',
 }
 
 export interface Attack {
@@ -179,6 +210,39 @@ export interface WarriorTalents {
    armsTree?: Record<string, number>;
    furyTree?: Record<string, number>;
    protectionTree?: Record<string, number>;
+}
+
+export interface MageTalents {
+   // Arcane Tree
+   arcaneSubtlety: number; // -10% threat per rank
+   arcaneFocus: number; // +2% spell hit on Arcane per rank
+   improvedArcaneMissiles: number; // -0.5s channel time per rank
+   arcaneMind: number; // +2% max mana per rank
+   arcaneMeditation: number; // +5% spirit regen while casting per rank
+   arcaneConcentration: number; // 2% proc chance per rank for clearcasting
+   arcanePower: boolean; // +30% damage, +30% cost, 15s duration, 3min CD
+   arcaneInstability: number; // +1% damage and +1% crit per rank
+
+   // Fire Tree
+   improvedFireball: number; // -0.1s cast time per rank
+   ignite: boolean; // 40% of fire crit damage as DoT over 4s
+   flameThrowing: number; // +3 yards range per rank
+   improvedScorch: number; // 33%/66%/100% chance to apply debuff per rank
+   masterOfElements: number; // 10% per rank mana refund on spell crit
+   criticalMass: number; // +2% fire crit per rank
+   firePower: number; // +2% fire damage per rank (excludes Ignite)
+   combustion: boolean; // +10% crit per stack, consumed after 3 crits
+   burningSoul: number; // -15% threat on fire spells per rank
+
+   // Frost Tree
+   improvedFrostbolt: number; // -0.1s cast time per rank
+   iceShards: number; // +20% crit damage on frost spells per rank
+   piercingIce: number; // +2% frost damage per rank
+   frostChanneling: number; // -5% mana cost, -10% threat on frost per rank
+   elementalPrecision: number; // +2% spell hit on Fire/Frost per rank
+   iceBarrier: boolean; // Absorbs damage, 1min CD
+   arcticReach: number; // +10% range on frost spells per rank
+   wintersChill: number; // 20% proc chance per rank to apply debuff
 }
 
 export interface SimulationSetup {
@@ -250,6 +314,26 @@ export interface WarriorSimulationState extends MeleeSimulationState {
    // Queue system for Heroic Strike/Cleave
    queuedAbility: Ability | null;
    queueActivationTime: number;
+}
+
+export interface MageSimulationState extends SimulationState {
+   mana: number;
+   currentCastEnd: number;
+   castingSpell: Ability | null;
+   nextManaTick: number;
+
+   // Buff stacks
+   combustionStacks: number;
+   improvedScorchStacks: number;
+   igniteStacks: number;
+
+   // Cooldowns
+   fireBlastCooldown: number;
+   arcanePowerCooldown: number;
+   combustionCooldown: number;
+   presenceOfMindCooldown: number;
+   evocationCooldown: number;
+   iceBarrierCooldown: number;
 }
 
 export interface SimulationConfig {

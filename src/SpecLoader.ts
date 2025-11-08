@@ -2,6 +2,7 @@ import {readFileSync} from 'fs';
 import {
    CharacterClass,
    GearStats,
+   MageTalents,
    RogueTalents,
    SimulationConfig,
    SimulationSetup,
@@ -17,7 +18,7 @@ export interface SimulationSpec {
    playerLevel: number;
    rotation?: string[];
    setup?: SimulationSetup;
-   talents: RogueTalents | WarriorTalents;
+   talents: RogueTalents | WarriorTalents | MageTalents;
    gearStats: GearStats;
    simulationConfig: SimulationConfig;
    fightLength: number;
@@ -66,11 +67,12 @@ export class SpecLoader {
         const classMap: { [key: string]: CharacterClass } = {
             'rogue': CharacterClass.Rogue,
             'warrior': CharacterClass.Warrior,
+            'mage': CharacterClass.Mage,
         };
 
         const characterClass = classMap[spec.class.toLowerCase()];
         if (!characterClass) {
-            throw new Error(`Unknown class "${spec.class}". Available classes: rogue, warrior`);
+            throw new Error(`Unknown class "${spec.class}". Available classes: rogue, warrior, mage`);
         }
         spec.class = characterClass;
 

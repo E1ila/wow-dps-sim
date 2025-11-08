@@ -26,6 +26,8 @@ export function colorByClass(characterClass: CharacterClass): string {
          return c.yellow;
       case CharacterClass.Warrior:
          return c.red;
+      case CharacterClass.Mage:
+         return c.cyan;
    }
 }
 

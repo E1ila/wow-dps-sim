@@ -1,23 +1,56 @@
 {
     "name": "Fury DPS",
     "class": "warrior",
-    "description": "Standard fury warrior spec for PvE (NOT IMPLEMENTED)",
+    "playerLevel": 60,
+    "description": "Standard fury warrior spec for PvE",
     "setup": {},
     "talents": {
-        "armsTree": {
-            "deflection": 5,
-            "improvedRend": 0,
-            "tacticalMastery": 0
+        "cruelty": 5,
+        "improvedRend": 0,
+        "impale": 0,
+        "improvedOverpower": 0,
+        "twoHandedSpecialization": 0,
+        "improvedMortalStrike": false,
+        "unbridledWrath": 5,
+        "flurry": 5,
+        "enrage": 5,
+        "improvedBloodthirst": true,
+        "improvedBerserkerRage": 0,
+        "dualWieldSpecialization": 5,
+        "improvedHeroicStrike": 0,
+        "improvedCleave": 0,
+        "angerManagement": false,
+        "defiance": 0,
+        "improvedRevenge": 0,
+        "shieldSpecialization": 0,
+        "tacticalMastery": 0
+    },
+    "gearStats": {
+        "attackPower": 1200,
+        "critChance": 25,
+        "hitChance": 9,
+        "agility": 300,
+        "strength": 200,
+        "weaponSkill": 308,
+        "mainHandWeapon": {
+            "minDamage": 85,
+            "maxDamage": 129,
+            "speed": 2.6,
+            "type": "Sword",
+            "enchant": "Crusader"
         },
-        "furyTree": {
-            "cruelty": 5,
-            "unbridledWrath": 5,
-            "piercingHowl": 0,
-            "dualWieldSpecialization": 5,
-            "enrage": 5,
-            "flurry": 5,
-            "bloodthirst": true
-        },
-        "protectionTree": {}
+        "offHandWeapon": {
+            "minDamage": 57,
+            "maxDamage": 107,
+            "speed": 1.5,
+            "type": "Sword",
+            "enchant": "+5 damage"
+        }
+    },
+    "simulationConfig": {
+        "fightLength": 120,
+        "targetLevel": 63,
+        "targetArmor": 3731,
+        "iterations": 1000
     }
 }
