@@ -5,7 +5,7 @@ import {BuffsProvider} from "./DamageCalculator";
 
 const EVISCERATE_9 = [[224,332],[394,502],[564,672],[734,842],[904,1012]];
 const SINISTER_STRIKE_7 = 68;
-const BACKSTAB_9 = 225;
+const BACKSTAB_9 = 225; // extra damage (not percent increase)
 
 export class RogueDamageCalculator extends MeleeDamageCalculator {
    protected talents: RogueTalents;

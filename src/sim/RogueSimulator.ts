@@ -21,6 +21,8 @@ export const ROGUE = {
    maxEnergy: 100,
    maxEnergyVigor: 110,
    slnDiceIAS: 0.2,
+   swordSpecICD: 200, // 200ms ICD between Sword Spec procs
+   sealFateICD: 500,  // 500ms ICD between Seal Fate procs
 }
 
 export class RogueSimulator extends MeleeSimulator {
@@ -50,6 +52,8 @@ export class RogueSimulator extends MeleeSimulator {
          globalCooldownExpiry: 0,
          nextEnergyTick: 2000,
          activeBuffs: [],
+         swordSpecICD: 0,
+         sealFateICD: 0,
       };
    }
 
@@ -219,24 +223,43 @@ export class RogueSimulator extends MeleeSimulator {
       this.addComboPoint();
       comboPointsGained++;
 
-      // Seal Fate: chance to gain extra combo point on crit
+      // Seal Fate: chance to gain extra combo point on crit (with 500ms ICD)
       if (result.type === AttackType.Crit && this.talents.sealFate > 0) {
-         if (Math.random() < (this.talents.sealFate * 0.2)) {
-            this.addComboPoint();
-            comboPointsGained++;
+         if (this.state.currentTime >= this.state.sealFateICD) {
+            if (Math.random() < (this.talents.sealFate * 0.2)) {
+               this.addComboPoint();
+               comboPointsGained++;
+               this.state.sealFateICD = this.state.currentTime + ROGUE.sealFateICD;
+               this.addProc(`Seal Fate ${c.red}●${c.reset}`, true);
+            }
          }
       }
 
       return comboPointsGained;
    }
 
-   onMainHandHit(result: AttackResult): void {
+   private trySwordSpecProc(result: AttackResult, weaponType: WeaponType | undefined, procLabel: string): void {
       if (result.amount > 0 &&
          this.talents.swordSpecialization > 0 &&
-         this.spec.gearStats.mainHandWeapon.type === WeaponType.Sword &&
-         Math.random() < (this.talents.swordSpecialization * 0.01)) {
-         this.logDamage(Ability.Extra, result);
+         weaponType === WeaponType.Sword &&
+         this.state.currentTime >= this.state.swordSpecICD) {
+         if (Math.random() < (this.talents.swordSpecialization * 0.01)) {
+            const extraAttack = this.damageCalculator.calculateAutoAttackDamage(false);
+            this.logDamage(Ability.Extra, extraAttack);
+            this.state.swordSpecICD = this.state.currentTime + ROGUE.swordSpecICD;
+            this.addProc(procLabel, true);
+         }
       }
+   }
+
+   override onMainHandHit(result: AttackResult): void {
+      super.onMainHandHit(result);
+      this.trySwordSpecProc(result, this.spec.gearStats.mainHandWeapon.type, `EXTRA(S) ${c.yellow}⚔${c.reset}`);
+   }
+
+   override onOffHandHit(result: AttackResult): void {
+      super.onOffHandHit(result);
+      this.trySwordSpecProc(result, this.spec.gearStats.offHandWeapon?.type, `EXTRA(S,OH) ${c.yellow}⚔${c.reset}`);
    }
 
    protected checkCondition(cond: string): boolean {

@@ -209,6 +209,10 @@ export interface RogueSimulationState extends MeleeSimulationState {
    energy: number;
    comboPoints: number;
    nextEnergyTick: number;
+
+   // Internal cooldowns for procs
+   swordSpecICD: number;
+   sealFateICD: number;
 }
 
 export enum WarriorStance {
