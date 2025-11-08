@@ -28,6 +28,8 @@ export function colorByClass(characterClass: CharacterClass): string {
          return c.red;
       case CharacterClass.Mage:
          return c.cyan;
+      case CharacterClass.Shaman:
+         return c.blue;
    }
 }
 

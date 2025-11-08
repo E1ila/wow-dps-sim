@@ -32,6 +32,7 @@ export enum CharacterClass {
    Rogue = 'rogue',
    Warrior = 'warrior',
    Mage = 'mage',
+   Shaman = 'shaman',
 }
 
 export enum TargetType {
@@ -63,6 +64,10 @@ export interface GearStats {
    intellect?: number;
    spirit?: number;
    mana?: number;
+
+   // Healer stats
+   healingPower?: number;
+   mp5?: number; // Mana per 5 seconds
 }
 
 export interface Weapon {
@@ -145,6 +150,12 @@ export enum Ability {
    ArcanePower = 'ap',
    PresenceOfMind = 'pom',
    Combustion = 'combustion',
+
+   // shaman healing
+   HealingWave = 'hw',
+   LesserHealingWave = 'lhw',
+   ChainHeal = 'ch',
+   NaturesSwiftness = 'ns',
 }
 
 export interface Attack {
@@ -245,6 +256,56 @@ export interface MageTalents {
    wintersChill: number; // 20% proc chance per rank to apply debuff
 }
 
+export interface ShamanTalents {
+   // Restoration Tree
+   tidalFocus: number; // -1% mana cost per rank on healing spells
+   improvedHealingWave: number; // -0.1s cast time per rank on Healing Wave
+   tidalMastery: number; // +1% crit per rank on healing and lightning spells
+   healingFocus: number; // Reduces pushback on healing spells by 23%/46%/70%
+   naturesGuidance: number; // +3% spell hit per rank
+   healingGrace: number; // -5% threat per rank on healing spells
+   restorativeTotems: number; // +5% effect per rank on healing totems
+   tidalWaves: boolean; // Chain Heal/Riptide make next HW/LHW faster
+   naturesSwiftness: boolean; // 3min CD, next spell instant
+   manaTideTotem: boolean; // Totem restores mana
+   purification: number; // +2% healing per rank
+   earthShield: boolean; // Place shield on target that heals when damaged
+
+   // Elemental Tree
+   convection: number; // -2% mana cost per rank on elemental spells
+   concussion: number; // +1% damage per rank on lightning/shock spells
+   callOfFlame: number; // +5% damage per rank on fire totems
+   elementalFocus: boolean; // Clearcasting proc (10% on crit)
+   reverberation: number; // -5% mana cost per rank on shock spells
+   callOfThunder: number; // +1% crit per rank on lightning spells
+   improvedFireTotems: number; // +6% spell power bonus per rank from fire totems
+   eyeOfTheStorm: number; // -3.3% pushback per rank on lightning spells
+   elementalFury: number; // +20% crit damage per rank on elemental spells
+   stormreach: number; // +3% range per rank on lightning spells
+   elementalPrecision: number; // -2% threat per rank, +1% spell hit per rank
+   lightningMastery: number; // -0.2s cast time per rank on Lightning Bolt/Chain Lightning
+   elementalMastery: boolean; // 3min CD, next spell instant + guaranteed crit
+   lightningOverload: number; // 4%/8%/12%/16%/20% chance per rank to cast second lightning spell at reduced damage
+   totemOfWrath: boolean; // Totem increases spell power and spell crit for party
+
+   // Enhancement Tree
+   ancestralKnowledge: number; // +1% max mana per rank
+   shieldSpecialization: number; // +5% block chance per rank
+   thunderingStrikes: number; // +1% crit per rank with elemental weapons
+   improvedGhostWolf: number; // -0.5s cast time per rank on Ghost Wolf
+   enhancingTotems: number; // +8% strength per rank from strength of earth totem
+   shamanisticFocus: number; // -10%/20%/30% mana cost on shock spells after crit
+   flurry: number; // +5%/10%/15%/20%/25% attack speed after crit
+   spiritWeapons: boolean; // Reduces threat by 30%
+   mentalDexterity: number; // +100%/200%/300% of attack power as spell power
+   unleashedRage: number; // 2%/4%/6% attack power bonus to party after crit
+   weaponMastery: number; // +2% damage per rank with melee weapons
+   dualWieldSpec: number; // +10%/20%/30%/40%/50% offhand damage
+   stormstrike: boolean; // Instant attack, increases nature damage taken
+   mentalQuickness: number; // +6%/12%/18%/20%/25% of attack power as spell/healing power
+   shamanisticRage: boolean; // 1min CD, 30% of intellect as mana over 15s, damage reduction
+}
+
 export interface SimulationSetup {
    // general
    wbs?: boolean; // apply world buffs
@@ -336,6 +397,25 @@ export interface MageSimulationState extends SimulationState {
    iceBarrierCooldown: number;
 }
 
+export interface ShamanSimulationState extends SimulationState {
+   mana: number;
+   currentCastEnd: number;
+   castingSpell: Ability | null;
+   nextManaTick: number;
+
+   // Healing throughput tracking
+   totalHealing: number;
+   overhealing: number;
+
+   // Target health (simulating a tank being healed)
+   targetCurrentHealth: number;
+   targetMaxHealth: number;
+
+   // Cooldowns
+   naturesSwiftnessCooldown: number;
+   manaTideCooldown: number;
+}
+
 export interface SimulationConfig {
    targetLevel: number;
    targetType?: TargetType;
@@ -388,7 +468,17 @@ export interface BuffFadeEvent {
    hidden?: boolean
 }
 
-export type SimulationEvent = DamageEvent | BuffEvent | ProcEvent | BuffFadeEvent;
+export interface HealingEvent {
+   timestamp: number;
+   ability: string;
+   eventType: 'healing';
+   amount: number;
+   overhealing: number;
+   crit: boolean;
+   hidden?: boolean
+}
+
+export type SimulationEvent = DamageEvent | BuffEvent | ProcEvent | BuffFadeEvent | HealingEvent;
 
 export interface SimulationStatistics {
    critCount: number;

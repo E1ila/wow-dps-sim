@@ -4,6 +4,7 @@ import {
    GearStats,
    MageTalents,
    RogueTalents,
+   ShamanTalents,
    SimulationConfig,
    SimulationSetup,
    TargetType,
@@ -18,7 +19,7 @@ export interface SimulationSpec {
    playerLevel: number;
    rotation?: string[];
    setup?: SimulationSetup;
-   talents: RogueTalents | WarriorTalents | MageTalents;
+   talents: RogueTalents | WarriorTalents | MageTalents | ShamanTalents;
    gearStats: GearStats;
    simulationConfig: SimulationConfig;
    fightLength: number;
@@ -68,11 +69,12 @@ export class SpecLoader {
             'rogue': CharacterClass.Rogue,
             'warrior': CharacterClass.Warrior,
             'mage': CharacterClass.Mage,
+            'shaman': CharacterClass.Shaman,
         };
 
         const characterClass = classMap[spec.class.toLowerCase()];
         if (!characterClass) {
-            throw new Error(`Unknown class "${spec.class}". Available classes: rogue, warrior, mage`);
+            throw new Error(`Unknown class "${spec.class}". Available classes: rogue, warrior, mage, shaman`);
         }
         spec.class = characterClass;
 
