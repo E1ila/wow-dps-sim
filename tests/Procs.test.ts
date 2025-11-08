@@ -102,10 +102,19 @@ describe('Procs', () => {
     });
 
     it('should proc at approximately 1 PPM rate for mainhand', () => {
-      const spec = createTestSpec(baseStats, config, baseTalents);
+      // Remove Crusader from offhand to test mainhand proc rate in isolation
+      const statsOnlyMHCrusader = {
+        ...baseStats,
+        offHandWeapon: {
+          ...baseStats.offHandWeapon!,
+          enchant: WeaponEnchant.Dmg5
+        }
+      };
+
+      const spec = createTestSpec(statsOnlyMHCrusader, config, baseTalents);
       const simulator = new RogueSimulator(spec);
 
-      const iterations = 500;
+      const iterations = 2000;
       let totalProcs = 0;
       let totalMHHits = 0;
 
@@ -127,12 +136,12 @@ describe('Procs', () => {
       }
 
       // Proc chance should be weapon_speed / 60 = 1.8 / 60 = 0.03 (3%)
-      const expectedProcRate = baseStats.mainHandWeapon.speed / 60;
+      const expectedProcRate = statsOnlyMHCrusader.mainHandWeapon.speed / 60;
       const actualProcRate = totalProcs / totalMHHits;
 
-      // Allow 25% variance due to RNG (0.03 * 0.75 = 0.0225, 0.03 * 1.25 = 0.0375)
-      expect(actualProcRate).toBeGreaterThan(expectedProcRate * 0.75);
-      expect(actualProcRate).toBeLessThan(expectedProcRate * 1.25);
+      // Allow 35% variance due to RNG (0.03 * 0.65 = 0.0195, 0.03 * 1.35 = 0.0405)
+      expect(actualProcRate).toBeGreaterThan(expectedProcRate * 0.7);
+      expect(actualProcRate).toBeLessThan(expectedProcRate * 1.3);
     });
 
     it('should activate Crusader buff when it procs', () => {

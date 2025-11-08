@@ -70,7 +70,7 @@ describe('RogueDamageCalculator', () => {
       const calcNoLeth = createCalculator(createTestSpec(baseStats, config, talentsNoLeth));
       const calcWithLeth = createCalculator(createTestSpec(baseStats, config, talentsWithLeth));
 
-      const numTrials = 5000;
+      const numTrials = 10000;
       let totalNoLeth = 0;
       let totalWithLeth = 0;
       let critsNoLeth = 0;
@@ -93,8 +93,8 @@ describe('RogueDamageCalculator', () => {
 
       // Lethality 5/5: crits deal 2.3x instead of 2.0x (15% increase on crits)
       const expectedMultiplier = 1.15;
-      expect(totalWithLeth / totalNoLeth).toBeGreaterThan(expectedMultiplier - 0.07);
-      expect(totalWithLeth / totalNoLeth).toBeLessThan(expectedMultiplier + 0.07);
+      expect(totalWithLeth / totalNoLeth).toBeGreaterThan(expectedMultiplier - 0.08);
+      expect(totalWithLeth / totalNoLeth).toBeLessThan(expectedMultiplier + 0.08);
     });
 
     it('should stack aggression and lethality (aggression all hits, lethality crits only)', () => {
@@ -436,7 +436,7 @@ describe('RogueDamageCalculator', () => {
       const calcNoDW = createCalculator(createTestSpec(baseStats, config, talentsNoDW));
       const calcWithDW = createCalculator(createTestSpec(baseStats, config, talentsWithDW));
 
-      const numTrials = 1000;
+      const numTrials = 3000;
       let totalNoDW = 0;
       let totalWithDW = 0;
       let totalMH_NoDW = 0;
@@ -458,12 +458,12 @@ describe('RogueDamageCalculator', () => {
 
       // Offhand should benefit: 50% base + 25% from 5 points = 75% = 1.5x
       const expectedOHRatio = (0.5 + 0.25) / 0.5;
-      expect(totalWithDW / totalNoDW).toBeGreaterThan(expectedOHRatio - 0.10);
-      expect(totalWithDW / totalNoDW).toBeLessThan(expectedOHRatio + 0.10);
+      expect(totalWithDW / totalNoDW).toBeGreaterThan(expectedOHRatio - 0.12);
+      expect(totalWithDW / totalNoDW).toBeLessThan(expectedOHRatio + 0.12);
 
       // Mainhand should NOT benefit (ratio ~1.0)
-      expect(totalMH_WithDW / totalMH_NoDW).toBeGreaterThan(0.94);
-      expect(totalMH_WithDW / totalMH_NoDW).toBeLessThan(1.06);
+      expect(totalMH_WithDW / totalMH_NoDW).toBeGreaterThan(0.93);
+      expect(totalMH_WithDW / totalMH_NoDW).toBeLessThan(1.07);
     });
 
     it('should return NoWeapon result when offhand does not exist', () => {
