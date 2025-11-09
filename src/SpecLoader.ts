@@ -28,6 +28,7 @@ export interface SimulationSpec {
    targetArmor: number;
    iterations: number;
    postCycleResourceGeneration?: boolean;
+   isHealerSpec: boolean;
 }
 
 export class SpecLoader {
@@ -77,6 +78,9 @@ export class SpecLoader {
             throw new Error(`Unknown class "${spec.class}". Available classes: rogue, warrior, mage, shaman`);
         }
         spec.class = characterClass;
+
+        // Determine if this is a healer spec based on class
+        spec.isHealerSpec = characterClass === CharacterClass.Shaman;
 
          return spec as SimulationSpec;
       } catch (error) {

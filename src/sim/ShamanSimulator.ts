@@ -11,6 +11,7 @@ const TANK_DAMAGE_PER_SECOND = 500; // Simulated incoming DPS
 export class ShamanSimulator extends BaseSimulator {
    protected state: ShamanSimulationState;
    protected healingCalculator: ShamanHealingCalculator;
+   protected damageCalculator: ShamanHealingCalculator;
    protected talents: ShamanTalents;
    private healingBreakdown: Map<string, number> = new Map();
 
@@ -18,6 +19,7 @@ export class ShamanSimulator extends BaseSimulator {
       super(spec);
       this.talents = spec.talents as ShamanTalents;
       this.healingCalculator = new ShamanHealingCalculator(spec, this);
+      this.damageCalculator = this.healingCalculator;
       this.state = this.initializeState();
    }
 
@@ -357,12 +359,26 @@ export class ShamanSimulator extends BaseSimulator {
       }
    }
 
-   simulate(): SimulationResult {
-      this.state = this.initializeState();
-      this.events = [];
-      this.damageBreakdown = new Map();
+   protected prepareSimulation(): void {
+      super.prepareSimulation();
       this.healingBreakdown = new Map();
-      this.nextRotationCommandIndex = 0;
+   }
+
+   protected getSimulationResult(): SimulationResult {
+      const totalHealing = Array.from(this.healingBreakdown.values()).reduce((a, b) => a + b, 0);
+      const hps = totalHealing / this.spec.fightLength;
+
+      return {
+         totalDamage: totalHealing,
+         dps: hps,
+         events: this.events,
+         damageBreakdown: this.healingBreakdown,
+         statistics: this.statistics,
+      };
+   }
+
+   simulate(): SimulationResult {
+      this.prepareSimulation();
 
       const fightLength = this.spec.fightLength * 1000;
 
@@ -371,20 +387,7 @@ export class ShamanSimulator extends BaseSimulator {
          this.advanceTime();
       }
 
-      const totalHealing = this.state.totalHealing;
-      const hps = totalHealing / this.spec.fightLength;
-
-      return {
-         totalDamage: totalHealing, // Use totalDamage field for healing for compatibility
-         dps: hps,
-         events: this.events,
-         damageBreakdown: this.healingBreakdown, // Use damageBreakdown for healing breakdown
-         statistics: this.statistics,
-      };
-   }
-
-   async simulateWithPlayback(speed: number): Promise<void> {
-      throw new Error('Not implemented');
+      return this.getSimulationResult();
    }
 
    runMultipleIterations(): { results: SimulationResult[]; executionTimeMs: number } {

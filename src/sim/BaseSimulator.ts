@@ -289,7 +289,8 @@ export abstract class BaseSimulator implements Simulator, BuffsProvider, PlayerS
 
       const result = this.getSimulationResult();
       console.log('\n=== Playback Complete ===');
-      console.log(` ${c.green}**  ${c.brightGreen}DPS ${result.dps.toFixed(2)} ${c.green}**${c.reset}`);
+      const label = this.spec.isHealerSpec ? 'HPS' : 'DPS';
+      console.log(` ${c.green}**  ${c.brightGreen}${label} ${result.dps.toFixed(2)} ${c.green}**${c.reset}`);
    }
 
    protected abstract getStateText(): string;
@@ -350,6 +351,10 @@ export abstract class BaseSimulator implements Simulator, BuffsProvider, PlayerS
          console.log(`${timestamp} ${c.cyan}${event.procName}${c.reset}`);
       } else if (event.eventType === 'buff--') {
          console.log(`${timestamp}${c.red} -- ${event.buffName}${c.reset}`);
+      } else if (event.eventType === 'healing') {
+         const critStr = event.crit ? ' (crit)' : '';
+         const overhealStr = event.overhealing > 0 ? ` ${c.gray}(${event.overhealing} OH)${c.reset}` : '';
+         console.log(`${timestamp} ${c.blue}${event.ability.toUpperCase()} ${c.green}${event.amount}${c.reset}${critStr}${overhealStr}`);
       } else {
          const extra = this.getPrintDamageEventExtra(event);
          const isWhiteDamage = event.ability === Ability.MainHand || event.ability === Ability.OffHand || event.ability === Ability.Extra;
@@ -512,7 +517,8 @@ export abstract class BaseSimulator implements Simulator, BuffsProvider, PlayerS
                console.log(` ${value} ${name}`);
             }
          }
-         console.log(` ${c.green}**  ${c.brightGreen}DPS ${avgDPS.toFixed(2)} ${c.green}**${c.reset}`);
+         const label = simulator.spec.isHealerSpec ? 'HPS' : 'DPS';
+         console.log(` ${c.green}**  ${c.brightGreen}${label} ${avgDPS.toFixed(2)} ${c.green}**${c.reset}`);
       }
       return jsonResults;
    }

@@ -1,9 +1,10 @@
-import {CharacterClass, RogueTalents, SimulationSetup, WarriorTalents, WeaponType} from './types';
+import {CharacterClass, RogueTalents, ShamanTalents, SimulationSetup, WarriorTalents, WeaponType} from './types';
 import {c, colorByClass} from './globals';
 import {WarriorSimulator} from './sim/WarriorSimulator';
 import {BaseSimulator} from './sim/BaseSimulator';
 import {SimulationSpec, SpecLoader} from './SpecLoader';
 import {RogueSimulator} from "./sim/RogueSimulator";
+import {ShamanSimulator} from "./sim/ShamanSimulator";
 
 export interface SimulationOptions {
     specFile: string;
@@ -233,6 +234,9 @@ export class SimulationRunner {
 
             case CharacterClass.Warrior:
                 return new WarriorSimulator(this.spec as SimulationSpec & { talents: WarriorTalents });
+
+            case CharacterClass.Shaman:
+                return new ShamanSimulator(this.spec as SimulationSpec & { talents: ShamanTalents });
 
             default:
                 throw new Error(`Class ${this.spec.class} is not implemented yet.`);
