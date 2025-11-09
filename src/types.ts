@@ -7,6 +7,7 @@ export interface SpecOverrides {
 
 export enum Buff {
    SnD = 'SnD',
+   ColdBlood = 'ColdBlood',
    Crusader = 'Crusader',
    BattleStance = 'BattleStance',
    DefensiveStance = 'DefensiveStance',
@@ -108,6 +109,7 @@ export enum Ability {
    Backstab = 'bs',
    Hemorrhage = 'hemo',
    SliceAndDice = 'snd',
+   ColdBlood = 'coldblood',
 
    // custom rogue ops
    AddCombo = 'cp',
@@ -338,6 +340,9 @@ export interface RogueSimulationState extends MeleeSimulationState {
    // Internal cooldowns for procs
    swordSpecICD: number;
    sealFateICD: number;
+
+   // Ability cooldowns
+   coldBloodCooldown: number;
 }
 
 export enum WarriorStance {

@@ -12,7 +12,7 @@ import {
    SimulationSetup,
    WeaponType,
 } from '../types';
-import {c} from '../globals';
+import {c, isHit} from '../globals';
 import {SimulationSpec} from '../SpecLoader';
 import {RogueDamageCalculator} from '../mechanics/RogueDamageCalculator';
 import {MeleeSimulator} from './MeleeSimulator';
@@ -54,6 +54,7 @@ export class RogueSimulator extends MeleeSimulator {
          activeBuffs: [],
          swordSpecICD: 0,
          sealFateICD: 0,
+         coldBloodCooldown: 0,
       };
    }
 
@@ -108,6 +109,13 @@ export class RogueSimulator extends MeleeSimulator {
       return cp;
    }
 
+   consumeColdBlood(): void {
+      if (this.isBuffActive(Buff.ColdBlood)) {
+         this.removeBuff(Buff.ColdBlood);
+         this.state.coldBloodCooldown = this.state.currentTime + 180000; // 3 min CD
+      }
+   }
+
    onFinishingMove(): void {
       if (this.talents.ruthlessness > 0) {
          const chance = this.talents.ruthlessness * 0.2; // 20% per rank
@@ -154,6 +162,7 @@ export class RogueSimulator extends MeleeSimulator {
       this.logDamage(Ability.Eviscerate, result, 0, cp);
       this.onFinishingMove();
       this.onMainHandHit(result); // MH triggers
+      this.consumeColdBlood();
       this.triggerGlobalCooldown();
       return true;
    }
@@ -175,7 +184,22 @@ export class RogueSimulator extends MeleeSimulator {
       const comboPointsGained = this.handleComboPointGeneration(result);
       this.logDamage(Ability.SinisterStrike, result, comboPointsGained);
       this.onMainHandHit(result); // MH triggers
+      this.consumeColdBlood();
       this.triggerGlobalCooldown();
+      return true;
+   }
+
+   castColdBlood(): boolean {
+      if (!this.talents.coldBlood || this.isBuffActive(Buff.ColdBlood)  ) {
+         return false;
+      }
+
+      if (this.state.currentTime < this.state.coldBloodCooldown) {
+         return false;
+      }
+
+      // Cold Blood doesn't cost energy and doesn't trigger GCD
+      this.activateBuff(Buff.ColdBlood, -1, 0); // -1 for infinite duration (consumed on next attack)
       return true;
    }
 
@@ -192,6 +216,7 @@ export class RogueSimulator extends MeleeSimulator {
       const comboPointsGained = this.handleComboPointGeneration(result);
       this.logDamage(Ability.Backstab, result, comboPointsGained);
       this.onMainHandHit(result); // MH triggers
+      this.consumeColdBlood();
       this.triggerGlobalCooldown();
       return true;
    }
@@ -209,6 +234,7 @@ export class RogueSimulator extends MeleeSimulator {
       const comboPointsGained = this.handleComboPointGeneration(result);
       this.logDamage(Ability.Hemorrhage, result, comboPointsGained);
       this.onMainHandHit(result); // MH triggers
+      this.consumeColdBlood();
       this.triggerGlobalCooldown();
       return true;
    }
@@ -239,27 +265,28 @@ export class RogueSimulator extends MeleeSimulator {
    }
 
    private trySwordSpecProc(result: AttackResult, weaponType: WeaponType | undefined, procLabel: string): void {
-      if (result.amount > 0 &&
+      if (
+         isHit(result) &&
          this.talents.swordSpecialization > 0 &&
          weaponType === WeaponType.Sword &&
-         this.state.currentTime >= this.state.swordSpecICD) {
-         if (Math.random() < (this.talents.swordSpecialization * 0.01)) {
-            const extraAttack = this.damageCalculator.calculateAutoAttackDamage(false);
-            this.logDamage(Ability.Extra, extraAttack);
-            this.state.swordSpecICD = this.state.currentTime + ROGUE.swordSpecICD;
-            this.addProc(procLabel, true);
-         }
+         this.state.currentTime >= this.state.swordSpecICD &&
+         Math.random() < (this.talents.swordSpecialization * 0.01)
+      ) {
+         const extraAttack = this.damageCalculator.calculateAutoAttackDamage(false);
+         this.logDamage(Ability.Extra, extraAttack);
+         this.state.swordSpecICD = this.state.currentTime + ROGUE.swordSpecICD;
+         this.addProc(procLabel, true);
       }
    }
 
    override onMainHandHit(result: AttackResult): void {
       super.onMainHandHit(result);
-      this.trySwordSpecProc(result, this.spec.gearStats.mainHandWeapon.type, `EXTRA(S) ${c.yellow}⚔${c.reset}`);
+      this.trySwordSpecProc(result, this.spec.gearStats.mainHandWeapon.type, `EXTRA(main) ${c.yellow}⚔${c.reset}`);
    }
 
    override onOffHandHit(result: AttackResult): void {
       super.onOffHandHit(result);
-      this.trySwordSpecProc(result, this.spec.gearStats.offHandWeapon?.type, `EXTRA(S,OH) ${c.yellow}⚔${c.reset}`);
+      this.trySwordSpecProc(result, this.spec.gearStats.offHandWeapon?.type, `EXTRA(off) ${c.yellow}⚔${c.reset}`);
    }
 
    protected checkCondition(cond: string): boolean {
@@ -305,6 +332,8 @@ export class RogueSimulator extends MeleeSimulator {
             return this.castHemorrhage();
          case Ability.SliceAndDice:
             return this.castSliceAndDice();
+         case Ability.ColdBlood:
+            return this.castColdBlood();
          case Ability.AddCombo:
             this.addComboPoint();
             return true;
@@ -446,6 +475,16 @@ export class RogueSimulator extends MeleeSimulator {
       // Add ability-specific crit bonuses
       if (attack.ability === Ability.Backstab && this.talents.improvedBackstab > 0) {
          critChance += this.talents.improvedBackstab * 10;
+      }
+
+      // Cold Blood: 100% crit on next Sinister Strike, Backstab, Ambush, Hemorrhage, or Eviscerate
+      if (this.isBuffActive(Buff.ColdBlood)) {
+         if (attack.ability === Ability.SinisterStrike ||
+             attack.ability === Ability.Backstab ||
+             attack.ability === Ability.Hemorrhage ||
+             attack.ability === Ability.Eviscerate) {
+            critChance = 100;
+         }
       }
 
       return critChance;

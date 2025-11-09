@@ -194,6 +194,13 @@ export abstract class BaseSimulator implements Simulator, BuffsProvider, PlayerS
       return buff.expiry - this.state.currentTime;
    }
 
+   protected removeBuff(buffName: string): void {
+      if (this.isBuffActive(buffName)) {
+         this.state.activeBuffs = this.state.activeBuffs.filter(buff => buff.name !== buffName);
+         this.logBuffDrop(buffName);
+      }
+   }
+
    protected removeExpiredBuffs(): void {
       // Log all buffs that are expiring
       const expiredBuffs = this.state.activeBuffs.filter(buff => buff.expiry <= this.state.currentTime);

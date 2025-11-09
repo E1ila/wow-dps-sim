@@ -28,7 +28,7 @@ export interface SimulationSpec {
    targetArmor: number;
    iterations: number;
    postCycleResourceGeneration?: boolean;
-   isHealerSpec: boolean;
+   isHealerSpec?: boolean;
 }
 
 export class SpecLoader {
