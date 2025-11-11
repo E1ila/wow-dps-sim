@@ -414,7 +414,7 @@ describe('RogueDamageCalculator', () => {
       expect(avgDamage).toBeLessThan(expectedFullDamage * 0.9);
     });
 
-    it('should NOT apply dual wield penalty to offhand', () => {
+    it('should apply dual wield penalty to offhand base damage', () => {
       const calculator = createCalculator(createTestSpec(baseStats, config, baseTalents));
 
       const originalRandom = Math.random;
@@ -426,7 +426,9 @@ describe('RogueDamageCalculator', () => {
 
       const expectedWeaponDamage = 80;
       const expectedAPBonus = Math.round((1200 / 14) * 1.5);
-      const expectedBase = expectedWeaponDamage + expectedAPBonus;
+      // Offhand has 0.5 dual wield penalty + 0% dual wield spec (baseTalents has 0)
+      const dualWieldMultiplier = 0.5 + 0;
+      const expectedBase = (expectedWeaponDamage + expectedAPBonus) * dualWieldMultiplier;
 
       expect(result.baseAmount).toBe(expectedBase);
     });
