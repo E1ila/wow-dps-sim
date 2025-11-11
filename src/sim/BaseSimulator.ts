@@ -32,6 +32,7 @@ export abstract class BaseSimulator implements Simulator, BuffsProvider, PlayerS
    protected events: SimulationEvent[] = [];
    protected damageBreakdown: Map<string, number> = new Map();
    protected healingBreakdown: Map<string, number> = new Map();
+   protected hitDamage: number = 0;
    protected lastAbilityTimestamp: Map<string, number> = new Map();
    protected nextRotationCommandIndex = 0;
 
@@ -135,12 +136,15 @@ export abstract class BaseSimulator implements Simulator, BuffsProvider, PlayerS
       switch (attackResult.type) {
          case AttackType.Crit:
             this.statistics.critCount++;
+            this.hitDamage += attackResult.amount;
             break;
          case AttackType.Hit:
             this.statistics.hitCount++;
+            this.hitDamage += attackResult.amount;
             break;
          case AttackType.Glancing:
             this.statistics.glancingCount++;
+            this.hitDamage += attackResult.amount;
             break;
          case AttackType.Miss:
             this.statistics.missCount++;
@@ -263,6 +267,7 @@ export abstract class BaseSimulator implements Simulator, BuffsProvider, PlayerS
       this.events = [];
       this.damageBreakdown = new Map();
       this.healingBreakdown = new Map();
+      this.hitDamage = 0;
       this.lastAbilityTimestamp = new Map();
       this.statistics = {
          critCount: 0,
@@ -282,6 +287,7 @@ export abstract class BaseSimulator implements Simulator, BuffsProvider, PlayerS
 
       return {
          totalDamage: total,
+         totalHitDamage: this.hitDamage,
          dps: throughput,
          events: this.events,
          damageBreakdown: breakdown,
@@ -505,9 +511,11 @@ export abstract class BaseSimulator implements Simulator, BuffsProvider, PlayerS
          const aggregatedBreakdown = new Map<string, number>();
          const aggregatedHitCount = new Map<string, number>();
          let totalDamageSum = 0;
+         let totalHitDamageSum = 0;
 
          for (const result of results) {
             totalDamageSum += result.totalDamage;
+            totalHitDamageSum += result.totalHitDamage;
             for (const [ability, damage] of result.damageBreakdown.entries()) {
                const currentDamage = aggregatedBreakdown.get(ability) || 0;
                aggregatedBreakdown.set(ability, currentDamage + damage);
@@ -523,6 +531,7 @@ export abstract class BaseSimulator implements Simulator, BuffsProvider, PlayerS
          }
 
          const avgTotalDamage = totalDamageSum / results.length;
+         const  = totalHitDamageSum / results.length;
 
          !quiet && console.log('\n=== Damage Breakdown (Average across all iterations) ===');
          jsonResults.abilityBreakdown = {};
@@ -561,6 +570,11 @@ export abstract class BaseSimulator implements Simulator, BuffsProvider, PlayerS
          }
 
          jsonResults.hitStats = this.printStatistics(aggregatedStats, simulator.critChance, quiet);
+
+         const totalSuccessfulHits = aggregatedStats.critCount + aggregatedStats.hitCount + aggregatedStats.glancingCount;
+         const avgDamagePerHit = totalSuccessfulHits > 0 ? totalHitDamageSum / totalSuccessfulHits : 0;
+
+         !quiet && console.log(`Average Damage per Hit (all successful attacks): ${avgDamagePerHit.toFixed(1)}`);
       }
       if (!quiet) {
          if (talentOverrides && Object.keys(talentOverrides).length > 0) {

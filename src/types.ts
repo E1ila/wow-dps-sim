@@ -331,6 +331,7 @@ export interface SimulationStatistics {
 
 export interface SimulationResult {
    totalDamage: number;
+   totalHitDamage: number;
    dps: number;
    events: SimulationEvent[];
    damageBreakdown: Map<string, number>;
