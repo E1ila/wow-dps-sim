@@ -38,25 +38,16 @@ export class RogueDamageCalculator extends MeleeDamageCalculator {
       return 1 + (this.talents.lethality * 0.03);
    }
 
-   get aggressionMultiplier() {
-      if (this.talents.aggression === 0) {
-         return 1;
-      }
-      return 1 + (this.talents.aggression * 0.02);
+   get aggressionBonus() {
+      return (this.talents.aggression ?? 0) * 0.02;
    }
 
-   get opportunityMultiplier() {
-      if (this.talents.opportunity === 0) {
-         return 1;
-      }
-      return 1 + (this.talents.opportunity * 0.04);
+   get opportunityBonus() {
+      return (this.talents.opportunity ?? 0) * 0.04;
    }
 
-   get improvedEviscerateMultiplier() {
-      if (this.talents.improvedEviscerate === 0) {
-         return 1;
-      }
-      return 1 + (this.talents.improvedEviscerate * 0.05);
+   get improvedEviscerateBonus() {
+      return (this.talents.improvedEviscerate ?? 0) * 0.05;
    }
 
    get murderMultiplier(): number {
@@ -71,8 +62,11 @@ export class RogueDamageCalculator extends MeleeDamageCalculator {
       const weaponDamage = this.getWeaponDamage(weapon);
       const baseDamage = weaponDamage + SINISTER_STRIKE_7 + this.calcAttackPowerDamage(weapon);
 
+      // Ability-specific talents are additive with each other
+      const abilityMultiplier = 1 + this.aggressionBonus;
+      // Murder is applied separately (at attack table level in reference)
       const multipliers = [
-         this.aggressionMultiplier,
+         abilityMultiplier,
          this.murderMultiplier,
       ];
 
@@ -90,10 +84,13 @@ export class RogueDamageCalculator extends MeleeDamageCalculator {
       const weapon = this.spec.gearStats.mainHandWeapon;
       const weaponDamage = this.getWeaponDamage(weapon);
       const apBonus = this.calcAttackPowerDamage(weapon);
-      const baseDamage = (weaponDamage + BACKSTAB_9 + apBonus) * 1.5;
+      const baseDamage = weaponDamage + BACKSTAB_9 + apBonus;
 
+      // Base multiplier (1.5x) is multiplicative with Opportunity talent in reference implementation
+      const abilityMultiplier = 1.5 * (1 + this.opportunityBonus);
+      // Murder is applied separately (at attack table level in reference)
       const multipliers = [
-         this.opportunityMultiplier,
+         abilityMultiplier,
          this.murderMultiplier,
       ];
 
@@ -137,9 +134,11 @@ export class RogueDamageCalculator extends MeleeDamageCalculator {
       const apBonus = this.statsProvider.attackPower * comboPoints * 0.03;
       const baseDamage = Math.round(cpDamage + apBonus);
 
+      // Ability-specific talents are additive with each other
+      const abilityMultiplier = 1 + this.improvedEviscerateBonus + this.aggressionBonus;
+      // Murder is applied separately (at attack table level in reference)
       const multipliers = [
-         this.improvedEviscerateMultiplier,
-         this.aggressionMultiplier,
+         abilityMultiplier,
          this.murderMultiplier,
       ];
 

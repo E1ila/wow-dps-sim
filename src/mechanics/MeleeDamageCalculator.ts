@@ -70,12 +70,10 @@ export abstract class MeleeDamageCalculator extends DamageCalculator {
     * by special abilities, like a Rogue's backstab.
     */
    protected calculateMeleeDamage(params: MeleeDamageParams): AttackResult {
-      const {baseDamage, damageMultipliers = [], ability, isSpecialAttack, weapon, critMultiplier} = params;
-
-      let damage = baseDamage;
+      let {baseDamage, damageMultipliers = [], ability, isSpecialAttack, weapon, critMultiplier} = params;
 
       for (const multiplier of damageMultipliers) {
-         damage *= multiplier;
+         baseDamage *= multiplier;
       }
 
       const attack: Attack = {
@@ -95,7 +93,7 @@ export abstract class MeleeDamageCalculator extends DamageCalculator {
          };
       }
 
-      damage *= attackTableResult.amountModifier;
+      let damage = baseDamage * attackTableResult.amountModifier;
 
       // Apply additional crit multiplier (e.g., Lethality) if it's a crit
       if (attackTableResult.type === AttackType.Crit && critMultiplier) {

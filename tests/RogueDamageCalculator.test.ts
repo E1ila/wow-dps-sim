@@ -137,7 +137,8 @@ describe('RogueDamageCalculator', () => {
 
       Math.random = originalRandom;
 
-      // (weaponDamage (100) + BACKSTAB_9 (225) + AP contribution with normalized dagger speed 1.7) * 1.5
+      // weaponDamage (100) + BACKSTAB_9 (225) + AP contribution with normalized dagger speed 1.7
+      // The 1.5x multiplier is now applied separately as part of abilityMultiplier
       const expectedBase = (100 + 225 + Math.round((1200 / 14) * 1.7)) * 1.5;
       expect(result.baseAmount).toBe(expectedBase);
     });
