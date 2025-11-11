@@ -12,16 +12,15 @@ enum ItemSlotType {
     Shoulders = 3,
     Back = 4,
     Chest = 5,
-    Waist = 6,
-    Legs = 7,
-    Feet = 8,
-    Wrist = 9,
-    Hands = 10,
+    Wrist = 6,
+    Hands = 7,
+    Waist = 8,
+    Legs = 9,
+    Feet = 10,
     Finger = 11,
     Trinket = 12,
     Weapon = 13,
-    Shield = 14,
-    Ranged = 15,
+    Ranged = 14,
     TwoHand = 17,
     Tabard = 19,
 }
@@ -48,7 +47,7 @@ const EQUIPMENT_SLOTS: EquipmentSlot[] = [
     { name: 'trinket1', slotTypes: [ItemSlotType.Trinket] },
     { name: 'trinket2', slotTypes: [ItemSlotType.Trinket] },
     { name: 'mainhand', slotTypes: [ItemSlotType.Weapon, ItemSlotType.TwoHand] },
-    { name: 'offhand', slotTypes: [ItemSlotType.Weapon, ItemSlotType.Shield], optional: true },
+    { name: 'offhand', slotTypes: [ItemSlotType.Weapon], optional: true },
     { name: 'ranged', slotTypes: [ItemSlotType.Ranged], optional: true },
 ];
 
@@ -134,31 +133,58 @@ class GearBuilder {
         return await this.promptForEnchantAndSuffix(selectedItem);
     }
 
+    private getEnchantTypesForItem(itemType: number): number[] {
+        const mapping: Record<number, number[]> = {
+            1: [1],      // Head → Head enchants
+            3: [3],      // Shoulders → Shoulder enchants
+            4: [4],      // Back → Cloak enchants
+            5: [5],      // Chest → Chest enchants
+            6: [6],      // Wrist → Bracer enchants
+            7: [7],      // Hands → Gloves enchants
+            9: [1],      // Legs → Head enchants (leg armor patches)
+            10: [10],    // Feet → Boot enchants
+            13: [13],    // Weapon → Weapon enchants
+            14: [14],    // Ranged → Ranged enchants
+            17: [13],    // TwoHand → Weapon enchants
+        };
+        return mapping[itemType] || [];
+    }
+
     private async promptForEnchantAndSuffix(item: Item): Promise<EquippedItem> {
         let enchantId = 0;
         let randomSuffixId = 0;
 
         const allEnchants = this.db.getAllEnchants();
-        const compatibleEnchants = allEnchants.filter(enchant =>
-            enchant.type === item.type ||
-            (enchant.extraTypes && enchant.extraTypes.includes(item.type))
-        );
+        const enchantTypes = this.getEnchantTypesForItem(item.type);
+        const compatibleEnchants = allEnchants
+            .filter(enchant =>
+                enchantTypes.includes(enchant.type) ||
+                (enchant.extraTypes && enchant.extraTypes.includes(item.type))
+            )
+            .sort((a, b) => {
+                if (b.quality !== a.quality) return b.quality - a.quality;
+                return a.name.localeCompare(b.name);
+            });
 
         if (compatibleEnchants.length > 0) {
+            const qualityColors = ['', c.white, c.green, c.blue, c.magenta, c.yellow];
             const enchantChoices = [
                 { name: 'None', value: 0 },
-                ...compatibleEnchants.map(enchant => ({
-                    name: `${enchant.name} (ID: ${enchant.effectId})`,
-                    value: enchant.effectId,
-                }))
+                ...compatibleEnchants.map(enchant => {
+                    const color = qualityColors[enchant.quality] || '';
+                    return {
+                        name: `${color}${enchant.name}${c.reset} (ID: ${enchant.effectId})`,
+                        value: enchant.effectId,
+                    };
+                })
             ];
 
             const { selectedEnchant } = await inquirer.prompt([{
                 type: 'list',
                 name: 'selectedEnchant',
-                message: 'Select enchant:',
+                message: `Select enchant (${compatibleEnchants.length} available):`,
                 choices: enchantChoices,
-                pageSize: 15,
+                pageSize: 25,
             }]);
 
             enchantId = selectedEnchant;
@@ -209,9 +235,6 @@ class GearBuilder {
     }
 
     displayGear(): void {
-        console.log('\n=== EQUIPPED GEAR ===\n');
-        console.log(JSON.stringify(this.equippedItems, null, 2));
-
         console.log('\n=== SUMMARY ===');
         this.equippedItems.forEach((equipped, index) => {
             const item = this.db.getItem(equipped.itemId);
@@ -224,6 +247,15 @@ class GearBuilder {
 
             console.log(description);
         });
+
+        console.log('\n=== GEAR SPEC (Copy this to your spec file) ===\n');
+        const gearSpec = this.equippedItems.map(item => {
+            const obj: any = { itemId: item.itemId };
+            if (item.randomSuffixId) obj.randomSuffixId = item.randomSuffixId;
+            if (item.enchantId) obj.enchantId = item.enchantId;
+            return obj;
+        });
+        console.log(c.green + JSON.stringify(gearSpec) + c.reset);
     }
 }
 
