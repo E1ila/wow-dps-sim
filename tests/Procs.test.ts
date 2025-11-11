@@ -65,6 +65,7 @@ function createTestSpec(stats: GearStats, config: SimulationConfig, talents: Rog
     description: 'test spec',
     class: CharacterClass.Rogue,
     playerLevel: 60,
+    gear: [],
     gearStats: stats,
     simulationConfig: config,
     talents,

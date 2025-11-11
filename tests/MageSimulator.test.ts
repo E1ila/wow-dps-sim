@@ -65,6 +65,7 @@ function createTestSpec(stats: GearStats, config: SimulationConfig, talents: Mag
       description: 'test spec',
       class: CharacterClass.Mage,
       playerLevel: 60,
+      gear: [],
       gearStats: stats,
       simulationConfig: config,
       talents,

@@ -9,7 +9,7 @@ export interface SimulationSpec {
    rotation?: string[];
    setup?: SimulationSetup;
    talents: RogueTalents | WarriorTalents | MageTalents | ShamanTalents;
-   gearStats: GearStats;
+   gearStats: GearStats; // only from gear, not inc. base stats (from level) nor enchants, etc.
    gear: EquippedItem[];
    simulationConfig: SimulationConfig;
    fightLength: number;
