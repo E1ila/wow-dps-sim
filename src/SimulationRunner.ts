@@ -88,7 +88,9 @@ export class SimulationRunner {
             this.spec.gearStats.hitChance = this.options.hitChance;
         }
         if (this.options.weaponSkill !== undefined) {
-            this.spec.gearStats.weaponSkill = this.options.weaponSkill;
+            // For backward compatibility, apply weapon skill to main hand weapon type
+            const mainHandType = this.spec.gearStats.mainHandWeapon.type;
+            this.spec.gearStats.weaponSkills.set(mainHandType, this.options.weaponSkill);
         }
         if (this.options.mainHand) {
             this.spec.gearStats.mainHandWeapon = {
@@ -206,7 +208,7 @@ export class SimulationRunner {
             if (name.startsWith('mh.')) {
                 const prop = name.substring('mh.'.length);
                 if (prop === 'type') {
-                    this.spec.gearStats.mainHandWeapon.type = value as WeaponType;
+                    this.spec.gearStats.mainHandWeapon.type = parseInt(value) as WeaponType;
                 } else {
                     (this.spec.gearStats.mainHandWeapon as any)[prop] = parseFloat(value);
                 }
@@ -217,7 +219,7 @@ export class SimulationRunner {
                 }
                 const prop = name.substring('oh.'.length);
                 if (prop === 'type') {
-                    this.spec.gearStats.offHandWeapon.type = value as WeaponType;
+                    this.spec.gearStats.offHandWeapon.type = parseInt(value) as WeaponType;
                 } else {
                     (this.spec.gearStats.offHandWeapon as any)[prop] = parseFloat(value);
                 }

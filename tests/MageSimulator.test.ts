@@ -8,7 +8,7 @@ const baseMageStats: GearStats = {
    hitChance: 0,
    agility: 0,
    strength: 0,
-   weaponSkill: 0,
+   weaponSkills: new Map(),
    mainHandWeapon: {
       minDamage: 1,
       maxDamage: 1,

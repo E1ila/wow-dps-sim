@@ -56,9 +56,24 @@ export class WarriorSimulator extends MeleeSimulator {
    private bloodrageTicksRemaining: number = 0;
    private nextBloodrageTickTime: number = 0;
 
-   protected strengthToAttackPower = 2;
    protected attackPowerPerLevel = 3;
+
+   protected strengthToAttackPower = 2;
+   protected strengthPerLevel = 1;
+   protected strengthLevel1 = 20;
+
    protected agilityToAttackPower = 0;
+   protected agilityPerLevel = 1;
+   protected agilityLevel1 = 20;
+
+   protected staminaPerLevel = 2;
+   protected staminaLevel1 = 10;
+
+   protected spiritPerLevel = 0;
+   protected spiritLevel1 = 45;
+
+   protected intellectPerLevel = 0;
+   protected intellectLevel1 = 30;
 
    constructor(spec: SimulationSpec) {
       super(spec);
@@ -789,6 +804,10 @@ export class WarriorSimulator extends MeleeSimulator {
       const buffsStatus = this.getBuffsStatusText();
 
       return `[${timestampSeconds.toFixed(1)}s] [${rageBar}] ${this.state.rage.toFixed(0)} ${stanceText}${flurryText}${enrageText}${buffsStatus}`;
+   }
+
+   get agilityToCrit() {
+      return this.agility * 0.0500;
    }
 
    override critChance(attack?: Attack): number {

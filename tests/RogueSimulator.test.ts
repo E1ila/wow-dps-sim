@@ -669,7 +669,7 @@ describe('Rogue Talents', () => {
          const testStats: GearStats = {
             ...baseStats,
             hitChance: 0,
-            weaponSkill: 300,
+            weaponSkills: new Map(),
          };
 
          const simulator0 = new RogueSimulator(createTestSpec(testStats, rogueSimulatorConfig, talents0));
@@ -724,7 +724,7 @@ describe('Rogue Talents', () => {
             const testStats: GearStats = {
                ...rogueSimulatorBaseStats,
                hitChance: 0,
-               weaponSkill: 300,
+               weaponSkills: new Map(),
             };
 
             const simulator = new RogueSimulator(createTestSpec(testStats, rogueSimulatorConfig, talents));

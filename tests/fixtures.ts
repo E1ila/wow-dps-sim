@@ -11,7 +11,11 @@ export const createMockBuffsProvider = (activeBuffs: string[] = []): BuffsProvid
 export const createMockStatsProvider = (spec: SimulationSpec, buffsProvider: BuffsProvider): PlayerStatsProvider => {
   return {
     critChance: () => spec.gearStats.critChance,
-    get weaponSkill() { return spec.gearStats.weaponSkill; },
+    get weaponSkill() {
+      const mainHandType = spec.gearStats.mainHandWeapon.type;
+      const gearBonus = spec.gearStats.weaponSkills.get(mainHandType) || 0;
+      return 300 + gearBonus;
+    },
     get attackPower() {
       // Calculate attack power from stats (Rogue formula: level*2-20 + strength + agility)
       const baseAP = Math.max(1, spec.playerLevel * 2 - 20);
@@ -43,7 +47,7 @@ export const baseStats: GearStats = {
   // Adjusted to produce attackPower of 1200: 100 (base) + 900 (agility) + 200 (strength) = 1200
   agility: 900,
   strength: 200,
-  weaponSkill: 300,
+  weaponSkills: new Map(),
   mainHandWeapon: {
     minDamage: 100,
     maxDamage: 100,
@@ -119,7 +123,7 @@ export const createTestStats = (weaponSkill: number, hasOffHand: boolean = true)
   hitChance: 0,
   agility: 300,
   strength: 100,
-  weaponSkill,
+  weaponSkills: new Map([[WeaponType.Sword, weaponSkill - 300]]),
   mainHandWeapon: {
     minDamage: 100,
     maxDamage: 150,
@@ -138,7 +142,11 @@ export const createTestStats = (weaponSkill: number, hasOffHand: boolean = true)
 
 export const wrapStats = (gearStats: GearStats, targetLevel: number): PlayerStatsProvider => ({
   critChance: () => gearStats.critChance,
-  get weaponSkill() { return gearStats.weaponSkill; },
+  get weaponSkill() {
+    const mainHandType = gearStats.mainHandWeapon.type;
+    const gearBonus = gearStats.weaponSkills.get(mainHandType) || 0;
+    return 300 + gearBonus;
+  },
   get attackPower() {
     // Calculate attack power from stats (Rogue formula: level*2-20 + strength + agility)
     const baseAP = Math.max(1, 60 * 2 - 20);

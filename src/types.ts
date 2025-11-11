@@ -77,10 +77,22 @@ export enum WeaponEnchant {
 }
 
 export enum WeaponType {
-   Sword = 'Sword',
-   Dagger = 'Dagger',
-   Mace = 'Mace',
-   Fist = 'Fist',
+   Unknown = 0,
+   Axe = 1,
+   Sword = 2,
+   Mace = 3,
+   Dagger = 4,
+   Fist = 5,
+   TwoHandedAxe = 6,
+   TwoHandedSword = 7,
+   TwoHandedMace = 8,
+   Polearm = 9,
+   Staff = 10,
+   Thrown = 11,
+   Bow = 12,
+   Crossbow = 13,
+   Gun = 14,
+   FeralCombat = 15,
 }
 
 export enum Ability {

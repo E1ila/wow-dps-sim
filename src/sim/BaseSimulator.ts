@@ -49,6 +49,9 @@ export abstract class BaseSimulator implements Simulator, BuffsProvider, PlayerS
    protected spiritPerLevel = 1;
    protected spiritLevel1 = 10;
 
+   protected intellectPerLevel = 1;
+   protected intellectLevel1 = 10;
+
    protected attackPowerPerLevel = 1;
 
    statistics: SimulationStatistics = {
@@ -585,11 +588,46 @@ export abstract class BaseSimulator implements Simulator, BuffsProvider, PlayerS
 
    // -- player stats provider
 
+   /*
+    *   | Class   | Crit per Agi | Agi for 1% Crit |
+    *   |---------|--------------|-----------------|
+    *   | Hunter  | 0.0189       | ~53 Agi         |
+    *   | Rogue   | 0.0345       | ~29 Agi         |
+    *   | Warrior | 0.0500       | 20 Agi          |
+    *   | Paladin | 0.0506       | ~20 Agi         |
+    *   | Shaman  | 0.0508       | ~20 Agi         |
+    *   | Priest  | 0.0500       | 20 Agi          |
+    *   | Mage    | 0.0514       | ~19 Agi         |
+    *   | Warlock | 0.0500       | 20 Agi          |
+    *   | Druid   | 0.0500       | 20 Agi          |
+    */
+   get agilityToCrit(): number {
+      return 0;
+   }
+
+   /*
+    *   | Class   | Spell Crit per Int | Int for 1% Spell Crit |
+    *   |---------|--------------------|-----------------------|
+    *   | Hunter  | 0.0165             | ~61 Int               |
+    *   | Paladin | 0.0167             | ~60 Int               |
+    *   | Mage    | 0.0168             | ~60 Int               |
+    *   | Priest  | 0.0168             | ~60 Int               |
+    *   | Shaman  | 0.0169             | ~59 Int               |
+    *   | Warlock | 0.0165             | ~61 Int               |
+    *   | Druid   | 0.0167             | ~60 Int               |
+    *   | Warrior | 0.0                | N/A                   |
+    *   | Rogue   | 0.0                | N/A                   |
+    *
+    */
+   get intellectToSpellCrit(): number {
+      return 0;
+   }
+
    critChance(attack?: Attack): number {
       const targetDefense = this.spec.targetLevel * 5;
       const baseWeaponSkill = this.spec.playerLevel * 5;
 
-      let critChance = this.spec.gearStats.critChance;
+      let critChance =  this.spec.gearStats.critChance + this.agilityToCrit;
 
       // Crit suppression uses base weapon skill (not including +skill from gear/racials)
       const skillDiff = baseWeaponSkill - targetDefense;
@@ -635,17 +673,19 @@ export abstract class BaseSimulator implements Simulator, BuffsProvider, PlayerS
    }
 
    get stamina(): number {
-      // Stamina is not currently in gearStats, only used for health calculations
-      // For now, return just the racial delta
-      return this.racialStaminaDelta;
+      return this.racialStaminaDelta + this.staminaLevel1 + this.staminaPerLevel * this.playerLevel;
    }
 
    get intellect(): number {
-      return (this.spec.gearStats.intellect || 0) + this.racialIntellectDelta;
+      return this.racialIntellectDelta +
+         this.intellectLevel1 + this.intellectPerLevel * this.playerLevel +
+         (this.spec.gearStats.intellect || 0);
    }
 
    get spirit(): number {
-      return (this.spec.gearStats.spirit || 0) + this.racialSpiritDelta;
+      return this.racialSpiritDelta +
+         this.spiritLevel1 + this.spiritPerLevel * this.playerLevel +
+         (this.spec.gearStats.spirit || 0);
    }
 
    get haste(): number {
@@ -659,7 +699,10 @@ export abstract class BaseSimulator implements Simulator, BuffsProvider, PlayerS
    }
 
    get weaponSkill(): number {
-      return this.spec.gearStats.weaponSkill;
+      let skill = this.playerLevel * 5;
+      if (this.spec.gearStats?.mainHandWeapon?.type)
+         skill += this.spec.gearStats.weaponSkills.get(this.spec.gearStats.mainHandWeapon.type) || 0
+      return skill;
    }
 
    get hitChance(): number {

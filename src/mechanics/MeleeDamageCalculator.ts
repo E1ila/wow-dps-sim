@@ -1,4 +1,13 @@
-import {Ability, Attack, AttackResult, AttackType, PlayerStatsProvider, Weapon, WeaponEnchant} from '../types';
+import {
+   Ability,
+   Attack,
+   AttackResult,
+   AttackType,
+   PlayerStatsProvider,
+   Weapon,
+   WeaponEnchant,
+   WeaponType
+} from '../types';
 import {AttackTable} from './AttackTable';
 import {BuffsProvider, DamageCalculator} from './DamageCalculator';
 import {SimulationSpec} from "../SimulationSpec";
@@ -112,12 +121,12 @@ export abstract class MeleeDamageCalculator extends DamageCalculator {
 
       if (normalize) {
          switch (weapon.type) {
-            case 'Dagger':
+            case WeaponType.Dagger:
                speed = 1.7;
                break;
-            case 'Sword':
-            case 'Mace':
-            case 'Fist':
+            case WeaponType.Sword:
+            case WeaponType.Mace:
+            case WeaponType.Fist:
                speed = 2.4;
                break;
             default:

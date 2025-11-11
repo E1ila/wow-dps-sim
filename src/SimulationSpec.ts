@@ -1,4 +1,4 @@
-import {CharacterClass, Race, TargetType, Weapon} from "./types";
+import {CharacterClass, Race, TargetType, Weapon, WeaponType} from "./types";
 import {MageTalents, RogueTalents, ShamanTalents, WarriorTalents} from "./talents";
 
 export interface SimulationSpec {
@@ -25,7 +25,7 @@ export interface SimulationSpec {
 export interface EquippedItem {
    itemId: number;
    randomSuffixId: number;
-   enchantId: number;
+   spellId: number;
 }
 
 export interface GearStats {
@@ -34,7 +34,7 @@ export interface GearStats {
    hitChance: number;
    agility: number;
    strength: number;
-   weaponSkill: number;
+   weaponSkills: Map<WeaponType, number>;
 
    mainHandWeapon: Weapon;
    offHandWeapon?: Weapon;

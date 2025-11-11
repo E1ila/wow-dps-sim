@@ -22,7 +22,8 @@ describe('GearParser', () => {
             expect(result.agility).toBe(0);
             expect(result.critChance).toBe(0);
             expect(result.hitChance).toBe(0);
-            expect(result.weaponSkill).toBe(300);
+            expect(result.weaponSkills).toBeDefined();
+            expect(result.weaponSkills.size).toBe(0);
             expect(result.mainHandWeapon).toBeDefined();
             expect(result.mainHandWeapon.minDamage).toBe(1);
             expect(result.mainHandWeapon.maxDamage).toBe(2);
@@ -60,7 +61,7 @@ describe('GearParser', () => {
             expect(result.agility).toBeGreaterThan(0);
             expect(result.critChance).toBeGreaterThanOrEqual(0);
             expect(result.hitChance).toBeGreaterThanOrEqual(0);
-            expect(result.weaponSkill).toBeGreaterThanOrEqual(300);
+            expect(result.weaponSkills).toBeDefined();
 
             // Verify weapons were parsed
             expect(result.mainHandWeapon).toBeDefined();
@@ -176,7 +177,7 @@ describe('GearParser', () => {
 
             const result = gearParser.parse(gear);
 
-            expect(result.weaponSkill).toBeGreaterThanOrEqual(300);
+            expect(result.weaponSkills).toBeDefined();
         });
 
         it('should parse different weapon enchants', () => {
@@ -269,7 +270,7 @@ describe('GearParser', () => {
             expect(result.agility).toBeGreaterThan(100); // Heavily agility focused
             expect(result.critChance).toBeGreaterThanOrEqual(0); // May have crit rating
             expect(result.hitChance).toBeGreaterThanOrEqual(0); // May have hit rating
-            expect(result.weaponSkill).toBeGreaterThanOrEqual(300);
+            expect(result.weaponSkills).toBeDefined();
             
             // Verify weapons
             expect(result.mainHandWeapon.minDamage).toBeGreaterThan(50);

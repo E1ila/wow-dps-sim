@@ -1,6 +1,73 @@
 import {Database} from './Database';
 import {EquippedItem, GearStats} from './SimulationSpec';
 import {WeaponEnchant, WeaponType} from './types';
+import {Enchant, Item} from "./Database.types";
+
+type AccumulatedStats = {
+    strength: number;
+    agility: number;
+    stamina: number;
+    intellect: number;
+    spirit: number;
+    mana: number;
+    attackPower: number;
+    critChance: number;
+    hitChance: number;
+    weaponSkill: number;
+    spellPower: number;
+    spellCrit: number;
+    spellHit: number;
+    healingPower: number;
+    mp5: number;
+};
+
+// Stat index mapping based on WoW Classic database format
+const STAT_IDS = {
+    STRENGTH: 0,
+    AGILITY: 1,
+    STAMINA: 2,
+    INTELLECT: 3,
+    SPIRIT: 4,
+    SPELL_POWER: 5,
+    ARCANE_POWER: 6,
+    FIRE_POWER: 7,
+    FROST_POWER: 8,
+    HOLY_POWER: 9,
+    NATURE_POWER: 10,
+    SHADOW_POWER: 11,
+    MP5: 12,
+    SPELL_HIT: 13,
+    SPELL_CRIT: 14,
+    SPELL_HASTE: 15,
+    SPELL_PENETRATION: 16,
+    ATTACK_POWER: 17,
+    MELEE_HIT: 18,
+    MELEE_CRIT: 19,
+    MELEE_HASTE: 20,
+    ARMOR_PENETRATION: 21,
+    EXPERTISE: 22,
+    MANA: 23,
+    ENERGY: 24,
+    RAGE: 25,
+    ARMOR: 26,
+    RANGED_ATTACK_POWER: 27,
+    DEFENSE: 28,
+    BLOCK: 29,
+    BLOCK_VALUE: 30,
+    DODGE: 31,
+    PARRY: 32,
+    RESILIENCE: 33,
+    HEALTH: 34,
+    ARCANE_RESISTANCE: 35,
+    FIRE_RESISTANCE: 36,
+    FROST_RESISTANCE: 37,
+    NATURE_RESISTANCE: 38,
+    SHADOW_RESISTANCE: 39,
+    BONUS_ARMOR: 40,
+    HEALING_POWER: 41,
+    SPELL_DAMAGE: 42,
+    FERAL_ATTACK_POWER: 43,
+};
 
 export class GearParser {
     private readonly db: Database;
@@ -23,7 +90,7 @@ export class GearParser {
                 agility: 0,
                 critChance: 0,
                 hitChance: 0,
-                weaponSkill: 300,
+                weaponSkills: new Map<WeaponType, number>(),
                 mainHandWeapon: existingGearStats?.mainHandWeapon || {
                     minDamage: 1,
                     maxDamage: 2,
@@ -34,33 +101,8 @@ export class GearParser {
             };
         }
 
-        // Stat index mapping based on WoW Classic database format
-        const STAT_IDS = {
-            STRENGTH: 0,
-            AGILITY: 1,
-            STAMINA: 2,
-            INTELLECT: 3,
-            SPIRIT: 4,
-            MANA: 5,
-            ARMOR: 26,
-            HIT_RATING: 28,
-            CRIT_RATING: 29,
-            ATTACK_POWER: 31,
-            BLOCK_VALUE: 30,
-            SPELL_POWER: 37,
-            FIRE_SPELL_POWER: 38,
-            FROST_SPELL_POWER: 39,
-            SHADOW_SPELL_POWER: 40,
-            HEALING_POWER: 41,
-            MP5: 43,
-        };
-
-        // Conversion constants
-        const HIT_RATING_PER_PERCENT = 15.77; // Level 60
-        const CRIT_RATING_PER_PERCENT = 14.0; // Level 60
-
         // Initialize stats
-        const stats: any = {
+        const stats: AccumulatedStats = {
             strength: 0,
             agility: 0,
             stamina: 0,
@@ -70,7 +112,7 @@ export class GearParser {
             attackPower: 0,
             critChance: 0,
             hitChance: 0,
-            weaponSkill: 300, // Base weapon skill
+            weaponSkill: 0,
             spellPower: 0,
             spellCrit: 0,
             spellHit: 0,
@@ -78,6 +120,7 @@ export class GearParser {
             mp5: 0,
         };
 
+        const weaponSkills = new Map<WeaponType, number>();
         let mainHandWeapon: any = null;
         let offHandWeapon: any = null;
         let weaponSlotIndex = 0;
@@ -91,14 +134,15 @@ export class GearParser {
             }
 
             // Sum base item stats
-            this.addItemStats(item.stats, STAT_IDS, stats, HIT_RATING_PER_PERCENT, CRIT_RATING_PER_PERCENT);
+            this.addItemStats(item.stats, STAT_IDS, stats, item);
 
             // Handle weapon skills
             if (item.weaponSkills) {
                 for (let i = 0; i < item.weaponSkills.length; i++) {
                     const skillBonus = item.weaponSkills[i];
                     if (skillBonus > 0) {
-                        stats.weaponSkill = Math.max(stats.weaponSkill, 300 + skillBonus);
+                        const weaponType = i as WeaponType;
+                        weaponSkills.set(weaponType, (weaponSkills.get(weaponType) || 0) + skillBonus);
                     }
                 }
             }
@@ -120,7 +164,7 @@ export class GearParser {
             if (equippedItem.enchantId) {
                 const enchant = this.db.getEnchant(equippedItem.enchantId);
                 if (enchant && enchant.stats) {
-                    this.addItemStats(enchant.stats, STAT_IDS, stats, HIT_RATING_PER_PERCENT, CRIT_RATING_PER_PERCENT);
+                    this.addItemStats(enchant.stats, STAT_IDS, stats, undefined, enchant);
                 }
             }
 
@@ -128,7 +172,7 @@ export class GearParser {
             if (equippedItem.randomSuffixId) {
                 const suffix = this.db.getRandomSuffix(equippedItem.randomSuffixId);
                 if (suffix && suffix.stats) {
-                    this.addItemStats(suffix.stats, STAT_IDS, stats, HIT_RATING_PER_PERCENT, CRIT_RATING_PER_PERCENT);
+                    this.addItemStats(suffix.stats, STAT_IDS, stats);
                 }
             }
         }
@@ -151,7 +195,7 @@ export class GearParser {
             agility: stats.agility,
             critChance: stats.critChance,
             hitChance: stats.hitChance,
-            weaponSkill: stats.weaponSkill,
+            weaponSkills: weaponSkills,
             mainHandWeapon: mainHandWeapon,
         };
 
@@ -193,10 +237,10 @@ export class GearParser {
 
     private addItemStats(
         itemStats: number[] | undefined,
-        STAT_IDS: any,
-        stats: any,
-        HIT_RATING_PER_PERCENT: number,
-        CRIT_RATING_PER_PERCENT: number
+        statIds: Record<string, number>,
+        stats: AccumulatedStats,
+        item?: Item,
+        enchant?: Enchant,
     ): void {
         if (!itemStats) return;
 
@@ -205,44 +249,58 @@ export class GearParser {
             if (value === 0) continue;
 
             switch (i) {
-                case STAT_IDS.STRENGTH:
+                case statIds.STRENGTH:
                     stats.strength += value;
+                    item && console.log(`Added ${value} strength from ${item.name}`);
+                    enchant && console.log(`Added ${value} strength from ${enchant.name}`);
                     break;
-                case STAT_IDS.AGILITY:
+                case statIds.AGILITY:
                     stats.agility += value;
                     break;
-                case STAT_IDS.STAMINA:
+                case statIds.STAMINA:
                     stats.stamina += value;
                     break;
-                case STAT_IDS.INTELLECT:
+                case statIds.INTELLECT:
                     stats.intellect += value;
                     break;
-                case STAT_IDS.SPIRIT:
+                case statIds.SPIRIT:
                     stats.spirit += value;
                     break;
-                case STAT_IDS.MANA:
+                case statIds.MANA:
                     stats.mana += value;
                     break;
-                case STAT_IDS.HIT_RATING:
-                    stats.hitChance += value / HIT_RATING_PER_PERCENT;
-                    break;
-                case STAT_IDS.CRIT_RATING:
-                    stats.critChance += value / CRIT_RATING_PER_PERCENT;
-                    break;
-                case STAT_IDS.ATTACK_POWER:
+                case statIds.ATTACK_POWER:
+                case statIds.RANGED_ATTACK_POWER:
+                case statIds.FERAL_ATTACK_POWER:
                     stats.attackPower += value;
                     break;
-                case STAT_IDS.SPELL_POWER:
-                case STAT_IDS.FIRE_SPELL_POWER:
-                case STAT_IDS.FROST_SPELL_POWER:
-                case STAT_IDS.SHADOW_SPELL_POWER:
+                case statIds.SPELL_POWER:
+                case statIds.SPELL_DAMAGE:
+                case statIds.ARCANE_POWER:
+                case statIds.FIRE_POWER:
+                case statIds.FROST_POWER:
+                case statIds.HOLY_POWER:
+                case statIds.NATURE_POWER:
+                case statIds.SHADOW_POWER:
                     stats.spellPower += value;
                     break;
-                case STAT_IDS.HEALING_POWER:
+                case statIds.HEALING_POWER:
                     stats.healingPower += value;
                     break;
-                case STAT_IDS.MP5:
+                case statIds.MP5:
                     stats.mp5 += value;
+                    break;
+                case statIds.SPELL_HIT:
+                    stats.spellHit += value;
+                    break;
+                case statIds.SPELL_CRIT:
+                    stats.spellCrit += value;
+                    break;
+                case statIds.MELEE_HIT:
+                    stats.hitChance += value;
+                    break;
+                case statIds.MELEE_CRIT:
+                    stats.critChance += value;
                     break;
             }
         }
@@ -250,10 +308,17 @@ export class GearParser {
 
     private parseWeapon(item: any, enchantId: number): any {
         const weaponTypeMap: { [key: number]: WeaponType } = {
-            1: WeaponType.Sword,
-            2: WeaponType.Dagger,
+            0: WeaponType.Axe,
+            1: WeaponType.Axe,
+            2: WeaponType.Bow,
+            3: WeaponType.Gun,
             4: WeaponType.Mace,
-            6: WeaponType.Fist,
+            5: WeaponType.Polearm,
+            6: WeaponType.Sword,
+            7: WeaponType.Staff,
+            10: WeaponType.Fist,
+            13: WeaponType.Dagger,
+            15: WeaponType.Dagger,
         };
 
         const weaponEnchantMap: { [key: number]: string } = {
@@ -274,7 +339,7 @@ export class GearParser {
             minDamage: item.weaponDamageMin,
             maxDamage: item.weaponDamageMax,
             speed: item.weaponSpeed,
-            type: weaponTypeMap[item.weaponType || 1] || WeaponType.Sword,
+            type: weaponTypeMap[item.weaponType || 6] || WeaponType.Sword,
             enchant: enchantType,
         };
     }

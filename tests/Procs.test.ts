@@ -8,7 +8,7 @@ const baseStats: GearStats = {
   hitChance: 9,
   agility: 300,
   strength: 100,
-  weaponSkill: 300,
+  weaponSkills: new Map(),
   mainHandWeapon: {
     minDamage: 100,
     maxDamage: 100,

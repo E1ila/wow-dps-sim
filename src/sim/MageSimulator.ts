@@ -476,6 +476,14 @@ export class MageSimulator extends BaseSimulator {
       return 1.0;
    }
 
+   get agilityToCrit() {
+      return this.agility * 0.0514;
+   }
+
+   get intellectToSpellCrit(): number {
+      return this.intellect * 0.0168;
+   }
+
    critChance(): number {
       return 0;
    }

@@ -2,6 +2,7 @@
     "name": "PvE Combat Swords",
     "class": "Rogue",
     "playerLevel": 60,
+    "race": "undead",
     "setup": {
         "wbs": 1,
         "waitForSndExpiry": 1.6

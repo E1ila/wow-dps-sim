@@ -395,6 +395,14 @@ export class ShamanSimulator extends BaseSimulator {
       return 1.0;
    }
 
+   get agilityToCrit() {
+      return this.agility * 0.0508;
+   }
+
+   get intellectToSpellCrit(): number {
+      return this.intellect * 0.0169;
+   }
+
    critChance(): number {
       return 0;
    }

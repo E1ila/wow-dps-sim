@@ -32,8 +32,21 @@ export class RogueSimulator extends MeleeSimulator {
    setup: SimulationSetup;
    talents: RogueTalents;
 
+   protected strengthPerLevel = 1;
+   protected strengthLevel1 = 20;
+
    protected agilityPerLevel = 2;
    protected attackPowerPerLevel = 2;
+   protected agilityLevel1 = 10;
+
+   protected staminaPerLevel = 1;
+   protected staminaLevel1 = 15;
+
+   protected spiritPerLevel = 0;
+   protected spiritLevel1 = 50;
+
+   protected intellectPerLevel = 0;
+   protected intellectLevel1 = 35;
 
    constructor(spec: SimulationSpec) {
       super(spec);
@@ -466,6 +479,10 @@ export class RogueSimulator extends MeleeSimulator {
       }
 
       return baseSkill;
+   }
+
+   get agilityToCrit() {
+      return this.agility * 0.0345;
    }
 
    critChance(attack?: Attack): number {
