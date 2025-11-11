@@ -9,7 +9,8 @@
     "dev": "ts-node src/sim.ts",
     "verify": "tsc && node dist/verifyMechanics.js",
     "test": "jest",
-    "compare": "ts-node src/compare.ts"
+    "compare": "ts-node src/compare.ts",
+    "gear": "ts-node src/gear-builder.ts"
   },
   "keywords": [
     "wow",
@@ -23,7 +24,9 @@
   "license": "ISC",
   "description": "WoW Classic Era DPS Simulator (Rogue, Warrior)",
   "dependencies": {
-    "commander": "^12.0.0"
+    "@types/inquirer": "^9.0.9",
+    "commander": "^12.0.0",
+    "inquirer": "^12.11.0"
   },
   "devDependencies": {
     "@types/jest": "^30.0.0",
