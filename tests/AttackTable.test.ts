@@ -9,7 +9,8 @@ describe('Attack Table Mechanics', () => {
 
       const missChance = (attackTable as any).baseMissChance;
       const glancingChance = (attackTable as any).glancingChance;
-      const glancingDamage = (attackTable as any).calculateGlancingDamageModifier();
+      const glancingMultipliers = (attackTable as any).calculateGlancingDamageMultipliers();
+      const glancingDamage = (glancingMultipliers.min + glancingMultipliers.max) / 2;
 
       expect(missChance * 100).toBeCloseTo(8.0, 1);
       expect(glancingChance * 100).toBeCloseTo(40, 1);
@@ -22,7 +23,8 @@ describe('Attack Table Mechanics', () => {
 
       const missChance = (attackTable as any).baseMissChance;
       const glancingChance = (attackTable as any).glancingChance;
-      const glancingDamage = (attackTable as any).calculateGlancingDamageModifier();
+      const glancingMultipliers = (attackTable as any).calculateGlancingDamageMultipliers();
+      const glancingDamage = (glancingMultipliers.min + glancingMultipliers.max) / 2;
 
       expect(missChance * 100).toBeCloseTo(6.0, 1);
       expect(glancingChance * 100).toBeCloseTo(40, 1);
@@ -35,7 +37,8 @@ describe('Attack Table Mechanics', () => {
 
       const missChance = (attackTable as any).baseMissChance;
       const glancingChance = (attackTable as any).glancingChance;
-      const glancingDamage = (attackTable as any).calculateGlancingDamageModifier();
+      const glancingMultipliers = (attackTable as any).calculateGlancingDamageMultipliers();
+      const glancingDamage = (glancingMultipliers.min + glancingMultipliers.max) / 2;
 
       expect(missChance * 100).toBeCloseTo(5.7, 1);
       expect(glancingChance * 100).toBeCloseTo(40, 1);
@@ -224,15 +227,16 @@ describe('Attack Table Mechanics', () => {
 
     it('should have better glancing damage with higher skill against level 60', () => {
       const testCases = [
-        { skill: 300, expectedDamage: 95 },
-        { skill: 305, expectedDamage: 95 },
-        { skill: 308, expectedDamage: 95 },
+        { skill: 300, expectedDamage: 85 },
+        { skill: 305, expectedDamage: 85 },
+        { skill: 308, expectedDamage: 85 },
       ];
 
       testCases.forEach(({ skill, expectedDamage }) => {
         const stats = createTestStats(skill, false);
         const attackTable = new AttackTable(wrapStats(stats, 60));
-        const glancingDamage = (attackTable as any).calculateGlancingDamageModifier();
+        const glancingMultipliers = (attackTable as any).calculateGlancingDamageMultipliers();
+        const glancingDamage = (glancingMultipliers.min + glancingMultipliers.max) / 2;
 
         expect(glancingDamage * 100).toBeCloseTo(expectedDamage, 1);
       });
