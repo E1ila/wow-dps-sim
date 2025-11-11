@@ -3,13 +3,15 @@ import {
    Attack,
    AttackResult,
    AttackType,
+   Buff,
    BuffEvent,
    DamageEvent,
    PlayerStatsProvider,
    SimulationEvent,
    SimulationResult,
    SimulationState,
-   SimulationStatistics
+   SimulationStatistics,
+   WeaponEnchant
 } from '../types';
 import {c} from '../globals';
 import {BuffsProvider, DamageCalculator} from "../mechanics/DamageCalculator";
@@ -28,8 +30,11 @@ export abstract class BaseSimulator implements Simulator, BuffsProvider, PlayerS
    protected abstract damageCalculator: DamageCalculator;
    protected events: SimulationEvent[] = [];
    protected damageBreakdown: Map<string, number> = new Map();
+   protected healingBreakdown: Map<string, number> = new Map();
    protected lastAbilityTimestamp: Map<string, number> = new Map();
    protected nextRotationCommandIndex = 0;
+   protected strengthToAttackPower = 1;
+   protected agilityToAttackPower = 1;
 
    statistics: SimulationStatistics = {
       critCount: 0,
@@ -128,6 +133,29 @@ export abstract class BaseSimulator implements Simulator, BuffsProvider, PlayerS
       }
    }
 
+   protected logHealing(ability: string, result: any): void {
+      const event: SimulationEvent = {
+         timestamp: this.state.currentTime,
+         ability,
+         eventType: 'healing',
+         amount: result.effectiveHealing,
+         overhealing: result.overhealing,
+         crit: result.crit,
+      };
+
+      this.events.push(event);
+   }
+
+   protected trackHealing(ability: string, result: any, shouldLog: boolean = true): void {
+      if (shouldLog) {
+         this.logHealing(ability, result);
+      }
+
+      // Update healing breakdown
+      const currentHealing = this.healingBreakdown.get(ability) || 0;
+      this.healingBreakdown.set(ability, currentHealing + result.effectiveHealing);
+   }
+
    protected logBuff(buffName: string, duration: number, extra?: any): void {
       this.events.push({
          timestamp: this.state.currentTime,
@@ -216,6 +244,7 @@ export abstract class BaseSimulator implements Simulator, BuffsProvider, PlayerS
       this.state = this.initializeState();
       this.events = [];
       this.damageBreakdown = new Map();
+      this.healingBreakdown = new Map();
       this.lastAbilityTimestamp = new Map();
       this.statistics = {
          critCount: 0,
@@ -227,14 +256,17 @@ export abstract class BaseSimulator implements Simulator, BuffsProvider, PlayerS
    }
 
    protected getSimulationResult(): SimulationResult {
-      const totalDamage = Array.from(this.damageBreakdown.values()).reduce((a, b) => a + b, 0);
-      const dps = totalDamage / this.spec.fightLength;
+      // For healer specs, use healing data; otherwise use damage data
+      const isHealerSpec = this.spec.isHealerSpec;
+      const breakdown = isHealerSpec ? this.healingBreakdown : this.damageBreakdown;
+      const total = Array.from(breakdown.values()).reduce((a, b) => a + b, 0);
+      const throughput = total / this.spec.fightLength;
 
       return {
-         totalDamage,
-         dps,
+         totalDamage: total,
+         dps: throughput,
          events: this.events,
-         damageBreakdown: this.damageBreakdown,
+         damageBreakdown: breakdown,
          statistics: this.statistics,
       };
    }
@@ -568,7 +600,16 @@ export abstract class BaseSimulator implements Simulator, BuffsProvider, PlayerS
    }
 
    get attackPower(): number {
-      return this.spec.gearStats.attackPower;
+      let attackPower = this.spec.gearStats.attackPower;
+      if (this.hasBuff(Buff.Crusader))
+         attackPower += 100 * this.strengthToAttackPower; // 1 Strength = 1 AP for Rogues
+      if (this.spec.gearStats.mainHandWeapon.enchant == WeaponEnchant.Agility15)
+         attackPower += 15;
+      if (this.spec.gearStats.mainHandWeapon.enchant == WeaponEnchant.Agility25)
+         attackPower += 25;
+      if (this.spec.gearStats.offHandWeapon?.enchant == WeaponEnchant.Agility15)
+         attackPower += 15;
+      return attackPower;
    }
 
    get weaponSkill(): number {

@@ -1,5 +1,5 @@
 import {BaseSimulator} from './BaseSimulator';
-import {Ability, HealingEvent, ShamanSimulationState, ShamanTalents, SimulationResult} from '../types';
+import {Ability, ShamanSimulationState, ShamanTalents, SimulationResult} from '../types';
 import {SimulationSpec} from '../SpecLoader';
 import {ShamanHealingCalculator} from '../mechanics/ShamanHealingCalculator';
 import {c} from '../globals';
@@ -13,7 +13,8 @@ export class ShamanSimulator extends BaseSimulator {
    protected healingCalculator: ShamanHealingCalculator;
    protected damageCalculator: ShamanHealingCalculator;
    protected talents: ShamanTalents;
-   private healingBreakdown: Map<string, number> = new Map();
+
+   protected strengthToAttackPower = 2;
 
    constructor(spec: SimulationSpec) {
       super(spec);
@@ -166,26 +167,8 @@ export class ShamanSimulator extends BaseSimulator {
       this.state.totalHealing += result.effectiveHealing;
       this.state.overhealing += result.overhealing;
 
-      if (shouldLog) {
-         this.logHealing(ability, result);
-      }
-
-      // Update healing breakdown
-      const currentHealing = this.healingBreakdown.get(ability) || 0;
-      this.healingBreakdown.set(ability, currentHealing + result.effectiveHealing);
-   }
-
-   private logHealing(ability: string, result: any): void {
-      const event: HealingEvent = {
-         timestamp: this.state.currentTime,
-         ability,
-         eventType: 'healing',
-         amount: result.effectiveHealing,
-         overhealing: result.overhealing,
-         crit: result.crit,
-      };
-
-      this.events.push(event);
+      // Track healing using base class method
+      this.trackHealing(ability, result, shouldLog);
    }
 
    private startCast(spell: Ability, castTime: number): boolean {
@@ -359,23 +342,6 @@ export class ShamanSimulator extends BaseSimulator {
       }
    }
 
-   protected prepareSimulation(): void {
-      super.prepareSimulation();
-      this.healingBreakdown = new Map();
-   }
-
-   protected getSimulationResult(): SimulationResult {
-      const totalHealing = Array.from(this.healingBreakdown.values()).reduce((a, b) => a + b, 0);
-      const hps = totalHealing / this.spec.fightLength;
-
-      return {
-         totalDamage: totalHealing,
-         dps: hps,
-         events: this.events,
-         damageBreakdown: this.healingBreakdown,
-         statistics: this.statistics,
-      };
-   }
 
    simulate(): SimulationResult {
       this.prepareSimulation();

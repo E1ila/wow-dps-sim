@@ -489,12 +489,4 @@ export class RogueSimulator extends MeleeSimulator {
 
       return critChance;
    }
-
-   get attackPower(): number {
-      let attackPower = this.spec.gearStats.attackPower;
-      if (this.hasBuff(Buff.Crusader)) {
-         attackPower += 100; // 1 Strength = 1 AP for Rogues
-      }
-      return attackPower;
-   }
 }

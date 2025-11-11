@@ -64,6 +64,8 @@ export class WarriorSimulator extends MeleeSimulator {
    private bloodrageTicksRemaining: number = 0;
    private nextBloodrageTickTime: number = 0;
 
+   protected strengthToAttackPower = 2;
+
    constructor(spec: SimulationSpec) {
       super(spec);
       this.talents = spec.talents as WarriorTalents;
