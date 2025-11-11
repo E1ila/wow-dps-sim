@@ -46,7 +46,7 @@ export class MageSimulator extends BaseSimulator {
 
    private getMaxMana(): number {
       const baseMana = this.spec.gearStats.mana || 3500;
-      const intellectBonus = (this.spec.gearStats.intellect || 0) * 15;
+      const intellectBonus = this.intellect * 15;
       let maxMana = baseMana + intellectBonus;
 
       // Arcane Mind talent
@@ -58,8 +58,7 @@ export class MageSimulator extends BaseSimulator {
    }
 
    private getManaRegen(): number {
-      const spirit = this.spec.gearStats.spirit || 0;
-      const baseRegen = (spirit / 5) * (MANA_TICK_INTERVAL / 1000);
+      const baseRegen = (this.spirit / 5) * (MANA_TICK_INTERVAL / 1000);
 
       let regen = baseRegen;
 

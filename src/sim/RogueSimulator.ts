@@ -468,19 +468,19 @@ export class RogueSimulator extends MeleeSimulator {
       return baseSkill;
    }
 
-   critChance(attack: Attack): number {
+   critChance(attack?: Attack): number {
       let critChance = super.critChance(attack) + this.talents.malice;
-      if (this.talents.daggerSpecialization > 0 && attack.weapon.type === WeaponType.Dagger) {
+      if (attack && this.talents.daggerSpecialization > 0 && attack.weapon.type === WeaponType.Dagger) {
          critChance += this.talents.daggerSpecialization;
       }
 
       // Add ability-specific crit bonuses
-      if (attack.ability === Ability.Backstab && this.talents.improvedBackstab > 0) {
+      if (attack?.ability === Ability.Backstab && this.talents.improvedBackstab > 0) {
          critChance += this.talents.improvedBackstab * 10;
       }
 
       // Cold Blood: 100% crit on next Sinister Strike, Backstab, Ambush, Hemorrhage, or Eviscerate
-      if (this.isBuffActive(Buff.ColdBlood)) {
+      if (attack && this.isBuffActive(Buff.ColdBlood)) {
          if (attack.ability === Ability.SinisterStrike ||
              attack.ability === Ability.Backstab ||
              attack.ability === Ability.Hemorrhage ||

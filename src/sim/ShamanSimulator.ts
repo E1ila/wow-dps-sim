@@ -51,7 +51,7 @@ export class ShamanSimulator extends BaseSimulator {
 
    private getMaxMana(): number {
       const baseMana = this.spec.gearStats.mana || 4300;
-      const intellectBonus = (this.spec.gearStats.intellect || 0) * 15;
+      const intellectBonus = this.intellect * 15;
       let maxMana = baseMana + intellectBonus;
 
       // Ancestral Knowledge talent (+1% max mana per rank)
@@ -63,11 +63,10 @@ export class ShamanSimulator extends BaseSimulator {
    }
 
    private getManaRegen(): number {
-      const spirit = this.spec.gearStats.spirit || 0;
       const mp5 = this.spec.gearStats.mp5 || 0;
 
       // Spirit regen
-      const baseRegen = (spirit / 5) * (MANA_TICK_INTERVAL / 1000);
+      const baseRegen = (this.spirit / 5) * (MANA_TICK_INTERVAL / 1000);
 
       // MP5 contribution
       const mp5Regen = mp5 * (MANA_TICK_INTERVAL / 5000);

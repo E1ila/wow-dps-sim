@@ -12,13 +12,18 @@ export class SpecLoader {
          const fileContent = readFileSync(filePath, 'utf-8');
          const spec: any = JSON.parse(fileContent);
 
-         if (!spec.name || !spec.class || !spec.talents || !spec.gearStats) {
-            throw new Error('Invalid spec file: missing required fields (name, class, talents, gearStats)');
-         }
+        if (!spec.name || !spec.class || !spec.talents) {
+            throw new Error('Invalid spec file: missing required fields (name, class, talents)');
+        }
 
-         if (!spec.playerLevel) {
+        // gearStats is optional now - can be built from gear array or provided directly
+        if (!spec.gearStats && !spec.gear) {
+            throw new Error('Invalid spec file: must have either gearStats or gear array');
+        }
+
+        if (!spec.playerLevel) {
             throw new Error('Invalid spec file: missing required field playerLevel');
-         }
+        }
 
          // Set defaults for simulation parameters if not provided
          spec.fightLength = spec.fightLength ?? spec.simulationConfig?.fightLength ?? 60;

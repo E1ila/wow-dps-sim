@@ -36,6 +36,17 @@ export enum CharacterClass {
    Shaman = 'shaman',
 }
 
+export enum Race {
+   Human = 'human',
+   Orc = 'orc',
+   Dwarf = 'dwarf',
+   NightElf = 'night elf',
+   Undead = 'undead',
+   Troll = 'troll',
+   Gnome = 'gnome',
+   Tauren = 'tauren',
+}
+
 export enum TargetType {
    Undefined = 'undefined',
    Humanoid = 'humanoid',

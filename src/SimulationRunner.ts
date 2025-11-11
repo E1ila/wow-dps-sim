@@ -256,14 +256,46 @@ export class SimulationRunner {
         }
     }
 
-    private printSimulationInfo(): void {
+    private printSimulationInfo(simulator: BaseSimulator): void {
         if (this.options.quiet) {
             return;
         }
 
         console.log(`${c.brightMagenta}WoW Classic Era - DPS Simulator${c.reset}`);
-        console.log(` ## ${colorByClass(this.spec.class)}${this.spec.class.toUpperCase()}${c.reset} ##`);
-        console.log(`${c.cyan}Config: ${c.reset}${JSON.stringify(this.spec.gearStats)}`);
+        console.log(` ## ${colorByClass(this.spec.class)}${this.spec.class.toUpperCase()}${c.reset} [${this.spec.playerLevel}] ##`);
+        
+        // Print gear stats nicely formatted
+        console.log(`${c.cyan}Gear Stats:${c.reset}`);
+        const gs = this.spec.gearStats;
+        
+        // Primary stats
+        if (simulator.strength > 0) console.log(`  Strength: ${c.green}${simulator.strength}${c.reset}`);
+        if (simulator.agility > 0) console.log(`  Agility: ${c.green}${simulator.agility}${c.reset}`);
+        // if (simulator.intellect !== undefined && simulator.intellect > 0) console.log(`  Intellect: ${c.green}${simulator.intellect}${c.reset}`);
+        // if (simulator.spirit !== undefined && simulator.spirit > 0) console.log(`  Spirit: ${c.green}${simulator.spirit}${c.reset}`);
+        
+        // Combat stats
+        if (simulator.attackPower !== undefined && simulator.attackPower > 0) console.log(`  Attack Power: ${c.green}${simulator.attackPower}${c.reset}`);
+        console.log(`  Crit Chance: ${c.green}${simulator.critChance().toFixed(2)}%${c.reset}`);
+        console.log(`  Hit Chance: ${c.green}${simulator.hitChance.toFixed(2)}%${c.reset}`);
+        console.log(`  Weapon Skill: ${c.green}${simulator.weaponSkill}${c.reset}`);
+        
+        // Spell stats
+        if (gs.spellPower !== undefined && gs.spellPower > 0) console.log(`  Spell Power: ${c.green}${gs.spellPower}${c.reset}`);
+        if (gs.spellCrit !== undefined && gs.spellCrit > 0) console.log(`  Spell Crit: ${c.green}${gs.spellCrit.toFixed(2)}%${c.reset}`);
+        if (gs.spellHit !== undefined && gs.spellHit > 0) console.log(`  Spell Hit: ${c.green}${gs.spellHit.toFixed(2)}%${c.reset}`);
+        
+        // Healer stats
+        if (gs.healingPower !== undefined && gs.healingPower > 0) console.log(`  Healing Power: ${c.green}${gs.healingPower}${c.reset}`);
+        if (gs.mp5 !== undefined && gs.mp5 > 0) console.log(`  MP5: ${c.green}${gs.mp5}${c.reset}`);
+        if (gs.mana !== undefined && gs.mana > 0) console.log(`  Mana: ${c.green}${gs.mana}${c.reset}`);
+        
+        // Weapons
+        console.log(`  Main Hand: ${c.yellow}${gs.mainHandWeapon.minDamage}-${gs.mainHandWeapon.maxDamage}${c.reset} dmg, ${c.yellow}${gs.mainHandWeapon.speed}${c.reset} speed, ${c.yellow}${gs.mainHandWeapon.type}${c.reset}${gs.mainHandWeapon.enchant !== 'None' ? ` (${c.magenta}${gs.mainHandWeapon.enchant}${c.reset})` : ''}`);
+        if (gs.offHandWeapon) {
+            console.log(`  Off Hand: ${c.yellow}${gs.offHandWeapon.minDamage}-${gs.offHandWeapon.maxDamage}${c.reset} dmg, ${c.yellow}${gs.offHandWeapon.speed}${c.reset} speed, ${c.yellow}${gs.offHandWeapon.type}${c.reset}${gs.offHandWeapon.enchant !== 'None' ? ` (${c.magenta}${gs.offHandWeapon.enchant}${c.reset})` : ''}`);
+        }
+        
         console.log(`${c.cyan}Simulation params: ${c.reset}fightLength=${this.spec.fightLength}, targetLevel=${this.spec.targetLevel}, targetArmor=${this.spec.targetArmor}, iterations=${this.spec.iterations}, postCycleResourceGeneration=${this.spec.postCycleResourceGeneration}`);
         console.log(`${c.cyan}Talents: ${c.reset}${JSON.stringify(this.spec.talents)}`);
         console.log(`${c.cyan}Setup: ${c.reset}${JSON.stringify(this.spec.setup)}`);
@@ -307,9 +339,8 @@ export class SimulationRunner {
     async run(): Promise<void> {
         this.loadSpec();
 
-        // this.printSimulationInfo();
-
         const simulator = this.createSimulator();
+        this.printSimulationInfo(simulator);
 
         if (this.options.playbackSpeed !== undefined) {
             await this.runWithPlayback(simulator);

@@ -7,6 +7,7 @@ import {
    BuffEvent,
    DamageEvent,
    PlayerStatsProvider,
+   Race,
    SimulationEvent,
    SimulationResult,
    SimulationState,
@@ -33,9 +34,21 @@ export abstract class BaseSimulator implements Simulator, BuffsProvider, PlayerS
    protected healingBreakdown: Map<string, number> = new Map();
    protected lastAbilityTimestamp: Map<string, number> = new Map();
    protected nextRotationCommandIndex = 0;
+
    protected strengthToAttackPower = 1;
+   protected strengthPerLevel = 1;
+   protected strengthLevel1 = 20;
+
    protected agilityToAttackPower = 1;
    protected agilityPerLevel = 1;
+   protected agilityLevel1 = 10;
+
+   protected staminaPerLevel = 1;
+   protected staminaLevel1 = 15;
+
+   protected spiritPerLevel = 1;
+   protected spiritLevel1 = 10;
+
    protected attackPowerPerLevel = 1;
 
    statistics: SimulationStatistics = {
@@ -572,7 +585,7 @@ export abstract class BaseSimulator implements Simulator, BuffsProvider, PlayerS
 
    // -- player stats provider
 
-   critChance(attack: Attack): number {
+   critChance(attack?: Attack): number {
       const targetDefense = this.spec.targetLevel * 5;
       const baseWeaponSkill = this.spec.playerLevel * 5;
 
@@ -598,14 +611,20 @@ export abstract class BaseSimulator implements Simulator, BuffsProvider, PlayerS
    }
 
    get strength(): number {
-      let str = this.spec.gearStats.strength;
+      let str =
+         this.playerLevel * this.strengthPerLevel + this.strengthLevel1 +
+         this.spec.gearStats.strength +
+         this.racialStrengthDelta;
       if (this.hasBuff(Buff.Crusader))
          str += 100;
       return str;
    }
 
    get agility(): number {
-      let agi = this.spec.gearStats.agility;
+      let agi =
+         this.playerLevel * this.agilityPerLevel + this.agilityLevel1 +
+         this.spec.gearStats.agility +
+         this.racialAgilityDelta;
       if (this.spec.gearStats.mainHandWeapon.enchant == WeaponEnchant.Agility15)
          agi += 15;
       if (this.spec.gearStats.mainHandWeapon.enchant == WeaponEnchant.Agility25)
@@ -613,6 +632,20 @@ export abstract class BaseSimulator implements Simulator, BuffsProvider, PlayerS
       if (this.spec.gearStats.offHandWeapon?.enchant == WeaponEnchant.Agility15)
          agi += 15;
       return agi;
+   }
+
+   get stamina(): number {
+      // Stamina is not currently in gearStats, only used for health calculations
+      // For now, return just the racial delta
+      return this.racialStaminaDelta;
+   }
+
+   get intellect(): number {
+      return (this.spec.gearStats.intellect || 0) + this.racialIntellectDelta;
+   }
+
+   get spirit(): number {
+      return (this.spec.gearStats.spirit || 0) + this.racialSpiritDelta;
    }
 
    get haste(): number {
@@ -644,4 +677,121 @@ export abstract class BaseSimulator implements Simulator, BuffsProvider, PlayerS
    get targetLevel(): number {
       return this.spec.targetLevel;
    }
+
+   // -- racial differences
+
+   get racialStrengthDelta(): number {
+      if (!this.spec.race)
+         return 0;
+
+      switch (this.spec.race) {
+         case Race.Orc:
+            return 3;
+         case Race.Dwarf:
+            return 2;
+         case Race.NightElf:
+            return -3;
+         case Race.Undead:
+            return -1;
+         case Race.Tauren:
+            return 5;
+         case Race.Gnome:
+            return -5;
+         case Race.Troll:
+            return 1;
+         default:
+            return 0;
+      }
+   }
+
+   get racialAgilityDelta(): number {
+      if (!this.spec.race)
+         return 0;
+
+      switch (this.spec.race) {
+         case Race.Orc:
+            return -3;
+         case Race.Dwarf:
+            return -4;
+         case Race.NightElf:
+            return 5;
+         case Race.Undead:
+            return -2;
+         case Race.Tauren:
+            return -5;
+         case Race.Gnome:
+            return 3;
+         case Race.Troll:
+            return 2;
+         default:
+            return 0;
+      }
+   }
+
+   get racialStaminaDelta(): number {
+      if (!this.spec.race)
+         return 0;
+
+      switch (this.spec.race) {
+         case Race.Orc:
+            return 2;
+         case Race.Dwarf:
+            return 3;
+         case Race.NightElf:
+            return -1;
+         case Race.Undead:
+            return 1;
+         case Race.Tauren:
+            return 2;
+         case Race.Gnome:
+            return -1;
+         case Race.Troll:
+            return 1;
+         default:
+            return 0;
+      }
+   }
+
+   get racialIntellectDelta(): number {
+      if (!this.spec.race)
+         return 0;
+
+      switch (this.spec.race) {
+         case Race.Orc:
+            return -3;
+         case Race.Dwarf:
+            return -1;
+         case Race.Undead:
+            return -2;
+         case Race.Tauren:
+            return -5;
+         case Race.Gnome:
+            return 3;
+         case Race.Troll:
+            return -4;
+         default:
+            return 0;
+      }
+   }
+
+   get racialSpiritDelta(): number {
+      if (!this.spec.race)
+         return 0;
+
+      switch (this.spec.race) {
+         case Race.Orc:
+            return 3;
+         case Race.Dwarf:
+            return -1;
+         case Race.Undead:
+            return 5;
+         case Race.Tauren:
+            return 2;
+         case Race.Troll:
+            return 1;
+         default:
+            return 0;
+      }
+   }
+
 }

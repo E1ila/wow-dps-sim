@@ -1,10 +1,11 @@
-import {CharacterClass, TargetType, Weapon} from "./types";
+import {CharacterClass, Race, TargetType, Weapon} from "./types";
 import {MageTalents, RogueTalents, ShamanTalents, WarriorTalents} from "./talents";
 
 export interface SimulationSpec {
    name: string;
    description: string;
    class: CharacterClass;
+   race?: Race;
    playerLevel: number;
    rotation?: string[];
    setup?: SimulationSetup;

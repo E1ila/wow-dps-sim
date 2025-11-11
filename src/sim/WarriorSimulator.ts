@@ -791,7 +791,7 @@ export class WarriorSimulator extends MeleeSimulator {
       return `[${timestampSeconds.toFixed(1)}s] [${rageBar}] ${this.state.rage.toFixed(0)} ${stanceText}${flurryText}${enrageText}${buffsStatus}`;
    }
 
-   override critChance(attack: Attack): number {
+   override critChance(attack?: Attack): number {
       let critChance = super.critChance(attack);
 
       // Cruelty talent
@@ -805,7 +805,7 @@ export class WarriorSimulator extends MeleeSimulator {
       }
 
       // Improved Overpower
-      if (attack.ability === Ability.Overpower && this.talents.improvedOverpower > 0) {
+      if (attack?.ability === Ability.Overpower && this.talents.improvedOverpower > 0) {
          critChance += this.talents.improvedOverpower * 25;
       }
 
