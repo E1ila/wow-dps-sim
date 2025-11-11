@@ -1,6 +1,7 @@
-import {Ability, CharacterClass, GearStats, MageTalents, SimulationConfig} from '../src/types';
+import {Ability, CharacterClass} from '../src/types';
 import {MageSimulator} from '../src/sim/MageSimulator';
-import {SimulationSpec} from '../src/SpecLoader';
+import {GearStats, SimulationConfig, SimulationSpec} from "../src/SimulationSpec";
+import {MageTalents} from "../src/talents";
 
 const baseMageStats: GearStats = {
    critChance: 0,

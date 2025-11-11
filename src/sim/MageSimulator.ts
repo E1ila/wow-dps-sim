@@ -1,8 +1,9 @@
 import {BaseSimulator} from './BaseSimulator';
-import {Ability, AttackType, Buff, MageSimulationState, MageTalents, SimulationResult,} from '../types';
-import {SimulationSpec} from '../SpecLoader';
+import {Ability, AttackType, Buff, MageSimulationState, SimulationResult,} from '../types';
 import {MageDamageCalculator} from '../mechanics/MageDamageCalculator';
 import {c} from '../globals';
+import {MageTalents} from "../talents";
+import {SimulationSpec} from "../SimulationSpec";
 
 const MANA_TICK_INTERVAL = 2000; // 2 seconds
 const GLOBAL_COOLDOWN = 1500; // 1.5 seconds

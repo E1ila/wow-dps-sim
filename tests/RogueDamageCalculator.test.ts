@@ -1,5 +1,6 @@
-import {AttackType, Buff, RogueTalents, TargetType} from '../src/types';
+import {AttackType, Buff, TargetType} from '../src/types';
 import {baseStats, baseTalents, config, createCalculator, createTestSpec} from './fixtures';
+import {RogueTalents} from "../src/talents";
 
 describe('RogueDamageCalculator', () => {
 

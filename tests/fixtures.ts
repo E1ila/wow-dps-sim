@@ -1,16 +1,8 @@
-import {
-  Buff,
-  CharacterClass,
-  GearStats,
-  PlayerStatsProvider,
-  RogueTalents,
-  SimulationConfig,
-  WeaponEnchant,
-  WeaponType
-} from '../src/types';
-import {SimulationSpec} from '../src/SpecLoader';
+import {Buff, CharacterClass, PlayerStatsProvider, WeaponEnchant, WeaponType} from '../src/types';
 import {BuffsProvider} from '../src/mechanics/DamageCalculator';
 import {RogueDamageCalculator} from '../src/mechanics/RogueDamageCalculator';
+import {GearStats, SimulationConfig, SimulationSpec} from "../src/SimulationSpec";
+import {RogueTalents} from "../src/talents";
 
 export const createMockBuffsProvider = (activeBuffs: string[] = []): BuffsProvider => ({
   hasBuff: (name: string) => activeBuffs.includes(name)

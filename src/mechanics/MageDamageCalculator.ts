@@ -1,6 +1,7 @@
-import {Ability, AttackResult, AttackType, MageTalents} from '../types';
+import {Ability, AttackResult, AttackType} from '../types';
 import {BuffsProvider, DamageCalculator} from './DamageCalculator';
-import {SimulationSpec} from '../SpecLoader';
+import {SimulationSpec} from "../SimulationSpec";
+import {MageTalents} from "../talents";
 
 // Spell constants (rank 11 for Fireball, rank 10 for Frostbolt)
 const FIREBALL_11 = {

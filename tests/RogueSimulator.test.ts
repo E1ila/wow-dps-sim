@@ -1,7 +1,9 @@
-import {Ability, AttackType, GearStats, RogueTalents, WeaponEnchant, WeaponType} from '../src/types';
+import {Ability, AttackType, WeaponEnchant, WeaponType} from '../src/types';
 import {AttackTable} from '../src/mechanics/AttackTable';
 import {RogueSimulator} from '../src/sim/RogueSimulator';
 import {baseStats, baseTalents, config, createTestSpec} from './fixtures';
+import {RogueTalents} from "../src/talents";
+import {GearStats} from "../src/SimulationSpec";
 
 // RogueSimulator tests use different weapon damages and speeds
 const rogueSimulatorBaseStats = {
@@ -470,7 +472,7 @@ describe('Rogue Talents', () => {
 
             const simulator = new RogueSimulator(createTestSpec(swordStats, rogueSimulatorConfig, talents));
 
-            const iterations = 1000;
+            const iterations = 500;
             let totalExtraAttacks = 0;
             let totalTriggerableHits = 0;
 

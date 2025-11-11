@@ -1,6 +1,7 @@
-import {CharacterClass, GearStats, RogueTalents, SimulationConfig, WeaponEnchant, WeaponType} from '../src/types';
+import {CharacterClass, WeaponEnchant, WeaponType} from '../src/types';
 import {RogueSimulator} from '../src/sim/RogueSimulator';
-import {SimulationSpec} from '../src/SpecLoader';
+import {GearStats, SimulationConfig, SimulationSpec} from "../src/SimulationSpec";
+import {RogueTalents} from "../src/talents";
 
 const baseStats: GearStats = {
   critChance: 30,
