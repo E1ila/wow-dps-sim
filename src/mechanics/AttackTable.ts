@@ -39,24 +39,23 @@ export class AttackTable {
          baseMissChance = 0.05 + (defenseSkillDiff * 0.001);
       }
 
-      let missReduction = this.stats.hitChance / 100;
-
-      // Hit suppression: when skill deficit > 10, hit is less effective
-      if (defenseSkillDiff > 10) {
-         const hitSuppression = (defenseSkillDiff - 10) * 0.002;
-         missReduction = Math.max(0, missReduction - hitSuppression);
-      }
-
+      const missReduction = this.stats.hitChance / 100;
       const missChance = baseMissChance - missReduction;
 
-      return Math.max(0, missChance);
+      // Don't floor to 0 yet - DW penalty needs to be added first
+      return missChance;
    }
 
    private getMissChance(isWhiteAttack: boolean): number {
+      let missChance = this.baseMissChance;
+
+      // Add DW penalty for white attacks
       if (isWhiteAttack && this.stats.isDualWielding) {
-         return Math.max(0, this.baseMissChance + 0.19);
+         missChance += 0.19;
       }
-      return this.baseMissChance;
+
+      // Floor to 0 after all modifiers
+      return Math.max(0, missChance);
    }
 
    private calculateDodgeChance(): number {

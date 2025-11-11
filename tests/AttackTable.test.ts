@@ -112,7 +112,9 @@ describe('Attack Table Mechanics', () => {
           { hitPercent: 0, expectedMissMin: 24, expectedMissMax: 26 },
           { hitPercent: 3, expectedMissMin: 21, expectedMissMax: 23 },
           { hitPercent: 6, expectedMissMin: 18, expectedMissMax: 20 },
-          { hitPercent: 9, expectedMissMin: 19, expectedMissMax: 19 }, // Hits DW floor (19%)
+          { hitPercent: 9, expectedMissMin: 15, expectedMissMax: 17 }, // 6% base + 19% DW - 9% hit = 16%
+          { hitPercent: 12, expectedMissMin: 12, expectedMissMax: 14 }, // 6% base + 19% DW - 9% hit = 16%
+          { hitPercent: 18, expectedMissMin: 7, expectedMissMax: 9 }, // 6% base + 19% DW - 9% hit = 16%
         ];
 
         testCases.forEach(({ hitPercent, expectedMissMin, expectedMissMax }) => {
@@ -134,7 +136,7 @@ describe('Attack Table Mechanics', () => {
           { hitPercent: 0, expectedMissMin: 24, expectedMissMax: 26 },
           { hitPercent: 3, expectedMissMin: 21, expectedMissMax: 23 },
           { hitPercent: 6, expectedMissMin: 18, expectedMissMax: 20 },
-          { hitPercent: 9, expectedMissMin: 19, expectedMissMax: 19 }, // Hits DW floor (19%)
+          { hitPercent: 9, expectedMissMin: 15, expectedMissMax: 16 }, // 5.7% base + 19% DW - 9% hit = 15.7%
         ];
 
         testCases.forEach(({ hitPercent, expectedMissMin, expectedMissMax }) => {
@@ -242,17 +244,17 @@ describe('Attack Table Mechanics', () => {
       });
     });
 
-    it('should approach 19% DW miss floor with high hit rating against level 60', () => {
+    it('should have very low DW miss with high hit rating against level 60', () => {
       const stats = createTestStats(300, true);
       stats.hitChance = 20;
       const attackTable = new AttackTable(wrapStats(stats, 60));
 
       const whiteAttackMiss = (attackTable as any).getMissChance(true);
 
-      // Base miss floor is 0, DW adds 19%
-      expect(whiteAttackMiss * 100).toBeCloseTo(19, 1);
-      expect(whiteAttackMiss * 100).toBeGreaterThan(18);
-      expect(whiteAttackMiss * 100).toBeLessThan(20);
+      // Base 5% - 20% hit = -15%, DW adds 19% = 4% final
+      expect(whiteAttackMiss * 100).toBeCloseTo(4, 1);
+      expect(whiteAttackMiss * 100).toBeGreaterThan(3);
+      expect(whiteAttackMiss * 100).toBeLessThan(5);
     });
   });
 });
