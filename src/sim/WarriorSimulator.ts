@@ -65,6 +65,8 @@ export class WarriorSimulator extends MeleeSimulator {
    private nextBloodrageTickTime: number = 0;
 
    protected strengthToAttackPower = 2;
+   protected attackPowerPerLevel = 3;
+   protected agilityToAttackPower = 0;
 
    constructor(spec: SimulationSpec) {
       super(spec);
@@ -795,20 +797,6 @@ export class WarriorSimulator extends MeleeSimulator {
       const buffsStatus = this.getBuffsStatusText();
 
       return `[${timestampSeconds.toFixed(1)}s] [${rageBar}] ${this.state.rage.toFixed(0)} ${stanceText}${flurryText}${enrageText}${buffsStatus}`;
-   }
-
-   override get attackPower(): number {
-      let ap = this.spec.gearStats.attackPower;
-
-      // Warriors get 2 AP per point of Strength (vs 1 for rogues)
-      ap += this.spec.gearStats.strength * 2;
-
-      // Crusader buff
-      if (this.hasBuff(Buff.Crusader)) {
-         ap += 200; // 100 Strength * 2 AP per Strength for warriors
-      }
-
-      return ap;
    }
 
    override critChance(attack: Attack): number {

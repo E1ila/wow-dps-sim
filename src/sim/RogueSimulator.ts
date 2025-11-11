@@ -33,6 +33,9 @@ export class RogueSimulator extends MeleeSimulator {
    setup: SimulationSetup;
    talents: RogueTalents;
 
+   protected agilityPerLevel = 2;
+   protected attackPowerPerLevel = 2;
+
    constructor(spec: SimulationSpec) {
       super(spec);
       this.talents = spec.talents as RogueTalents;

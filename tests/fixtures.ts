@@ -42,7 +42,6 @@ export const createCalculator = (spec: SimulationSpec, activeBuffs: string[] = [
 };
 
 export const baseStats: GearStats = {
-  attackPower: 1200,
   critChance: 30,
   hitChance: 9,
   agility: 300,
@@ -118,7 +117,6 @@ export function createTestSpec(stats: GearStats, config: SimulationConfig, talen
 
 // Helper for AttackTable tests
 export const createTestStats = (weaponSkill: number, hasOffHand: boolean = true): GearStats => ({
-  attackPower: 1000,
   critChance: 30,
   hitChance: 0,
   agility: 300,

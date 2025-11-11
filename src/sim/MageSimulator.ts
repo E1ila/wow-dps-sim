@@ -464,10 +464,6 @@ export class MageSimulator extends BaseSimulator {
       return 0; // Not used for mages
    }
 
-   get attackPower(): number {
-      return 0; // Not used for mages
-   }
-
    get hitChance(): number {
       return 0; // Not used for mages
    }

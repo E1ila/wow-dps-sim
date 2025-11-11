@@ -48,7 +48,6 @@ export enum TargetType {
 }
 
 export interface GearStats {
-   attackPower: number;
    critChance: number;
    hitChance: number;
    agility: number;

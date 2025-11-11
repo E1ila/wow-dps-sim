@@ -14,6 +14,8 @@ export class ShamanSimulator extends BaseSimulator {
    protected damageCalculator: ShamanHealingCalculator;
    protected talents: ShamanTalents;
 
+   protected attackPowerPerLevel = 2;
+   protected agilityToAttackPower = 0;
    protected strengthToAttackPower = 2;
 
    constructor(spec: SimulationSpec) {
@@ -378,10 +380,6 @@ export class ShamanSimulator extends BaseSimulator {
    }
 
    get weaponSkill(): number {
-      return 0;
-   }
-
-   get attackPower(): number {
       return 0;
    }
 

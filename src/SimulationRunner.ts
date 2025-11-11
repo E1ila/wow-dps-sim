@@ -9,7 +9,6 @@ import {ShamanSimulator} from "./sim/ShamanSimulator";
 export interface SimulationOptions {
     specFile: string;
     // gear stats CLI override
-    attackPower?: number;
     critChance?: number;
     hitChance?: number;
     weaponSkill?: number;
@@ -65,9 +64,6 @@ export class SimulationRunner {
     }
 
     private applyCliOverrides(): void {
-        if (this.options.attackPower !== undefined) {
-            this.spec.gearStats.attackPower = this.options.attackPower;
-        }
         if (this.options.critChance !== undefined) {
             this.spec.gearStats.critChance = this.options.critChance;
         }

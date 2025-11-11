@@ -53,7 +53,7 @@ export class ShamanHealingCalculator extends DamageCalculator {
       // Mental Quickness: adds % of attack power as healing power
       if (this.talents.mentalQuickness > 0) {
          const apToHealingPercent = [0, 0.06, 0.12, 0.18, 0.20, 0.25][this.talents.mentalQuickness];
-         power += (this.spec.gearStats.attackPower || 0) * apToHealingPercent;
+         power += (this.statsProvider.attackPower || 0) * apToHealingPercent;
       }
 
       return power;

@@ -35,6 +35,8 @@ export abstract class BaseSimulator implements Simulator, BuffsProvider, PlayerS
    protected nextRotationCommandIndex = 0;
    protected strengthToAttackPower = 1;
    protected agilityToAttackPower = 1;
+   protected agilityPerLevel = 1;
+   protected attackPowerPerLevel = 1;
 
    statistics: SimulationStatistics = {
       critCount: 0,
@@ -595,21 +597,32 @@ export abstract class BaseSimulator implements Simulator, BuffsProvider, PlayerS
       return critChance;
    }
 
+   get strength(): number {
+      let str = this.spec.gearStats.strength;
+      if (this.hasBuff(Buff.Crusader))
+         str += 100;
+      return str;
+   }
+
+   get agility(): number {
+      let agi = this.spec.gearStats.agility;
+      if (this.spec.gearStats.mainHandWeapon.enchant == WeaponEnchant.Agility15)
+         agi += 15;
+      if (this.spec.gearStats.mainHandWeapon.enchant == WeaponEnchant.Agility25)
+         agi += 25;
+      if (this.spec.gearStats.offHandWeapon?.enchant == WeaponEnchant.Agility15)
+         agi += 15;
+      return agi;
+   }
+
    get haste(): number {
       return 1;
    }
 
    get attackPower(): number {
-      let attackPower = this.spec.gearStats.attackPower;
-      if (this.hasBuff(Buff.Crusader))
-         attackPower += 100 * this.strengthToAttackPower; // 1 Strength = 1 AP for Rogues
-      if (this.spec.gearStats.mainHandWeapon.enchant == WeaponEnchant.Agility15)
-         attackPower += 15;
-      if (this.spec.gearStats.mainHandWeapon.enchant == WeaponEnchant.Agility25)
-         attackPower += 25;
-      if (this.spec.gearStats.offHandWeapon?.enchant == WeaponEnchant.Agility15)
-         attackPower += 15;
-      return attackPower;
+      return Math.max(1, this.playerLevel * this.attackPowerPerLevel - 20)
+         + this.strength * this.strengthToAttackPower
+         + this.agility * this.agilityToAttackPower;
    }
 
    get weaponSkill(): number {

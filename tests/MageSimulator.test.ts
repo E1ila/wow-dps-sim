@@ -3,7 +3,6 @@ import {MageSimulator} from '../src/sim/MageSimulator';
 import {SimulationSpec} from '../src/SpecLoader';
 
 const baseMageStats: GearStats = {
-   attackPower: 0,
    critChance: 0,
    hitChance: 0,
    agility: 0,
