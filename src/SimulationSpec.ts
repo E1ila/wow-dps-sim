@@ -10,6 +10,7 @@ export interface SimulationSpec {
    setup?: SimulationSetup;
    talents: RogueTalents | WarriorTalents | MageTalents | ShamanTalents;
    gearStats: GearStats;
+   gear: EquippedItem[];
    simulationConfig: SimulationConfig;
    fightLength: number;
    targetLevel: number;
@@ -20,7 +21,14 @@ export interface SimulationSpec {
    isHealerSpec?: boolean;
 }
 
+export interface EquippedItem {
+   itemId: number;
+   randomSuffixId: number;
+   enchantId: number;
+}
+
 export interface GearStats {
+   attackPower?: number;
    critChance: number;
    hitChance: number;
    agility: number;
