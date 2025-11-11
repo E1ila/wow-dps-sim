@@ -5,6 +5,8 @@ import {BaseSimulator} from './sim/BaseSimulator';
 import {SimulationSpec, SpecLoader} from './SpecLoader';
 import {RogueSimulator} from "./sim/RogueSimulator";
 import {ShamanSimulator} from "./sim/ShamanSimulator";
+import path from "node:path";
+import {Database} from "./Database";
 
 export interface SimulationOptions {
     specFile: string;
@@ -46,8 +48,13 @@ export class SimulationRunner {
     private spec!: SimulationSpec;
     private appliedTalentOverrides: Record<string, any> = {};
 
+    db: Database;
+
     constructor(options: SimulationOptions) {
         this.options = options;
+
+        const dbPath = path.resolve(__dirname, 'db.json');
+        this.db = new Database(dbPath);
     }
 
     private loadSpec(): void {
