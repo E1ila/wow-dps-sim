@@ -9,6 +9,7 @@ import path from "node:path";
 import {Database} from "./Database";
 import {SimulationSetup, SimulationSpec} from "./SimulationSpec";
 import {RogueTalents, ShamanTalents, WarriorTalents} from "./talents";
+import {GearParser} from "./GearParser";
 
 export interface SimulationOptions {
     specFile: string;
@@ -51,17 +52,20 @@ export class SimulationRunner {
     private appliedTalentOverrides: Record<string, any> = {};
 
     db: Database;
+    gearParser: GearParser;
 
     constructor(options: SimulationOptions) {
         this.options = options;
 
         const dbPath = path.resolve(__dirname, 'db.json');
         this.db = new Database(dbPath);
+        this.gearParser = new GearParser(this.db);
     }
 
     private loadSpec(): void {
         try {
             this.spec = SpecLoader.load(this.options.specFile);
+            this.applyGearStats();
             this.applyTalentOverrides();
             this.applySetupOverrides();
             this.applyGearOverrides();
@@ -70,6 +74,10 @@ export class SimulationRunner {
         } catch (error) {
             throw new Error(`Error loading spec file: ${(error as Error).message}`);
         }
+    }
+
+    private applyGearStats(): void {
+        this.spec.gearStats = this.gearParser.parse(this.spec.gear, this.spec.gearStats);
     }
 
     private applyCliOverrides(): void {

@@ -1,6 +1,7 @@
 {
     "name": "PvE Combat Swords",
     "class": "Rogue",
+    "playerLevel": 60,
     "setup": {
         "wbs": 1,
         "waitForSndExpiry": 1.6
@@ -30,29 +31,7 @@
         "swordSpecialization": 5,
         "weaponExpertise": 2
     },
-    "gearStats": {
-        "level": 60,
-        "attackPower": 1168,
-        "critChance": 34.1,
-        "hitChance": 11,
-        "agility": 339,
-        "strength": 213,
-        "weaponSkill": 306,
-        "mainHandWeapon": {
-            "minDamage": 138,
-            "maxDamage": 258,
-            "speed": 2.7,
-            "type": "Sword",
-            "enchant": "Crusader"
-        },
-        "offHandWeapon": {
-            "minDamage": 76,
-            "maxDamage": 143,
-            "speed": 1.5,
-            "type": "Sword",
-            "enchant": "Crusader"
-        }
-    },
+    "gear": [{"itemId":22478,"enchantId":2585},{"itemId":19377},{"itemId":22479,"enchantId":2717},{"itemId":23045,"enchantId":2621},{"itemId":22476,"enchantId":1891},{"itemId":22483,"enchantId":1885},{"itemId":22481,"enchantId":25080},{"itemId":21586},{"itemId":22477,"enchantId":2585},{"itemId":22480,"enchantId":1887},{"itemId":23060},{"itemId":23038},{"itemId":22954},{"itemId":19406},{"itemId":23054,"enchantId":1900},{"itemId":23577,"enchantId":1900},{"itemId":23557}],
     "simulationConfig": {
         "fightLength": 120,
         "targetLevel": 63,

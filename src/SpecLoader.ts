@@ -16,12 +16,6 @@ export class SpecLoader {
             throw new Error('Invalid spec file: missing required fields (name, class, talents, gearStats)');
          }
 
-         // Migrate old format: move level from gearStats to playerLevel
-         if (spec.gearStats.level !== undefined && !spec.playerLevel) {
-            spec.playerLevel = spec.gearStats.level;
-            delete spec.gearStats.level;
-         }
-
          if (!spec.playerLevel) {
             throw new Error('Invalid spec file: missing required field playerLevel');
          }
