@@ -151,8 +151,8 @@ class GearBuilder {
     }
 
     private async promptForEnchantAndSuffix(item: Item): Promise<EquippedItem> {
-        let enchantId = 0;
-        let randomSuffixId = 0;
+        let spellId: number | undefined;
+        let randomSuffixId: number | undefined;
 
         const allEnchants = this.db.getAllEnchants();
         const enchantTypes = this.getEnchantTypesForItem(item.type);
@@ -172,11 +172,11 @@ class GearBuilder {
             const enchantChoices = [
                 { name: 'None', value: 0 },
                 ...compatibleEnchants.map(enchant => {
+                    const enchantSpellId = enchant.spellId;
                     const color = qualityColors[enchant.quality] || '';
-                    const enchantId = enchant.spellId || enchant.effectId;
                     return {
-                        name: `${color}${enchant.name}${c.reset} (ID: ${enchantId})`,
-                        value: enchantId,
+                        name: `${color}${enchant.name}${c.reset} (ID: ${enchantSpellId})`,
+                        value: enchantSpellId,
                     };
                 })
             ];
@@ -189,7 +189,7 @@ class GearBuilder {
                 pageSize: 25,
             }]);
 
-            enchantId = selectedEnchant;
+            spellId = selectedEnchant;
         }
 
         if (item.randomSuffixOptions && item.randomSuffixOptions.length > 0) {
@@ -217,17 +217,17 @@ class GearBuilder {
         return {
             itemId: item.id,
             randomSuffixId,
-            enchantId,
+            spellId,
         };
     }
 
     loadExistingGear(gearJson: string): void {
         try {
-            const gear = JSON.parse(gearJson) as EquippedItem[];
+            const gear = JSON.parse(gearJson) as any[];
             this.equippedItems = gear.map(item => ({
                 itemId: item.itemId,
-                randomSuffixId: item.randomSuffixId || 0,
-                enchantId: item.enchantId || 0,
+                randomSuffixId: item.randomSuffixId,
+                spellId: item.spellId,
             }));
             console.log(`Loaded ${this.equippedItems.length} items from existing gear.`);
         } catch (error) {
@@ -296,7 +296,7 @@ class GearBuilder {
         console.log('\n=== SUMMARY ===');
         this.equippedItems.forEach((equipped, index) => {
             const item = this.db.getItem(equipped.itemId);
-            const enchant = equipped.enchantId ? this.db.getEnchant(equipped.enchantId) : null;
+            const enchant = equipped.spellId ? this.db.getEnchant(equipped.spellId) : null;
             const suffix = equipped.randomSuffixId ? this.db.getRandomSuffix(equipped.randomSuffixId) : null;
 
             let description = `${index + 1}. ${item?.name || 'Unknown'} (ID: ${equipped.itemId})`;
@@ -310,7 +310,7 @@ class GearBuilder {
         const gearSpec = this.equippedItems.map(item => {
             const obj: any = { itemId: item.itemId };
             if (item.randomSuffixId) obj.randomSuffixId = item.randomSuffixId;
-            if (item.enchantId) obj.enchantId = item.enchantId;
+            if (item.spellId) obj.spellId = item.spellId;
             return obj;
         });
         console.log(c.green + JSON.stringify(gearSpec) + c.reset);

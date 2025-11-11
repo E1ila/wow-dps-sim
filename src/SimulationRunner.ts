@@ -277,7 +277,7 @@ export class SimulationRunner {
         // if (simulator.spirit !== undefined && simulator.spirit > 0) console.log(`  Spirit: ${c.green}${simulator.spirit}${c.reset}`);
         
         // Combat stats
-        if (simulator.attackPower !== undefined && simulator.attackPower > 0) console.log(`  Attack Power: ${c.green}${simulator.attackPower}${c.reset}`);
+        if (simulator.attackPower > 0) console.log(`  Attack Power: ${c.green}${simulator.attackPower}${c.reset}`);
         console.log(`  Crit Chance: ${c.green}${simulator.critChance().toFixed(2)}%${c.reset}`);
         console.log(`  Hit Chance: ${c.green}${simulator.hitChance.toFixed(2)}%${c.reset}`);
         console.log(`  Weapon Skill: ${c.green}${simulator.weaponSkill}${c.reset}`);

@@ -149,7 +149,7 @@ export class GearParser {
 
             // Handle weapons (mainhand and offhand)
             if (item.type === 13 && item.weaponDamageMin !== undefined && item.weaponDamageMax !== undefined && item.weaponSpeed !== undefined) {
-                const weapon = this.parseWeapon(item, equippedItem.enchantId);
+                const weapon = this.parseWeapon(item, equippedItem.spellId);
 
                 if (weaponSlotIndex === 0) {
                     mainHandWeapon = weapon;
@@ -161,8 +161,8 @@ export class GearParser {
             }
 
             // Add enchant stats
-            if (equippedItem.enchantId) {
-                const enchant = this.db.getEnchant(equippedItem.enchantId);
+            if (equippedItem.spellId) {
+                const enchant = this.db.getEnchant(equippedItem.spellId);
                 if (enchant && enchant.stats) {
                     this.addItemStats(enchant.stats, STAT_IDS, stats, undefined, enchant);
                 }
@@ -251,11 +251,13 @@ export class GearParser {
             switch (i) {
                 case statIds.STRENGTH:
                     stats.strength += value;
-                    item && console.log(`Added ${value} strength from ${item.name}`);
-                    enchant && console.log(`Added ${value} strength from ${enchant.name}`);
+                    // item && console.log(`Added ${value} strength from ${item.name}`);
+                    // enchant && console.log(`Added ${value} strength from ${enchant.name}`);
                     break;
                 case statIds.AGILITY:
                     stats.agility += value;
+                    // item && console.log(`Added ${value} agility from ${item.name}`);
+                    // enchant && console.log(`Added ${value} agility from ${enchant.name}`);
                     break;
                 case statIds.STAMINA:
                     stats.stamina += value;
@@ -270,10 +272,12 @@ export class GearParser {
                     stats.mana += value;
                     break;
                 case statIds.ATTACK_POWER:
+                    stats.attackPower += value;
+                    // item && console.log(`Added ${value} attack power from ${item.name}`);
+                    // enchant && console.log(`Added ${value} attack power from ${enchant.name}`);
+                    break;
                 case statIds.RANGED_ATTACK_POWER:
                 case statIds.FERAL_ATTACK_POWER:
-                    stats.attackPower += value;
-                    break;
                 case statIds.SPELL_POWER:
                 case statIds.SPELL_DAMAGE:
                 case statIds.ARCANE_POWER:
@@ -306,7 +310,7 @@ export class GearParser {
         }
     }
 
-    private parseWeapon(item: any, enchantId: number): any {
+    private parseWeapon(item: any, spellId?: number): any {
         const weaponTypeMap: { [key: number]: WeaponType } = {
             0: WeaponType.Axe,
             1: WeaponType.Axe,
@@ -331,8 +335,8 @@ export class GearParser {
         };
 
         let enchantType = WeaponEnchant.None;
-        if (enchantId && weaponEnchantMap[enchantId]) {
-            enchantType = weaponEnchantMap[enchantId] as WeaponEnchant;
+        if (spellId && weaponEnchantMap[spellId]) {
+            enchantType = weaponEnchantMap[spellId] as WeaponEnchant;
         }
 
         return {

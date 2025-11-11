@@ -24,8 +24,8 @@ export interface SimulationSpec {
 
 export interface EquippedItem {
    itemId: number;
-   randomSuffixId: number;
-   spellId: number;
+   randomSuffixId?: number;
+   spellId?: number;
 }
 
 export interface GearStats {

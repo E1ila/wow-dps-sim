@@ -695,7 +695,8 @@ export abstract class BaseSimulator implements Simulator, BuffsProvider, PlayerS
    get attackPower(): number {
       return Math.max(1, this.playerLevel * this.attackPowerPerLevel - 20)
          + this.strength * this.strengthToAttackPower
-         + this.agility * this.agilityToAttackPower;
+         + this.agility * this.agilityToAttackPower
+         + (this.spec.gearStats.attackPower || 0);
    }
 
    get weaponSkill(): number {
