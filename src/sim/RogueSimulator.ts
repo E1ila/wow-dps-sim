@@ -482,11 +482,15 @@ export class RogueSimulator extends MeleeSimulator {
    }
 
    get agilityToCrit() {
-      return this.agility * 0.0345;
+      return this.agility * 0.03598726;
    }
 
-   critChance(attack?: Attack): number {
-      let critChance = super.critChance(attack) + this.talents.malice;
+   get critFromTalents(): number {
+      return this.talents.malice;
+   }
+
+   attackCritChance(attack?: Attack): number {
+      let critChance = super.attackCritChance(attack);
       if (attack && this.talents.daggerSpecialization > 0 && attack.weapon.type === WeaponType.Dagger) {
          critChance += this.talents.daggerSpecialization;
       }

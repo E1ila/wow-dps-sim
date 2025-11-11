@@ -358,7 +358,7 @@ export interface AttackResult extends AttackTableResult {
 }
 
 export interface PlayerStatsProvider {
-   critChance(attack: Attack): number;
+   attackCritChance(attack: Attack): number;
    get weaponSkill(): number;
    get attackPower(): number;
    get hitChance(): number;

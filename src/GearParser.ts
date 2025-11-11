@@ -189,50 +189,12 @@ export class GearParser {
             };
         }
 
-        // Build final gearStats
-        const gearStats: GearStats = {
-            strength: stats.strength,
-            agility: stats.agility,
-            critChance: stats.critChance,
-            hitChance: stats.hitChance,
-            weaponSkills: weaponSkills,
-            mainHandWeapon: mainHandWeapon,
-        };
-
-        if (offHandWeapon) {
-            gearStats.offHandWeapon = offHandWeapon;
-        }
-
-        // Add optional stats if they exist
-        if (stats.attackPower > 0) {
-            gearStats.attackPower = stats.attackPower;
-        }
-        if (stats.spellPower > 0) {
-            gearStats.spellPower = stats.spellPower;
-        }
-        if (stats.spellCrit > 0) {
-            gearStats.spellCrit = stats.spellCrit;
-        }
-        if (stats.spellHit > 0) {
-            gearStats.spellHit = stats.spellHit;
-        }
-        if (stats.intellect > 0) {
-            gearStats.intellect = stats.intellect;
-        }
-        if (stats.spirit > 0) {
-            gearStats.spirit = stats.spirit;
-        }
-        if (stats.mana > 0) {
-            gearStats.mana = stats.mana;
-        }
-        if (stats.healingPower > 0) {
-            gearStats.healingPower = stats.healingPower;
-        }
-        if (stats.mp5 > 0) {
-            gearStats.mp5 = stats.mp5;
-        }
-
-        return gearStats;
+        return {
+            ...stats,
+            weaponSkills,
+            mainHandWeapon,
+            offHandWeapon,
+        } as GearStats;
     }
 
     private addItemStats(
@@ -278,6 +240,7 @@ export class GearParser {
                     break;
                 case statIds.RANGED_ATTACK_POWER:
                 case statIds.FERAL_ATTACK_POWER:
+                    break;
                 case statIds.SPELL_POWER:
                 case statIds.SPELL_DAMAGE:
                 case statIds.ARCANE_POWER:
@@ -305,6 +268,8 @@ export class GearParser {
                     break;
                 case statIds.MELEE_CRIT:
                     stats.critChance += value;
+                    // item && console.log(`Added ${value} crit from ${item.name}`);
+                    // enchant && console.log(`Added ${value} crit from ${enchant.name}`);
                     break;
             }
         }

@@ -10,7 +10,7 @@ export const createMockBuffsProvider = (activeBuffs: string[] = []): BuffsProvid
 
 export const createMockStatsProvider = (spec: SimulationSpec, buffsProvider: BuffsProvider): PlayerStatsProvider => {
   return {
-    critChance: () => spec.gearStats.critChance,
+    attackCritChance: () => spec.gearStats.critChance,
     get weaponSkill() {
       const mainHandType = spec.gearStats.mainHandWeapon.type;
       const gearBonus = spec.gearStats.weaponSkills.get(mainHandType) || 0;
@@ -141,7 +141,7 @@ export const createTestStats = (weaponSkill: number, hasOffHand: boolean = true)
 });
 
 export const wrapStats = (gearStats: GearStats, targetLevel: number): PlayerStatsProvider => ({
-  critChance: () => gearStats.critChance,
+  attackCritChance: () => gearStats.critChance,
   get weaponSkill() {
     const mainHandType = gearStats.mainHandWeapon.type;
     const gearBonus = gearStats.weaponSkills.get(mainHandType) || 0;

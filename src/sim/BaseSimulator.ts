@@ -560,12 +560,7 @@ export abstract class BaseSimulator implements Simulator, BuffsProvider, PlayerS
             aggregatedStats.dodgeCount += result.statistics.dodgeCount;
          }
 
-         const gearCrit = simulator.critChance({
-            ability: Ability.MainHand,
-            isSpecialAttack: false,
-            weapon: simulator.spec.gearStats.mainHandWeapon
-         });
-         jsonResults.hitStats = this.printStatistics(aggregatedStats, gearCrit, quiet);
+         jsonResults.hitStats = this.printStatistics(aggregatedStats, simulator.critChance, quiet);
       }
       if (!quiet) {
          if (talentOverrides && Object.keys(talentOverrides).length > 0) {
@@ -623,11 +618,19 @@ export abstract class BaseSimulator implements Simulator, BuffsProvider, PlayerS
       return 0;
    }
 
-   critChance(attack?: Attack): number {
+   get critFromTalents(): number {
+      return 0;
+   }
+
+   get critChance(): number {
+      return this.spec.gearStats.critChance + this.agilityToCrit + this.critFromTalents;
+   }
+
+   attackCritChance(attack?: Attack): number {
       const targetDefense = this.spec.targetLevel * 5;
       const baseWeaponSkill = this.spec.playerLevel * 5;
 
-      let critChance =  this.spec.gearStats.critChance + this.agilityToCrit;
+      let critChance =  this.critChance;
 
       // Crit suppression uses base weapon skill (not including +skill from gear/racials)
       const skillDiff = baseWeaponSkill - targetDefense;

@@ -484,10 +484,6 @@ export class MageSimulator extends BaseSimulator {
       return this.intellect * 0.0168;
    }
 
-   critChance(): number {
-      return 0;
-   }
-
    protected getStateText(): string {
       const timestampSeconds = this.state.currentTime / 1000;
       const manaBar = this.generateResourceBar(this.state.mana, this.getMaxMana(), 20, c.blue);

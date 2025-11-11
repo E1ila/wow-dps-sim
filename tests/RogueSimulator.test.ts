@@ -50,7 +50,7 @@ describe('Rogue Talents', () => {
 
             const simulator = new RogueSimulator(createTestSpec(rogueSimulatorBaseStats, rogueSimulatorConfig, talents));
 
-            expect(simulator.critChance({
+            expect(simulator.attackCritChance({
                ability: Ability.MainHand,
                isSpecialAttack: false,
                weapon: rogueSimulatorBaseStats.mainHandWeapon
@@ -164,7 +164,7 @@ describe('Rogue Talents', () => {
 
             const simulator = new RogueSimulator(createTestSpec(rogueSimulatorBaseStats, rogueSimulatorConfig, talents));
 
-            expect(simulator.critChance({
+            expect(simulator.attackCritChance({
                ability: Ability.MainHand,
                isSpecialAttack: false,
                weapon: rogueSimulatorBaseStats.mainHandWeapon
@@ -191,7 +191,7 @@ describe('Rogue Talents', () => {
 
          const simulator = new RogueSimulator(createTestSpec(swordStats, rogueSimulatorConfig, talents));
 
-         expect(simulator.critChance({
+         expect(simulator.attackCritChance({
             ability: Ability.MainHand,
             isSpecialAttack: false,
             weapon: swordStats.mainHandWeapon
@@ -289,7 +289,7 @@ describe('Rogue Talents', () => {
          const simulator = new RogueSimulator(createTestSpec(rogueSimulatorBaseStats, rogueSimulatorConfig, talents));
 
          // Base 40% (30 + 5 malice + 5 dagger) - 4.8% suppression = 35.2%
-         expect(simulator.critChance({
+         expect(simulator.attackCritChance({
             ability: Ability.Backstab,
             isSpecialAttack: true,
             weapon: rogueSimulatorBaseStats.mainHandWeapon

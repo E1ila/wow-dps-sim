@@ -810,18 +810,16 @@ export class WarriorSimulator extends MeleeSimulator {
       return this.agility * 0.0500;
    }
 
-   override critChance(attack?: Attack): number {
-      let critChance = super.critChance(attack);
-
-      // Cruelty talent
-      if (this.talents.cruelty > 0) {
-         critChance += this.talents.cruelty;
-      }
-
-      // Berserker Stance: +3% crit
+   get critFromTalents(): number {
+      let crit = this.talents.cruelty;
       if (this.state.currentStance === WarriorStance.Berserker) {
-         critChance += 3;
+         crit += 3;
       }
+      return crit;
+   }
+
+   override attackCritChance(attack?: Attack): number {
+      let critChance = super.attackCritChance(attack);
 
       // Improved Overpower
       if (attack?.ability === Ability.Overpower && this.talents.improvedOverpower > 0) {

@@ -118,7 +118,7 @@ export class AttackTable {
          }
       }
 
-      const critChance = this.stats.critChance(attack) / 100;
+      const critChance = this.stats.attackCritChance(attack) / 100;
       cumulative += critChance;
       if (roll < cumulative) {
          return {type: AttackType.Crit, amountModifier: 2.0};
