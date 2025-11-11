@@ -1,7 +1,7 @@
 import {Ability, Attack, AttackResult, AttackType, PlayerStatsProvider, Weapon, WeaponEnchant} from '../types';
 import {AttackTable} from './AttackTable';
 import {BuffsProvider, DamageCalculator} from './DamageCalculator';
-import {SimulationSpec} from '../SpecLoader';
+import {SimulationSpec} from "../SimulationSpec";
 
 interface MeleeDamageParams {
    baseDamage: number;

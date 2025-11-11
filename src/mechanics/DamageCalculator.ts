@@ -1,5 +1,5 @@
 import {PlayerStatsProvider} from '../types';
-import {SimulationSpec} from '../SpecLoader';
+import {SimulationSpec} from "../SimulationSpec";
 
 export interface BuffsProvider {
    hasBuff(name: string): boolean;

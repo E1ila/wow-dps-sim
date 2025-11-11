@@ -1,6 +1,7 @@
-import {Ability, ShamanTalents} from '../types';
+import {Ability} from '../types';
 import {BuffsProvider, DamageCalculator} from './DamageCalculator';
-import {SimulationSpec} from '../SpecLoader';
+import {ShamanTalents} from "../talents";
+import {SimulationSpec} from "../SimulationSpec";
 
 // Healing spell constants (max rank)
 const HEALING_WAVE_10 = {

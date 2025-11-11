@@ -1,12 +1,14 @@
-import {CharacterClass, RogueTalents, ShamanTalents, SimulationSetup, WarriorTalents, WeaponType} from './types';
+import {CharacterClass, WeaponType} from './types';
 import {c, colorByClass} from './globals';
 import {WarriorSimulator} from './sim/WarriorSimulator';
 import {BaseSimulator} from './sim/BaseSimulator';
-import {SimulationSpec, SpecLoader} from './SpecLoader';
+import {SpecLoader} from './SpecLoader';
 import {RogueSimulator} from "./sim/RogueSimulator";
 import {ShamanSimulator} from "./sim/ShamanSimulator";
 import path from "node:path";
 import {Database} from "./Database";
+import {SimulationSetup, SimulationSpec} from "./SimulationSpec";
+import {RogueTalents, ShamanTalents, WarriorTalents} from "./talents";
 
 export interface SimulationOptions {
     specFile: string;

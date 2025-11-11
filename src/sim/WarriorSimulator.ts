@@ -1,17 +1,9 @@
-import {
-   Ability,
-   Attack,
-   AttackResult,
-   AttackType,
-   Buff,
-   WarriorSimulationState,
-   WarriorStance,
-   WarriorTalents,
-} from '../types';
+import {Ability, Attack, AttackResult, AttackType, Buff, WarriorSimulationState, WarriorStance,} from '../types';
 import {MeleeSimulator} from './MeleeSimulator';
 import {WarriorDamageCalculator} from '../mechanics/WarriorDamageCalculator';
-import {SimulationSpec} from '../SpecLoader';
 import {c, isHit} from '../globals';
+import {WarriorTalents} from "../talents";
+import {SimulationSpec} from "../SimulationSpec";
 
 export const WARRIOR = {
    maxRage: 100,

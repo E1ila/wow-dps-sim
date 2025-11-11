@@ -1,7 +1,8 @@
-import {Ability, AttackResult, PlayerStatsProvider, WarriorTalents} from '../types';
+import {Ability, AttackResult, PlayerStatsProvider} from '../types';
 import {MeleeDamageCalculator} from './MeleeDamageCalculator';
-import {SimulationSpec} from '../SpecLoader';
 import {BuffsProvider} from "./DamageCalculator";
+import {SimulationSpec} from "../SimulationSpec";
+import {WarriorTalents} from "../talents";
 
 export class WarriorDamageCalculator extends MeleeDamageCalculator {
    protected talents: WarriorTalents;

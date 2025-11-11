@@ -1,35 +1,7 @@
 import {readFileSync} from 'fs';
-import {
-   CharacterClass,
-   GearStats,
-   MageTalents,
-   RogueTalents,
-   ShamanTalents,
-   SimulationConfig,
-   SimulationSetup,
-   TargetType,
-   WarriorTalents
-} from './types';
+import {CharacterClass,} from './types';
 import path from "node:path";
-
-export interface SimulationSpec {
-   name: string;
-   description: string;
-   class: CharacterClass;
-   playerLevel: number;
-   rotation?: string[];
-   setup?: SimulationSetup;
-   talents: RogueTalents | WarriorTalents | MageTalents | ShamanTalents;
-   gearStats: GearStats;
-   simulationConfig: SimulationConfig;
-   fightLength: number;
-   targetLevel: number;
-   targetType?: TargetType;
-   targetArmor: number;
-   iterations: number;
-   postCycleResourceGeneration?: boolean;
-   isHealerSpec?: boolean;
-}
+import {SimulationSpec} from "./SimulationSpec";
 
 export class SpecLoader {
    static load(specFile: string): SimulationSpec {

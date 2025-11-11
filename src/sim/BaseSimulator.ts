@@ -15,7 +15,7 @@ import {
 } from '../types';
 import {c} from '../globals';
 import {BuffsProvider, DamageCalculator} from "../mechanics/DamageCalculator";
-import {SimulationSpec} from '../SpecLoader';
+import {SimulationSpec} from "../SimulationSpec";
 
 const LATENCY_LAG = 200;
 

@@ -1,8 +1,9 @@
 import {BaseSimulator} from './BaseSimulator';
-import {Ability, ShamanSimulationState, ShamanTalents, SimulationResult} from '../types';
-import {SimulationSpec} from '../SpecLoader';
+import {Ability, ShamanSimulationState, SimulationResult} from '../types';
 import {ShamanHealingCalculator} from '../mechanics/ShamanHealingCalculator';
 import {c} from '../globals';
+import {ShamanTalents} from "../talents";
+import {SimulationSpec} from "../SimulationSpec";
 
 const MANA_TICK_INTERVAL = 2000; // 2 seconds
 const GLOBAL_COOLDOWN = 1500; // 1.5 seconds

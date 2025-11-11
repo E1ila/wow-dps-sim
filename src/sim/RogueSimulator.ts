@@ -8,14 +8,13 @@ import {
    RogueBuffEvent,
    RogueDamageEvent,
    RogueSimulationState,
-   RogueTalents,
-   SimulationSetup,
    WeaponType,
 } from '../types';
 import {c, isHit} from '../globals';
-import {SimulationSpec} from '../SpecLoader';
 import {RogueDamageCalculator} from '../mechanics/RogueDamageCalculator';
 import {MeleeSimulator} from './MeleeSimulator';
+import {SimulationSetup, SimulationSpec} from "../SimulationSpec";
+import {RogueTalents} from "../talents";
 
 export const ROGUE = {
    maxEnergy: 100,

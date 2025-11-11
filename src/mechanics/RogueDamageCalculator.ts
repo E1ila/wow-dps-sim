@@ -1,7 +1,8 @@
-import {Ability, AttackResult, PlayerStatsProvider, RogueTalents, TargetType} from '../types';
+import {Ability, AttackResult, PlayerStatsProvider, TargetType} from '../types';
 import {MeleeDamageCalculator} from './MeleeDamageCalculator';
-import {SimulationSpec} from '../SpecLoader';
 import {BuffsProvider} from "./DamageCalculator";
+import {SimulationSpec} from "../SimulationSpec";
+import {RogueTalents} from "../talents";
 
 const EVISCERATE_9 = [[224,332],[394,502],[564,672],[734,842],[904,1012]];
 const SINISTER_STRIKE_7 = 68;
