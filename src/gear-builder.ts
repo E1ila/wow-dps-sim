@@ -156,6 +156,7 @@ class GearBuilder {
 
         const allEnchants = this.db.getAllEnchants();
         const enchantTypes = this.getEnchantTypesForItem(item.type);
+
         const compatibleEnchants = allEnchants
             .filter(enchant =>
                 enchantTypes.includes(enchant.type) ||
@@ -172,9 +173,10 @@ class GearBuilder {
                 { name: 'None', value: 0 },
                 ...compatibleEnchants.map(enchant => {
                     const color = qualityColors[enchant.quality] || '';
+                    const enchantId = enchant.spellId || enchant.effectId;
                     return {
-                        name: `${color}${enchant.name}${c.reset} (ID: ${enchant.effectId})`,
-                        value: enchant.effectId,
+                        name: `${color}${enchant.name}${c.reset} (ID: ${enchantId})`,
+                        value: enchantId,
                     };
                 })
             ];

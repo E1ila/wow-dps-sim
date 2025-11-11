@@ -28,7 +28,7 @@ export class Database {
       const data: DatabaseJSON = JSON.parse(rawData);
 
       this.items = new Map(data.items.map(item => [item.id, item]));
-      this.enchants = new Map(data.enchants.map(enchant => [enchant.effectId, enchant]));
+      this.enchants = new Map(data.enchants.map(enchant => [enchant.spellId || enchant.effectId, enchant]));
       this.randomSuffixes = new Map(data.randomSuffixes.map(suffix => [suffix.id, suffix]));
       this.zones = new Map(data.zones.map(zone => [zone.id, zone]));
       this.npcs = new Map(data.npcs.map(npc => [npc.id, npc]));
@@ -42,8 +42,8 @@ export class Database {
       return this.items.get(id);
    }
 
-   getEnchant(effectId: number): Enchant | undefined {
-      return this.enchants.get(effectId);
+   getEnchant(spellId: number): Enchant | undefined {
+      return this.enchants.get(spellId);
    }
 
    getRandomSuffix(id: number): RandomSuffix | undefined {
