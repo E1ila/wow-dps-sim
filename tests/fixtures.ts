@@ -17,16 +17,20 @@ export const createMockBuffsProvider = (activeBuffs: string[] = []): BuffsProvid
 });
 
 export const createMockStatsProvider = (spec: SimulationSpec, buffsProvider: BuffsProvider): PlayerStatsProvider => {
-  const baseAttackPower = spec.gearStats.attackPower;
   return {
     critChance: () => spec.gearStats.critChance,
     get weaponSkill() { return spec.gearStats.weaponSkill; },
     get attackPower() {
-      let ap = baseAttackPower;
+      // Calculate attack power from stats (Rogue formula: level*2-20 + strength + agility)
+      const baseAP = Math.max(1, spec.playerLevel * 2 - 20);
+      let strength = spec.gearStats.strength;
+      let agility = spec.gearStats.agility;
+
       if (buffsProvider.hasBuff(Buff.Crusader)) {
-        ap += 100;
+        strength += 100;
       }
-      return ap;
+
+      return baseAP + strength + agility;
     },
     get hitChance() { return spec.gearStats.hitChance; },
     get playerLevel() { return spec.playerLevel; },
@@ -44,8 +48,9 @@ export const createCalculator = (spec: SimulationSpec, activeBuffs: string[] = [
 export const baseStats: GearStats = {
   critChance: 30,
   hitChance: 9,
-  agility: 300,
-  strength: 100,
+  // Adjusted to produce attackPower of 1200: 100 (base) + 900 (agility) + 200 (strength) = 1200
+  agility: 900,
+  strength: 200,
   weaponSkill: 300,
   mainHandWeapon: {
     minDamage: 100,
@@ -141,7 +146,11 @@ export const createTestStats = (weaponSkill: number, hasOffHand: boolean = true)
 export const wrapStats = (gearStats: GearStats, targetLevel: number): PlayerStatsProvider => ({
   critChance: () => gearStats.critChance,
   get weaponSkill() { return gearStats.weaponSkill; },
-  get attackPower() { return gearStats.attackPower; },
+  get attackPower() {
+    // Calculate attack power from stats (Rogue formula: level*2-20 + strength + agility)
+    const baseAP = Math.max(1, 60 * 2 - 20);
+    return baseAP + gearStats.strength + gearStats.agility;
+  },
   get hitChance() { return gearStats.hitChance; },
   get playerLevel() { return 60; },
   get targetLevel() { return targetLevel; },
