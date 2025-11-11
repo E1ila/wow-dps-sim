@@ -129,7 +129,7 @@ export class GearParser {
         for (const equippedItem of gear) {
             const item = this.db.getItem(equippedItem.itemId);
             if (!item) {
-                console.warn(`Warning: Item ${equippedItem.itemId} not found in database`);
+                // console.warn(`Warning: Item ${equippedItem.itemId} not found in database`);
                 continue;
             }
 

@@ -540,7 +540,7 @@ export abstract class BaseSimulator implements Simulator, BuffsProvider, PlayerS
                hitCount,
                totalDamage,
             };
-            !quiet && console.log(`${ability}: ${percentage.toFixed(1)}% - Avg Hit: ${avgHitDamage.toFixed(1)}`);
+            !quiet && console.log(`${ability}: ${percentage.toFixed(1)}% - Total: ${totalDamage.toFixed(0)} - Avg Hit: ${avgHitDamage.toFixed(1)} - Hits: ${hitCount}`);
          }
 
          // Aggregate statistics across all iterations
