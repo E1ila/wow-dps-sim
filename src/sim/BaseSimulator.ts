@@ -510,6 +510,7 @@ export abstract class BaseSimulator implements Simulator, BuffsProvider, PlayerS
          // Aggregate damage breakdown across all iterations
          const aggregatedBreakdown = new Map<string, number>();
          const aggregatedHitCount = new Map<string, number>();
+         const aggregatedMissCount = new Map<string, number>();
          let totalDamageSum = 0;
          let totalHitDamageSum = 0;
 
@@ -521,11 +522,17 @@ export abstract class BaseSimulator implements Simulator, BuffsProvider, PlayerS
                aggregatedBreakdown.set(ability, currentDamage + damage);
             }
 
-            // Count hits for each ability
+            // Count hits and misses for each ability
             for (const event of result.events) {
-               if (event.eventType === 'damage' && event.amount > 0) {
-                  const currentCount = aggregatedHitCount.get(event.ability) || 0;
-                  aggregatedHitCount.set(event.ability, currentCount + 1);
+               if (event.eventType === 'damage') {
+                  if (event.amount > 0) {
+                     const currentCount = aggregatedHitCount.get(event.ability) || 0;
+                     aggregatedHitCount.set(event.ability, currentCount + 1);
+                  }
+                  if (event.type === AttackType.Miss) {
+                     const currentCount = aggregatedMissCount.get(event.ability) || 0;
+                     aggregatedMissCount.set(event.ability, currentCount + 1);
+                  }
                }
             }
          }
@@ -541,14 +548,19 @@ export abstract class BaseSimulator implements Simulator, BuffsProvider, PlayerS
             const avgDamage = totalDamage / results.length;
             const percentage = (avgDamage / avgTotalDamage) * 100;
             const hitCount = aggregatedHitCount.get(ability) || 0;
+            const missCount = aggregatedMissCount.get(ability) || 0;
+            const totalAttempts = hitCount + missCount;
+            const missPercentage = totalAttempts > 0 ? (missCount / totalAttempts) * 100 : 0;
             const avgHitDamage = hitCount > 0 ? totalDamage / hitCount : 0;
             jsonResults.abilityBreakdown[ability] = {
                percentage: Math.round(percentage) + '%',
                avgHitDamage: Math.round(avgHitDamage),
                hitCount,
+               missCount,
+               missPercentage: missPercentage.toFixed(1) + '%',
                totalDamage,
             };
-            !quiet && console.log(`${ability}: ${percentage.toFixed(1)}% - Total: ${totalDamage.toFixed(0)} - Avg Hit: ${avgHitDamage.toFixed(1)} - Hits: ${hitCount}`);
+            !quiet && console.log(`${ability}: ${percentage.toFixed(1)}% - Total: ${totalDamage.toFixed(0)} - Avg Hit: ${avgHitDamage.toFixed(1)} - Hits: ${hitCount} - Miss: ${missPercentage.toFixed(1)}%`);
          }
 
          // Aggregate statistics across all iterations
