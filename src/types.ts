@@ -163,6 +163,7 @@ export interface Attack {
    ability: Ability;
    isSpecialAttack: boolean;
    weapon: Weapon;
+   inFrontOfEnemy?: boolean
 }
 
 export interface SimulationState {
@@ -346,6 +347,7 @@ export enum AttackType {
    Hit = 'Hit',
    Crit = 'Crit',
    Block = 'Block',
+   Parry = 'Parry',
 }
 
 export interface AttackTableResult {
