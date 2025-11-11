@@ -531,7 +531,6 @@ export abstract class BaseSimulator implements Simulator, BuffsProvider, PlayerS
          }
 
          const avgTotalDamage = totalDamageSum / results.length;
-         const  = totalHitDamageSum / results.length;
 
          !quiet && console.log('\n=== Damage Breakdown (Average across all iterations) ===');
          jsonResults.abilityBreakdown = {};
