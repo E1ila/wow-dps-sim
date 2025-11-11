@@ -219,6 +219,20 @@ class GearBuilder {
         };
     }
 
+    loadExistingGear(gearJson: string): void {
+        try {
+            const gear = JSON.parse(gearJson) as EquippedItem[];
+            this.equippedItems = gear.map(item => ({
+                itemId: item.itemId,
+                randomSuffixId: item.randomSuffixId || 0,
+                enchantId: item.enchantId || 0,
+            }));
+            console.log(`Loaded ${this.equippedItems.length} items from existing gear.`);
+        } catch (error) {
+            throw new Error('Invalid JSON format for gear');
+        }
+    }
+
     async buildGear(): Promise<EquippedItem[]> {
         console.log('=== WoW Classic Gear Builder ===\n');
         console.log('Build your character\'s equipment by searching for items.');
@@ -228,6 +242,48 @@ class GearBuilder {
             const equippedItem = await this.promptForItem(slot);
             if (equippedItem) {
                 this.equippedItems.push(equippedItem);
+            }
+        }
+
+        return this.equippedItems;
+    }
+
+    async editGear(): Promise<EquippedItem[]> {
+        console.log('=== WoW Classic Gear Editor ===\n');
+        console.log('Current gear loaded. Select slots to edit.\n');
+
+        while (true) {
+            const slotChoices = EQUIPMENT_SLOTS.map((slot, index) => {
+                const equipped = this.equippedItems[index];
+                const item = equipped ? this.db.getItem(equipped.itemId) : null;
+                const itemName = item ? item.name : '(empty)';
+                return {
+                    name: `${slot.name}: ${itemName}`,
+                    value: index,
+                };
+            });
+
+            slotChoices.push({ name: '✓ Finish editing', value: -1 });
+
+            const { slotIndex } = await inquirer.prompt<{ slotIndex: number }>([{
+                type: 'list',
+                name: 'slotIndex',
+                message: 'Select slot to edit:',
+                choices: slotChoices,
+                pageSize: 20,
+            }]);
+
+            if (slotIndex === -1) {
+                break;
+            }
+
+            const slot = EQUIPMENT_SLOTS[slotIndex];
+            const newItem = await this.promptForItem(slot);
+
+            if (newItem) {
+                this.equippedItems[slotIndex] = newItem;
+            } else if (!slot.optional) {
+                console.log('Required slot cannot be empty.');
             }
         }
 
@@ -265,15 +321,22 @@ async function main() {
     program
         .name('gear-builder')
         .description('Interactive gear builder for WoW Classic DPS Simulator')
-        .version('1.0.0');
+        .version('1.0.0')
+        .option('-e, --edit <json>', 'Edit existing gear (provide JSON array of EquippedItem[])');
 
     program.parse();
 
+    const options = program.opts<{ edit?: string }>();
     const dbPath = path.resolve(__dirname, 'db.json');
     const builder = new GearBuilder(dbPath);
 
     try {
-        await builder.buildGear();
+        if (options.edit) {
+            builder.loadExistingGear(options.edit);
+            await builder.editGear();
+        } else {
+            await builder.buildGear();
+        }
         builder.displayGear();
     } catch (error) {
         if (error instanceof Error) {
