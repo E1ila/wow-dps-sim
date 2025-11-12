@@ -717,7 +717,7 @@ export abstract class BaseSimulator implements Simulator, BuffsProvider, PlayerS
    }
 
    get haste(): number {
-      return 1;
+      return this.spec.gearStats.meleeHaste || 1;
    }
 
    get attackPower(): number {

@@ -1,25 +1,7 @@
 import {Database} from './Database';
-import {EquippedItem, GearStats} from './SimulationSpec';
+import {EquippedItem, GearBuffsStats} from './SimulationSpec';
 import {WeaponEnchant, WeaponType} from './types';
 import {Enchant, Item} from "./Database.types";
-
-type AccumulatedStats = {
-    strength: number;
-    agility: number;
-    stamina: number;
-    intellect: number;
-    spirit: number;
-    mana: number;
-    attackPower: number;
-    critChance: number;
-    hitChance: number;
-    weaponSkill: number;
-    spellPower: number;
-    spellCrit: number;
-    spellHit: number;
-    healingPower: number;
-    mp5: number;
-};
 
 // Stat index mapping based on WoW Classic database format
 const STAT_IDS = {
@@ -82,7 +64,7 @@ export class GearParser {
      * @param existingGearStats Optional existing gear stats to preserve
      * @returns Calculated GearStats object
      */
-    parse(gear: EquippedItem[], existingGearStats?: Partial<GearStats>): GearStats {
+    parse(gear: EquippedItem[], existingGearStats?: Partial<GearBuffsStats>): GearBuffsStats {
         if (!gear || gear.length === 0) {
             // Return minimal stats if no gear provided
             return {
@@ -102,7 +84,7 @@ export class GearParser {
         }
 
         // Initialize stats
-        const stats: AccumulatedStats = {
+        const stats: Partial<GearBuffsStats> = {
             strength: 0,
             agility: 0,
             stamina: 0,
@@ -112,7 +94,6 @@ export class GearParser {
             attackPower: 0,
             critChance: 0,
             hitChance: 0,
-            weaponSkill: 0,
             spellPower: 0,
             spellCrit: 0,
             spellHit: 0,
@@ -194,13 +175,13 @@ export class GearParser {
             weaponSkills,
             mainHandWeapon,
             offHandWeapon,
-        } as GearStats;
+        } as GearBuffsStats;
     }
 
     private addItemStats(
         itemStats: number[] | undefined,
         statIds: Record<string, number>,
-        stats: AccumulatedStats,
+        stats: Partial<GearBuffsStats>,
         item?: Item,
         enchant?: Enchant,
     ): void {
@@ -212,29 +193,29 @@ export class GearParser {
 
             switch (i) {
                 case statIds.STRENGTH:
-                    stats.strength += value;
+                    stats.strength = (stats.strength || 0) + value;
                     // item && console.log(`Added ${value} strength from ${item.name}`);
                     // enchant && console.log(`Added ${value} strength from ${enchant.name}`);
                     break;
                 case statIds.AGILITY:
-                    stats.agility += value;
+                    stats.agility = (stats.agility || 0) + value;
                     // item && console.log(`Added ${value} agility from ${item.name}`);
                     // enchant && console.log(`Added ${value} agility from ${enchant.name}`);
                     break;
                 case statIds.STAMINA:
-                    stats.stamina += value;
+                    stats.stamina = (stats.stamina || 0) + value;
                     break;
                 case statIds.INTELLECT:
-                    stats.intellect += value;
+                    stats.intellect = (stats.intellect || 0) + value;
                     break;
                 case statIds.SPIRIT:
-                    stats.spirit += value;
+                    stats.spirit = (stats.spirit || 0) + value;
                     break;
                 case statIds.MANA:
-                    stats.mana += value;
+                    stats.mana = (stats.mana || 0) + value;
                     break;
                 case statIds.ATTACK_POWER:
-                    stats.attackPower += value;
+                    stats.attackPower = (stats.attackPower || 0) + value;
                     // item && console.log(`Added ${value} attack power from ${item.name}`);
                     // enchant && console.log(`Added ${value} attack power from ${enchant.name}`);
                     break;
@@ -249,25 +230,25 @@ export class GearParser {
                 case statIds.HOLY_POWER:
                 case statIds.NATURE_POWER:
                 case statIds.SHADOW_POWER:
-                    stats.spellPower += value;
+                    stats.spellPower = (stats.spellPower || 0) + value;
                     break;
                 case statIds.HEALING_POWER:
-                    stats.healingPower += value;
+                    stats.healingPower = (stats.healingPower || 0) + value;
                     break;
                 case statIds.MP5:
-                    stats.mp5 += value;
+                    stats.mp5 = (stats.mp5 || 0) + value;
                     break;
                 case statIds.SPELL_HIT:
-                    stats.spellHit += value;
+                    stats.spellHit = (stats.spellHit || 0) + value;
                     break;
                 case statIds.SPELL_CRIT:
-                    stats.spellCrit += value;
+                    stats.spellCrit = (stats.spellCrit || 0) + value;
                     break;
                 case statIds.MELEE_HIT:
-                    stats.hitChance += value;
+                    stats.hitChance = (stats.hitChance || 0) + value;
                     break;
                 case statIds.MELEE_CRIT:
-                    stats.critChance += value;
+                    stats.critChance = (stats.critChance || 0) + value;
                     // item && console.log(`Added ${value} crit from ${item.name}`);
                     // enchant && console.log(`Added ${value} crit from ${enchant.name}`);
                     break;

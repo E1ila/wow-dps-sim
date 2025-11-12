@@ -1,5 +1,6 @@
 import {CharacterClass, Race, TargetType, Weapon, WeaponType} from "./types";
 import {MageTalents, RogueTalents, ShamanTalents, WarriorTalents} from "./talents";
+import {WorldBuff} from "./WorldBuffs";
 
 export interface SimulationSpec {
    name: string;
@@ -10,8 +11,9 @@ export interface SimulationSpec {
    rotation?: string[];
    setup?: SimulationSetup;
    talents: RogueTalents | WarriorTalents | MageTalents | ShamanTalents;
-   gearStats: GearStats; // only from gear, not inc. base stats (from level) nor enchants, etc.
+   gearStats: GearBuffsStats; // only from gear, not inc. base stats (from level) nor enchants, etc.
    gear: EquippedItem[];
+   worldBuffs?: WorldBuff[];
    simulationConfig: SimulationConfig;
    fightLength: number;
    targetLevel: number;
@@ -22,13 +24,48 @@ export interface SimulationSpec {
    isHealerSpec?: boolean;
 }
 
+export interface SimulationOptions {
+   specFile: string;
+   // gear stats CLI override
+   critChance?: number;
+   hitChance?: number;
+   weaponSkill?: number;
+   mainHand?: {
+      minDamage: number;
+      maxDamage: number;
+      speed: number;
+      type: WeaponType;
+   };
+   offHand?: {
+      minDamage: number;
+      maxDamage: number;
+      speed: number;
+      type: WeaponType;
+   };
+   // encounter
+   targetLevel?: number;
+   targetArmor?: number;
+   fightLength?: number;
+   // simulation
+   iterations?: number;
+   postCycleResourceGeneration?: boolean;
+   playbackSpeed?: number;
+   // compare input
+   talentOverrides?: string;
+   setupOverrides?: string;
+   gearOverrides?: string;
+   rotationOverrides?: string;
+   // output
+   quiet: boolean;
+}
+
 export interface EquippedItem {
    itemId: number;
    randomSuffixId?: number;
    spellId?: number;
 }
 
-export interface GearStats {
+export interface GearBuffsStats {
    attackPower?: number;
    critChance: number;
    hitChance: number;
@@ -44,12 +81,17 @@ export interface GearStats {
    spellCrit?: number;
    spellHit?: number;
    intellect?: number;
+   stamina?: number;
    spirit?: number;
    mana?: number;
 
    // Healer stats
    healingPower?: number;
    mp5?: number; // Mana per 5 seconds
+
+   // Additional stats (can be modified by buffs)
+   health?: number;
+   meleeHaste?: number; // Haste multiplier (1.15 = 15% faster)
 }
 
 export interface SimulationSetup {

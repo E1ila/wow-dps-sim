@@ -1,9 +1,9 @@
 import {Ability, CharacterClass} from '../src/types';
 import {MageSimulator} from '../src/sim/MageSimulator';
-import {GearStats, SimulationConfig, SimulationSpec} from "../src/SimulationSpec";
+import {GearBuffsStats, SimulationConfig, SimulationSpec} from "../src/SimulationSpec";
 import {MageTalents} from "../src/talents";
 
-const baseMageStats: GearStats = {
+const baseMageStats: GearBuffsStats = {
    critChance: 0,
    hitChance: 0,
    agility: 0,
@@ -59,7 +59,7 @@ const baseMageTalents: MageTalents = {
    wintersChill: 0,
 };
 
-function createTestSpec(stats: GearStats, config: SimulationConfig, talents: MageTalents): SimulationSpec {
+function createTestSpec(stats: GearBuffsStats, config: SimulationConfig, talents: MageTalents): SimulationSpec {
    return {
       name: 'test',
       description: 'test spec',

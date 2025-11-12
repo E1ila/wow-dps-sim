@@ -1,9 +1,9 @@
 import {CharacterClass, WeaponEnchant, WeaponType} from '../src/types';
 import {RogueSimulator} from '../src/sim/RogueSimulator';
-import {GearStats, SimulationConfig, SimulationSpec} from "../src/SimulationSpec";
+import {GearBuffsStats, SimulationConfig, SimulationSpec} from "../src/SimulationSpec";
 import {RogueTalents} from "../src/talents";
 
-const baseStats: GearStats = {
+const baseStats: GearBuffsStats = {
   critChance: 30,
   hitChance: 9,
   agility: 300,
@@ -59,7 +59,7 @@ const baseTalents: RogueTalents = {
   vigor: false,
 };
 
-function createTestSpec(stats: GearStats, config: SimulationConfig, talents: RogueTalents): SimulationSpec {
+function createTestSpec(stats: GearBuffsStats, config: SimulationConfig, talents: RogueTalents): SimulationSpec {
   return {
     name: 'test',
     description: 'test spec',

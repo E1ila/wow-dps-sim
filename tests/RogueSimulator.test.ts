@@ -3,7 +3,7 @@ import {AttackTable} from '../src/mechanics/AttackTable';
 import {RogueSimulator} from '../src/sim/RogueSimulator';
 import {baseStats, baseTalents, config, createTestSpec} from './fixtures';
 import {RogueTalents} from "../src/talents";
-import {GearStats} from "../src/SimulationSpec";
+import {GearBuffsStats} from "../src/SimulationSpec";
 
 // RogueSimulator tests use different weapon damages and speeds
 // Note: Base rogue at level 60 has 130 agility (60*2 + 10) which gives ~4.678% crit
@@ -179,7 +179,7 @@ describe('Rogue Talents', () => {
       });
 
       it('should NOT increase crit chance when using non-dagger weapons', () => {
-         const swordStats: GearStats = {
+         const swordStats: GearBuffsStats = {
             ...rogueSimulatorBaseStats,
             mainHandWeapon: {
                minDamage: 76,
@@ -251,7 +251,7 @@ describe('Rogue Talents', () => {
             enchant: WeaponEnchant.None
          };
 
-         const swordStats: GearStats = {
+         const swordStats: GearBuffsStats = {
             ...rogueSimulatorBaseStats,
             mainHandWeapon: swordWeapon,
          };
@@ -372,7 +372,7 @@ describe('Rogue Talents', () => {
                precision,
             };
 
-            const testStats: GearStats = {
+            const testStats: GearBuffsStats = {
                ...rogueSimulatorBaseStats,
                hitChance: baseHitChance,
             };
@@ -451,7 +451,7 @@ describe('Rogue Talents', () => {
    describe('Sword Specialization', () => {
 
       it('should proc extra attacks at 1% per talent point', () => {
-         const swordStats: GearStats = {
+         const swordStats: GearBuffsStats = {
             ...rogueSimulatorBaseStats,
             mainHandWeapon: {
                minDamage: 100,
@@ -537,7 +537,7 @@ describe('Rogue Talents', () => {
       });
 
       it('should only proc on hits that deal damage', () => {
-         const swordStats: GearStats = {
+         const swordStats: GearBuffsStats = {
             ...rogueSimulatorBaseStats,
             hitChance: 0,
             mainHandWeapon: {
@@ -610,7 +610,7 @@ describe('Rogue Talents', () => {
       });
 
       it('should increase weapon skill by 3 per point for swords', () => {
-         const swordStats: GearStats = {
+         const swordStats: GearBuffsStats = {
             ...rogueSimulatorBaseStats,
             mainHandWeapon: {
                minDamage: 76,
@@ -640,7 +640,7 @@ describe('Rogue Talents', () => {
       });
 
       it('should NOT increase weapon skill for maces', () => {
-         const maceStats: GearStats = {
+         const maceStats: GearBuffsStats = {
             ...baseStats,
             mainHandWeapon: {
                minDamage: 76,
@@ -672,7 +672,7 @@ describe('Rogue Talents', () => {
             weaponExpertise: 5,
          };
 
-         const testStats: GearStats = {
+         const testStats: GearBuffsStats = {
             ...baseStats,
             hitChance: 0,
             weaponSkills: new Map(),
@@ -727,7 +727,7 @@ describe('Rogue Talents', () => {
                weaponExpertise,
             };
 
-            const testStats: GearStats = {
+            const testStats: GearBuffsStats = {
                ...rogueSimulatorBaseStats,
                hitChance: 0,
                weaponSkills: new Map(),

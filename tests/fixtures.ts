@@ -1,7 +1,7 @@
 import {Buff, CharacterClass, PlayerStatsProvider, WeaponEnchant, WeaponType} from '../src/types';
 import {BuffsProvider} from '../src/mechanics/DamageCalculator';
 import {RogueDamageCalculator} from '../src/mechanics/RogueDamageCalculator';
-import {GearStats, SimulationConfig, SimulationSpec} from "../src/SimulationSpec";
+import {GearBuffsStats, SimulationConfig, SimulationSpec} from "../src/SimulationSpec";
 import {RogueTalents} from "../src/talents";
 
 export const createMockBuffsProvider = (activeBuffs: string[] = []): BuffsProvider => ({
@@ -41,7 +41,7 @@ export const createCalculator = (spec: SimulationSpec, activeBuffs: string[] = [
   return new RogueDamageCalculator(spec, buffs, createMockStatsProvider(spec, buffs));
 };
 
-export const baseStats: GearStats = {
+export const baseStats: GearBuffsStats = {
   critChance: 30,
   hitChance: 9,
   // Adjusted to produce attackPower of 1200: 100 (base) + 900 (agility) + 200 (strength) = 1200
@@ -98,7 +98,7 @@ export const baseTalents: RogueTalents = {
   vigor: false,
 };
 
-export function createTestSpec(stats: GearStats, config: SimulationConfig, talents: RogueTalents): SimulationSpec {
+export function createTestSpec(stats: GearBuffsStats, config: SimulationConfig, talents: RogueTalents): SimulationSpec {
   return {
     name: 'test',
     description: 'test spec',
@@ -118,7 +118,7 @@ export function createTestSpec(stats: GearStats, config: SimulationConfig, talen
 }
 
 // Helper for AttackTable tests
-export const createTestStats = (weaponSkill: number, hasOffHand: boolean = true): GearStats => ({
+export const createTestStats = (weaponSkill: number, hasOffHand: boolean = true): GearBuffsStats => ({
   critChance: 30,
   hitChance: 0,
   agility: 300,
@@ -140,7 +140,7 @@ export const createTestStats = (weaponSkill: number, hasOffHand: boolean = true)
   } : undefined,
 });
 
-export const wrapStats = (gearStats: GearStats, targetLevel: number): PlayerStatsProvider => ({
+export const wrapStats = (gearStats: GearBuffsStats, targetLevel: number): PlayerStatsProvider => ({
   attackCritChance: () => gearStats.critChance,
   get weaponSkill() {
     const mainHandType = gearStats.mainHandWeapon.type;

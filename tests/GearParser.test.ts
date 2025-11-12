@@ -1,6 +1,6 @@
 import {GearParser} from '../src/GearParser';
 import {Database} from '../src/Database';
-import {EquippedItem, GearStats} from '../src/SimulationSpec';
+import {EquippedItem, GearBuffsStats} from '../src/SimulationSpec';
 import {WeaponEnchant, WeaponType} from '../src/types';
 import path from 'path';
 
@@ -30,7 +30,7 @@ describe('GearParser', () => {
         });
 
         it('should preserve existing mainhand weapon if no weapon in gear', () => {
-            const existingStats: Partial<GearStats> = {
+            const existingStats: Partial<GearBuffsStats> = {
                 mainHandWeapon: {
                     minDamage: 100,
                     maxDamage: 200,

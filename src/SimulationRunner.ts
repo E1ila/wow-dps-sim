@@ -7,44 +7,10 @@ import {RogueSimulator} from "./sim/RogueSimulator";
 import {ShamanSimulator} from "./sim/ShamanSimulator";
 import path from "node:path";
 import {Database} from "./Database";
-import {SimulationSetup, SimulationSpec} from "./SimulationSpec";
+import {SimulationOptions, SimulationSetup, SimulationSpec} from "./SimulationSpec";
 import {RogueTalents, ShamanTalents, WarriorTalents} from "./talents";
 import {GearParser} from "./GearParser";
-
-export interface SimulationOptions {
-    specFile: string;
-    // gear stats CLI override
-    critChance?: number;
-    hitChance?: number;
-    weaponSkill?: number;
-    mainHand?: {
-        minDamage: number;
-        maxDamage: number;
-        speed: number;
-        type: WeaponType;
-    };
-    offHand?: {
-        minDamage: number;
-        maxDamage: number;
-        speed: number;
-        type: WeaponType;
-    };
-    // encounter
-    targetLevel?: number;
-    targetArmor?: number;
-    fightLength?: number;
-    // simulation
-    iterations?: number;
-    postCycleResourceGeneration?: boolean;
-    playbackSpeed?: number;
-    // compare input
-    talentOverrides?: string;
-    setupOverrides?: string;
-    gearOverrides?: string;
-    rotationOverrides?: string;
-    // output
-    quiet: boolean;
-}
+import {applyWorldBuffs} from "./WorldBuffs";
 
 export class SimulationRunner {
     private readonly options: SimulationOptions;
@@ -78,6 +44,8 @@ export class SimulationRunner {
 
     private applyGearStats(): void {
         this.spec.gearStats = this.gearParser.parse(this.spec.gear, this.spec.gearStats);
+        if (this.spec.worldBuffs)
+            applyWorldBuffs(this.spec.worldBuffs, this.spec.gearStats)
     }
 
     private applyCliOverrides(): void {

@@ -432,6 +432,7 @@ export class MageSimulator extends BaseSimulator {
          events: this.events,
          damageBreakdown: this.damageBreakdown,
          statistics: this.statistics,
+         totalHitDamage: 0,
       };
    }
 
