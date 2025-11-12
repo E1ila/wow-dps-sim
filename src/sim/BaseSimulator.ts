@@ -648,7 +648,7 @@ export abstract class BaseSimulator implements Simulator, BuffsProvider, PlayerS
    }
 
    get critChance(): number {
-      return this.spec.stats.critChance + this.agilityToCrit + this.critFromTalents;
+      return this.spec.extraStats.critChance + this.agilityToCrit + this.critFromTalents;
    }
 
    attackCritChance(attack?: Attack): number {
@@ -679,7 +679,7 @@ export abstract class BaseSimulator implements Simulator, BuffsProvider, PlayerS
    get strength(): number {
       let str =
          this.playerLevel * this.strengthPerLevel + this.strengthLevel1 +
-         this.spec.stats.strength +
+         this.spec.extraStats.strength +
          this.racialStrengthDelta;
       if (this.hasBuff(Buff.Crusader))
          str += 100;
@@ -689,13 +689,13 @@ export abstract class BaseSimulator implements Simulator, BuffsProvider, PlayerS
    get agility(): number {
       let agi =
          this.playerLevel * this.agilityPerLevel + this.agilityLevel1 +
-         this.spec.stats.agility +
+         this.spec.extraStats.agility +
          this.racialAgilityDelta;
-      if (this.spec.stats.mainHandWeapon.enchant == WeaponEnchant.Agility15)
+      if (this.spec.extraStats.mh.enchant == WeaponEnchant.Agility15)
          agi += 15;
-      if (this.spec.stats.mainHandWeapon.enchant == WeaponEnchant.Agility25)
+      if (this.spec.extraStats.mh.enchant == WeaponEnchant.Agility25)
          agi += 25;
-      if (this.spec.stats.offHandWeapon?.enchant == WeaponEnchant.Agility15)
+      if (this.spec.extraStats.oh?.enchant == WeaponEnchant.Agility15)
          agi += 15;
       return agi;
    }
@@ -707,35 +707,35 @@ export abstract class BaseSimulator implements Simulator, BuffsProvider, PlayerS
    get intellect(): number {
       return this.racialIntellectDelta +
          this.intellectLevel1 + this.intellectPerLevel * this.playerLevel +
-         (this.spec.stats.intellect || 0);
+         (this.spec.extraStats.intellect || 0);
    }
 
    get spirit(): number {
       return this.racialSpiritDelta +
          this.spiritLevel1 + this.spiritPerLevel * this.playerLevel +
-         (this.spec.stats.spirit || 0);
+         (this.spec.extraStats.spirit || 0);
    }
 
    get haste(): number {
-      return this.spec.stats.meleeHaste || 1;
+      return this.spec.extraStats.meleeHaste || 1;
    }
 
    get attackPower(): number {
       return Math.max(1, this.playerLevel * this.attackPowerPerLevel - 20)
          + this.strength * this.strengthToAttackPower
          + this.agility * this.agilityToAttackPower
-         + (this.spec.stats.attackPower || 0);
+         + (this.spec.extraStats.attackPower || 0);
    }
 
    get weaponSkill(): number {
       let skill = this.playerLevel * 5;
-      if (this.spec.stats?.mainHandWeapon?.type)
-         skill += this.spec.stats.weaponSkills.get(this.spec.stats.mainHandWeapon.type) || 0
+      if (this.spec.extraStats?.mh?.type)
+         skill += this.spec.extraStats.weaponSkills.get(this.spec.extraStats.mh.type) || 0
       return skill;
    }
 
    get hitChance(): number {
-      return this.spec.stats.hitChance;
+      return this.spec.extraStats.hitChance;
    }
 
    get playerLevel(): number {
@@ -743,7 +743,7 @@ export abstract class BaseSimulator implements Simulator, BuffsProvider, PlayerS
    }
 
    get isDualWielding(): boolean {
-      return this.spec.stats.offHandWeapon !== undefined;
+      return this.spec.extraStats.oh !== undefined;
    }
 
    get targetLevel(): number {

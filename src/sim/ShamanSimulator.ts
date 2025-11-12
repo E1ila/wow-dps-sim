@@ -50,7 +50,7 @@ export class ShamanSimulator extends BaseSimulator {
    }
 
    private getMaxMana(): number {
-      const baseMana = this.spec.stats.mana || 4300;
+      const baseMana = this.spec.extraStats.mana || 4300;
       const intellectBonus = this.intellect * 15;
       let maxMana = baseMana + intellectBonus;
 
@@ -63,7 +63,7 @@ export class ShamanSimulator extends BaseSimulator {
    }
 
    private getManaRegen(): number {
-      const mp5 = this.spec.stats.mp5 || 0;
+      const mp5 = this.spec.extraStats.mp5 || 0;
 
       // Spirit regen
       const baseRegen = (this.spirit / 5) * (MANA_TICK_INTERVAL / 1000);

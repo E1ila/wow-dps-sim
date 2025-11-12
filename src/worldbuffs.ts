@@ -1,4 +1,4 @@
-import {GearBuffsStats} from './SimulationSpec';
+import {Stats} from './SimulationSpec';
 
 export enum WorldBuff {
    RallyingCryOfTheDragonslayer = "dragonslayer",
@@ -9,14 +9,14 @@ export enum WorldBuff {
  * Applies world buff stats to the given GearStats object.
  * Modifies the gearStats object in place.
  */
-export function applyWorldBuffs(worldBuffs: WorldBuff[], gearStats: GearBuffsStats): void {
+export function applyWorldBuffs(worldBuffs: WorldBuff[], stats: Stats): void {
    for (const buff of worldBuffs) {
       switch (buff) {
          case WorldBuff.RallyingCryOfTheDragonslayer:
-            applyRallyingCry(gearStats);
+            applyRallyingCry(stats);
             break;
          case WorldBuff.WarchiefsBlessing:
-            applyWarchiefsBlessing(gearStats);
+            applyWarchiefsBlessing(stats);
             break;
       }
    }
@@ -26,43 +26,43 @@ export function applyWorldBuffs(worldBuffs: WorldBuff[], gearStats: GearBuffsSta
  * Rallying Cry of the Dragonslayer
  * +10% spell crit, +5% melee crit, +140 AP, +140 ranged AP
  */
-function applyRallyingCry(gearStats: GearBuffsStats): void {
+function applyRallyingCry(stats: Stats): void {
    // Add 10% spell crit
-   if (gearStats.spellCrit !== undefined)
-      gearStats.spellCrit += 10;
+   if (stats.spellCrit !== undefined)
+      stats.spellCrit += 10;
    else
-      gearStats.spellCrit = 10;
+      stats.spellCrit = 10;
 
    // Add 5% melee crit
-   gearStats.critChance += 5;
+   stats.critChance += 5;
 
    // Add 140 attack power (includes ranged AP in vanilla)
-   if (gearStats.attackPower !== undefined)
-      gearStats.attackPower += 140;
+   if (stats.attackPower !== undefined)
+      stats.attackPower += 140;
    else 
-      gearStats.attackPower = 140;
+      stats.attackPower = 140;
 }
 
 /**
  * Warchief's Blessing (Rend's buff from Orgrimmar)
  * +300 HP, +10 mp5, +15% melee haste
  */
-function applyWarchiefsBlessing(gearStats: GearBuffsStats): void {
+function applyWarchiefsBlessing(stats: Stats): void {
    // Add 300 HP
-   if (gearStats.health !== undefined)
-      gearStats.health += 300;
+   if (stats.health !== undefined)
+      stats.health += 300;
    else
-      gearStats.health = 300;
+      stats.health = 300;
 
    // Add 10 mp5
-   if (gearStats.mp5 !== undefined)
-      gearStats.mp5 += 10;
+   if (stats.mp5 !== undefined)
+      stats.mp5 += 10;
    else
-      gearStats.mp5 = 10;
+      stats.mp5 = 10;
 
    // Add 15% melee haste (multiply by 1.15)
-   if (gearStats.meleeHaste !== undefined)
-      gearStats.meleeHaste *= 1.15;
+   if (stats.meleeHaste !== undefined)
+      stats.meleeHaste *= 1.15;
    else
-      gearStats.meleeHaste = 1.15;
+      stats.meleeHaste = 1.15;
 }

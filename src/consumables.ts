@@ -1,4 +1,4 @@
-import {GearBuffsStats} from './SimulationSpec';
+import {Stats} from './SimulationSpec';
 
 export enum Consumable {
    // Battle Elixirs (only one can be active)
@@ -32,62 +32,62 @@ export enum Consumable {
  * Applies consumable buffs to the given GearBuffsStats object.
  * Modifies the gearStats object in place.
  */
-export function applyConsumables(consumables: Consumable[], gearStats: GearBuffsStats): void {
+export function applyConsumables(consumables: Consumable[], stats: Stats): void {
    for (const consumable of consumables) {
       switch (consumable) {
          case Consumable.ElixirOfTheMongoose:
-            applyElixirOfTheMongoose(gearStats);
+            applyElixirOfTheMongoose(stats);
             break;
          case Consumable.ElixirOfGiants:
-            applyElixirOfGiants(gearStats);
+            applyElixirOfGiants(stats);
             break;
          case Consumable.ElixirOfGreaterAgility:
-            applyElixirOfGreaterAgility(gearStats);
+            applyElixirOfGreaterAgility(stats);
             break;
          case Consumable.WinterfallFirewater:
-            applyWinterfallFirewater(gearStats);
+            applyWinterfallFirewater(stats);
             break;
          case Consumable.JujuMight:
-            applyJujuMight(gearStats);
+            applyJujuMight(stats);
             break;
          case Consumable.JujuPower:
-            applyJujuPower(gearStats);
+            applyJujuPower(stats);
             break;
          case Consumable.FlaskOfTheTitans:
-            applyFlaskOfTheTitans(gearStats);
+            applyFlaskOfTheTitans(stats);
             break;
          case Consumable.ElixirOfFortitude:
-            applyElixirOfFortitude(gearStats);
+            applyElixirOfFortitude(stats);
             break;
          case Consumable.SmokedDesertDumplings:
-            applySmokedDesertDumplings(gearStats);
+            applySmokedDesertDumplings(stats);
             break;
          case Consumable.GrilledSquid:
-            applyGrilledSquid(gearStats);
+            applyGrilledSquid(stats);
             break;
          case Consumable.BlessedSunfruitJuice:
-            applyBlessedSunfruitJuice(gearStats);
+            applyBlessedSunfruitJuice(stats);
             break;
          case Consumable.NightfinSoup:
-            applyNightfinSoup(gearStats);
+            applyNightfinSoup(stats);
             break;
          case Consumable.TenderWolfSteak:
-            applyTenderWolfSteak(gearStats);
+            applyTenderWolfSteak(stats);
             break;
          case Consumable.FlaskOfSupremePower:
-            applyFlaskOfSupremePower(gearStats);
+            applyFlaskOfSupremePower(stats);
             break;
          case Consumable.GreaterArcaneElixir:
-            applyGreaterArcaneElixir(gearStats);
+            applyGreaterArcaneElixir(stats);
             break;
          case Consumable.ElixirOfShadowPower:
-            applyElixirOfShadowPower(gearStats);
+            applyElixirOfShadowPower(stats);
             break;
          case Consumable.CerebralCortexCompound:
-            applyCerebralCortexCompound(gearStats);
+            applyCerebralCortexCompound(stats);
             break;
          case Consumable.RunnTumTuberSurprise:
-            applyRunnTumTuberSurprise(gearStats);
+            applyRunnTumTuberSurprise(stats);
             break;
       }
    }
@@ -99,55 +99,55 @@ export function applyConsumables(consumables: Consumable[], gearStats: GearBuffs
  * Elixir of the Mongoose
  * +25 Agility, +2% Crit
  */
-function applyElixirOfTheMongoose(gearStats: GearBuffsStats): void {
-   gearStats.agility += 25;
-   gearStats.critChance += 2;
+function applyElixirOfTheMongoose(stats: Stats): void {
+   stats.agility += 25;
+   stats.critChance += 2;
 }
 
 /**
  * Elixir of Giants
  * +25 Strength
  */
-function applyElixirOfGiants(gearStats: GearBuffsStats): void {
-   gearStats.strength += 25;
+function applyElixirOfGiants(stats: Stats): void {
+   stats.strength += 25;
 }
 
 /**
  * Elixir of Greater Agility
  * +25 Agility
  */
-function applyElixirOfGreaterAgility(gearStats: GearBuffsStats): void {
-   gearStats.agility += 25;
+function applyElixirOfGreaterAgility(stats: Stats): void {
+   stats.agility += 25;
 }
 
 /**
  * Winterfall Firewater
  * +35 Attack Power
  */
-function applyWinterfallFirewater(gearStats: GearBuffsStats): void {
-   if (gearStats.attackPower !== undefined)
-      gearStats.attackPower += 35;
+function applyWinterfallFirewater(stats: Stats): void {
+   if (stats.attackPower !== undefined)
+      stats.attackPower += 35;
    else
-      gearStats.attackPower = 35;
+      stats.attackPower = 35;
 }
 
 /**
  * Juju Might
  * +40 Attack Power
  */
-function applyJujuMight(gearStats: GearBuffsStats): void {
-   if (gearStats.attackPower !== undefined)
-      gearStats.attackPower += 40;
+function applyJujuMight(stats: Stats): void {
+   if (stats.attackPower !== undefined)
+      stats.attackPower += 40;
    else
-      gearStats.attackPower = 40;
+      stats.attackPower = 40;
 }
 
 /**
  * Juju Power
  * +30 Strength
  */
-function applyJujuPower(gearStats: GearBuffsStats): void {
-   gearStats.strength += 30;
+function applyJujuPower(stats: Stats): void {
+   stats.strength += 30;
 }
 
 // Guardian Elixirs
@@ -156,22 +156,22 @@ function applyJujuPower(gearStats: GearBuffsStats): void {
  * Flask of the Titans
  * +400 HP
  */
-function applyFlaskOfTheTitans(gearStats: GearBuffsStats): void {
-   if (gearStats.health !== undefined)
-      gearStats.health += 400;
+function applyFlaskOfTheTitans(stats: Stats): void {
+   if (stats.health !== undefined)
+      stats.health += 400;
    else
-      gearStats.health = 400;
+      stats.health = 400;
 }
 
 /**
  * Elixir of Fortitude
  * +120 HP
  */
-function applyElixirOfFortitude(gearStats: GearBuffsStats): void {
-   if (gearStats.health !== undefined)
-      gearStats.health += 120;
+function applyElixirOfFortitude(stats: Stats): void {
+   if (stats.health !== undefined)
+      stats.health += 120;
    else
-      gearStats.health = 120;
+      stats.health = 120;
 }
 
 // Food Buffs
@@ -180,46 +180,46 @@ function applyElixirOfFortitude(gearStats: GearBuffsStats): void {
  * Smoked Desert Dumplings
  * +20 Strength
  */
-function applySmokedDesertDumplings(gearStats: GearBuffsStats): void {
-   gearStats.strength += 20;
+function applySmokedDesertDumplings(stats: Stats): void {
+   stats.strength += 20;
 }
 
 /**
  * Grilled Squid
  * +10 Agility
  */
-function applyGrilledSquid(gearStats: GearBuffsStats): void {
-   gearStats.agility += 10;
+function applyGrilledSquid(stats: Stats): void {
+   stats.agility += 10;
 }
 
 /**
  * Blessed Sunfruit Juice
  * +10 Strength
  */
-function applyBlessedSunfruitJuice(gearStats: GearBuffsStats): void {
-   gearStats.strength += 10;
+function applyBlessedSunfruitJuice(stats: Stats): void {
+   stats.strength += 10;
 }
 
 /**
  * Nightfin Soup
  * +8 mp5
  */
-function applyNightfinSoup(gearStats: GearBuffsStats): void {
-   if (gearStats.mp5 !== undefined)
-      gearStats.mp5 += 8;
+function applyNightfinSoup(stats: Stats): void {
+   if (stats.mp5 !== undefined)
+      stats.mp5 += 8;
    else
-      gearStats.mp5 = 8;
+      stats.mp5 = 8;
 }
 
 /**
  * Tender Wolf Steak
  * +12 Spirit
  */
-function applyTenderWolfSteak(gearStats: GearBuffsStats): void {
-   if (gearStats.spirit !== undefined)
-      gearStats.spirit += 12;
+function applyTenderWolfSteak(stats: Stats): void {
+   if (stats.spirit !== undefined)
+      stats.spirit += 12;
    else
-      gearStats.spirit = 12;
+      stats.spirit = 12;
 }
 
 // Mage/Caster Consumables
@@ -228,53 +228,53 @@ function applyTenderWolfSteak(gearStats: GearBuffsStats): void {
  * Flask of Supreme Power
  * +150 Spell Damage
  */
-function applyFlaskOfSupremePower(gearStats: GearBuffsStats): void {
-   if (gearStats.spellPower !== undefined)
-      gearStats.spellPower += 150;
+function applyFlaskOfSupremePower(stats: Stats): void {
+   if (stats.spellPower !== undefined)
+      stats.spellPower += 150;
    else
-      gearStats.spellPower = 150;
+      stats.spellPower = 150;
 }
 
 /**
  * Greater Arcane Elixir
  * +35 Spell Damage
  */
-function applyGreaterArcaneElixir(gearStats: GearBuffsStats): void {
-   if (gearStats.spellPower !== undefined)
-      gearStats.spellPower += 35;
+function applyGreaterArcaneElixir(stats: Stats): void {
+   if (stats.spellPower !== undefined)
+      stats.spellPower += 35;
    else
-      gearStats.spellPower = 35;
+      stats.spellPower = 35;
 }
 
 /**
  * Elixir of Shadow Power
  * +40 Shadow Spell Damage (simplified to general spell damage)
  */
-function applyElixirOfShadowPower(gearStats: GearBuffsStats): void {
-   if (gearStats.spellPower !== undefined)
-      gearStats.spellPower += 40;
+function applyElixirOfShadowPower(stats: Stats): void {
+   if (stats.spellPower !== undefined)
+      stats.spellPower += 40;
    else
-      gearStats.spellPower = 40;
+      stats.spellPower = 40;
 }
 
 /**
  * Cerebral Cortex Compound
  * +25 Intellect
  */
-function applyCerebralCortexCompound(gearStats: GearBuffsStats): void {
-   if (gearStats.intellect !== undefined)
-      gearStats.intellect += 25;
+function applyCerebralCortexCompound(stats: Stats): void {
+   if (stats.intellect !== undefined)
+      stats.intellect += 25;
    else
-      gearStats.intellect = 25;
+      stats.intellect = 25;
 }
 
 /**
  * Runn Tum Tuber Surprise
  * +10 Intellect
  */
-function applyRunnTumTuberSurprise(gearStats: GearBuffsStats): void {
-   if (gearStats.intellect !== undefined)
-      gearStats.intellect += 10;
+function applyRunnTumTuberSurprise(stats: Stats): void {
+   if (stats.intellect !== undefined)
+      stats.intellect += 10;
    else
-      gearStats.intellect = 10;
+      stats.intellect = 10;
 }

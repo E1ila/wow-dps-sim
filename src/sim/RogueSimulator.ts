@@ -296,12 +296,12 @@ export class RogueSimulator extends MeleeSimulator {
 
    override onMainHandHit(result: AttackResult): void {
       super.onMainHandHit(result);
-      this.trySwordSpecProc(result, this.spec.stats.mainHandWeapon.type, `EXTRA(main) ${c.yellow}⚔${c.reset}`);
+      this.trySwordSpecProc(result, this.spec.extraStats.mh.type, `EXTRA(main) ${c.yellow}⚔${c.reset}`);
    }
 
    override onOffHandHit(result: AttackResult): void {
       super.onOffHandHit(result);
-      this.trySwordSpecProc(result, this.spec.stats.offHandWeapon?.type, `EXTRA(off) ${c.yellow}⚔${c.reset}`);
+      this.trySwordSpecProc(result, this.spec.extraStats.oh?.type, `EXTRA(off) ${c.yellow}⚔${c.reset}`);
    }
 
    protected checkCondition(cond: string): boolean {
@@ -402,7 +402,7 @@ export class RogueSimulator extends MeleeSimulator {
                this.castSliceAndDice();
          } else if (this.talents.hemorrhage) {
             this.castHemorrhage();
-         } else if (this.spec.stats.mainHandWeapon.type === WeaponType.Dagger) {
+         } else if (this.spec.extraStats.mh.type === WeaponType.Dagger) {
             this.castBackstab();
          } else {
             this.castSinisterStrike();
@@ -470,7 +470,7 @@ export class RogueSimulator extends MeleeSimulator {
       let baseSkill = super.weaponSkill;
 
       if ((this.talents?.weaponExpertise || 0) > 0) {
-         const mainHandType = this.spec.stats.mainHandWeapon.type;
+         const mainHandType = this.spec.extraStats.mh.type;
          if (mainHandType === WeaponType.Sword ||
             mainHandType === WeaponType.Fist ||
             mainHandType === WeaponType.Dagger) {

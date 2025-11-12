@@ -1,24 +1,24 @@
 import {CharacterClass, WeaponEnchant, WeaponType} from '../src/types';
 import {RogueSimulator} from '../src/sim/RogueSimulator';
-import {GearBuffsStats, SimulationConfig, SimulationSpec} from "../src/SimulationSpec";
+import {SimulationConfig, SimulationSpec, Stats} from "../src/SimulationSpec";
 import {RogueTalents} from "../src/talents";
 
-const baseStats: GearBuffsStats = {
+const baseStats: Stats = {
   critChance: 30,
   hitChance: 9,
   agility: 300,
   strength: 100,
   weaponSkills: new Map(),
-  mainHandWeapon: {
-    minDamage: 100,
-    maxDamage: 100,
+  mh: {
+    min: 100,
+    max: 100,
     speed: 1.8,
     type: WeaponType.Dagger,
     enchant: WeaponEnchant.Crusader
   },
-  offHandWeapon: {
-    minDamage: 80,
-    maxDamage: 80,
+  oh: {
+    min: 80,
+    max: 80,
     speed: 1.6,
     type: WeaponType.Dagger,
     enchant: WeaponEnchant.Crusader
@@ -59,14 +59,14 @@ const baseTalents: RogueTalents = {
   vigor: false,
 };
 
-function createTestSpec(stats: GearBuffsStats, config: SimulationConfig, talents: RogueTalents): SimulationSpec {
+function createTestSpec(stats: Stats, config: SimulationConfig, talents: RogueTalents): SimulationSpec {
   return {
     name: 'test',
     description: 'test spec',
     class: CharacterClass.Rogue,
     playerLevel: 60,
     gear: [],
-    stats: stats,
+    extraStats: stats,
     simulationConfig: config,
     talents,
     fightLength: config.fightLength ?? 60,
@@ -107,7 +107,7 @@ describe('Procs', () => {
       const statsOnlyMHCrusader = {
         ...baseStats,
         offHandWeapon: {
-          ...baseStats.offHandWeapon!,
+          ...baseStats.oh!,
           enchant: WeaponEnchant.Dmg5
         }
       };
@@ -137,7 +137,7 @@ describe('Procs', () => {
       }
 
       // Proc chance should be weapon_speed / 60 = 1.8 / 60 = 0.03 (3%)
-      const expectedProcRate = statsOnlyMHCrusader.mainHandWeapon.speed / 60;
+      const expectedProcRate = statsOnlyMHCrusader.mh.speed / 60;
       const actualProcRate = totalProcs / totalMHHits;
 
       // Allow 35% variance due to RNG (0.03 * 0.65 = 0.0195, 0.03 * 1.35 = 0.0405)
@@ -181,11 +181,11 @@ describe('Procs', () => {
       const statsNoCrusader = {
         ...baseStats,
         mainHandWeapon: {
-          ...baseStats.mainHandWeapon,
+          ...baseStats.mh,
           enchant: WeaponEnchant.Dmg5
         },
         offHandWeapon: {
-          ...baseStats.offHandWeapon!,
+          ...baseStats.oh!,
           enchant: WeaponEnchant.Dmg5
         }
       };

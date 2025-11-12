@@ -1,5 +1,5 @@
 import {Database} from './Database';
-import {EquippedItem, GearBuffsStats} from './SimulationSpec';
+import {EquippedItem, Stats} from './SimulationSpec';
 import {WeaponEnchant, WeaponType} from './types';
 import {Enchant, Item} from "./Database.types";
 
@@ -64,7 +64,7 @@ export class GearParser {
      * @param existingGearStats Optional existing gear stats to preserve
      * @returns Calculated GearStats object
      */
-    parse(gear: EquippedItem[], existingGearStats?: Partial<GearBuffsStats>): GearBuffsStats {
+    parse(gear: EquippedItem[], existingGearStats?: Partial<Stats>): Stats {
         if (!gear || gear.length === 0) {
             // Return minimal stats if no gear provided
             return {
@@ -73,9 +73,9 @@ export class GearParser {
                 critChance: 0,
                 hitChance: 0,
                 weaponSkills: new Map<WeaponType, number>(),
-                mainHandWeapon: existingGearStats?.mainHandWeapon || {
-                    minDamage: 1,
-                    maxDamage: 2,
+                mh: existingGearStats?.mh || {
+                    min: 1,
+                    max: 2,
                     speed: 2.0,
                     type: WeaponType.Sword,
                     enchant: WeaponEnchant.None,
@@ -84,7 +84,7 @@ export class GearParser {
         }
 
         // Initialize stats
-        const stats: Partial<GearBuffsStats> = {
+        const stats: Partial<Stats> = {
             strength: 0,
             agility: 0,
             stamina: 0,
@@ -161,7 +161,7 @@ export class GearParser {
         // Update with weapons
         if (!mainHandWeapon) {
             // If no weapon was found in gear, keep existing or use defaults
-            mainHandWeapon = existingGearStats?.mainHandWeapon || {
+            mainHandWeapon = existingGearStats?.mh || {
                 minDamage: 1,
                 maxDamage: 2,
                 speed: 2.0,
@@ -173,15 +173,15 @@ export class GearParser {
         return {
             ...stats,
             weaponSkills,
-            mainHandWeapon,
-            offHandWeapon,
-        } as GearBuffsStats;
+            mh: mainHandWeapon,
+            oh: offHandWeapon,
+        } as Stats;
     }
 
     private addItemStats(
         itemStats: number[] | undefined,
         statIds: Record<string, number>,
-        stats: Partial<GearBuffsStats>,
+        stats: Partial<Stats>,
         item?: Item,
         enchant?: Enchant,
     ): void {

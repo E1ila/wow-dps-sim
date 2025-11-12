@@ -1,17 +1,17 @@
 import {Ability, CharacterClass} from '../src/types';
 import {MageSimulator} from '../src/sim/MageSimulator';
-import {GearBuffsStats, SimulationConfig, SimulationSpec} from "../src/SimulationSpec";
+import {SimulationConfig, SimulationSpec, Stats} from "../src/SimulationSpec";
 import {MageTalents} from "../src/talents";
 
-const baseMageStats: GearBuffsStats = {
+const baseMageStats: Stats = {
    critChance: 0,
    hitChance: 0,
    agility: 0,
    strength: 0,
    weaponSkills: new Map(),
-   mainHandWeapon: {
-      minDamage: 1,
-      maxDamage: 1,
+   mh: {
+      min: 1,
+      max: 1,
       speed: 1.0,
       type: 0 as any,
       enchant: 0 as any,
@@ -59,14 +59,14 @@ const baseMageTalents: MageTalents = {
    wintersChill: 0,
 };
 
-function createTestSpec(stats: GearBuffsStats, config: SimulationConfig, talents: MageTalents): SimulationSpec {
+function createTestSpec(stats: Stats, config: SimulationConfig, talents: MageTalents): SimulationSpec {
    return {
       name: 'test',
       description: 'test spec',
       class: CharacterClass.Mage,
       playerLevel: 60,
       gear: [],
-      stats: stats,
+      extraStats: stats,
       simulationConfig: config,
       talents,
       fightLength: config.fightLength ?? 60,

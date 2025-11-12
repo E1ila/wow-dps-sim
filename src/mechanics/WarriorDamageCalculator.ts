@@ -25,7 +25,7 @@ export class WarriorDamageCalculator extends MeleeDamageCalculator {
       }
 
       // Two-Handed Weapon Specialization: +1% damage per rank (only with 2H)
-      if (this.talents.twoHandedSpecialization > 0 && !this.spec.stats.offHandWeapon) {
+      if (this.talents.twoHandedSpecialization > 0 && !this.spec.extraStats.oh) {
          multiplier *= (1 + this.talents.twoHandedSpecialization * 0.01);
       }
 
@@ -44,7 +44,7 @@ export class WarriorDamageCalculator extends MeleeDamageCalculator {
    }
 
    calculateSpecialAttackDamage(baseDamage: number, isOffhand: boolean = false): AttackResult {
-      const weapon = isOffhand ? this.spec.stats.offHandWeapon : this.spec.stats.mainHandWeapon;
+      const weapon = isOffhand ? this.spec.extraStats.oh : this.spec.extraStats.mh;
       if (!weapon) {
          return {
             type: 'NoWeapon' as any,
@@ -62,7 +62,7 @@ export class WarriorDamageCalculator extends MeleeDamageCalculator {
       }
 
       // Two-Handed Weapon Specialization: +1% damage per rank (only with 2H)
-      if (this.talents.twoHandedSpecialization > 0 && !this.spec.stats.offHandWeapon) {
+      if (this.talents.twoHandedSpecialization > 0 && !this.spec.extraStats.oh) {
          multipliers.push(1 + this.talents.twoHandedSpecialization * 0.01);
       }
 

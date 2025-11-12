@@ -44,44 +44,44 @@ export class SimulationRunner {
     }
 
     private applyGearStats(): void {
-        this.spec.stats = this.gearParser.parse(this.spec.gear, this.spec.stats);
+        this.spec.extraStats = this.gearParser.parse(this.spec.gear, this.spec.extraStats);
         if (this.spec.worldBuffs)
-            applyWorldBuffs(this.spec.worldBuffs, this.spec.stats)
+            applyWorldBuffs(this.spec.worldBuffs, this.spec.extraStats)
         if (this.spec.consumables)
-            applyConsumables(this.spec.consumables, this.spec.stats)
+            applyConsumables(this.spec.consumables, this.spec.extraStats)
     }
 
     private applyCliOverrides(): void {
         if (this.options.critChance !== undefined) {
-            this.spec.stats.critChance = this.options.critChance;
+            this.spec.extraStats.critChance = this.options.critChance;
         }
         if (this.options.hitChance !== undefined) {
-            this.spec.stats.hitChance = this.options.hitChance;
+            this.spec.extraStats.hitChance = this.options.hitChance;
         }
         if (this.options.weaponSkill !== undefined) {
             // For backward compatibility, apply weapon skill to main hand weapon type
-            const mainHandType = this.spec.stats.mainHandWeapon.type;
-            this.spec.stats.weaponSkills.set(mainHandType, this.options.weaponSkill);
+            const mainHandType = this.spec.extraStats.mh.type;
+            this.spec.extraStats.weaponSkills.set(mainHandType, this.options.weaponSkill);
         }
         if (this.options.mainHand) {
-            this.spec.stats.mainHandWeapon = {
-                ...this.spec.stats.mainHandWeapon,
-                minDamage: this.options.mainHand.minDamage,
-                maxDamage: this.options.mainHand.maxDamage,
+            this.spec.extraStats.mh = {
+                ...this.spec.extraStats.mh,
+                min: this.options.mainHand.minDamage,
+                max: this.options.mainHand.maxDamage,
                 speed: this.options.mainHand.speed,
                 type: this.options.mainHand.type,
             };
         }
-        if (this.options.offHand && this.spec.stats.offHandWeapon) {
-            this.spec.stats.offHandWeapon = {
-                ...this.spec.stats.offHandWeapon,
-                minDamage: this.options.offHand.minDamage,
-                maxDamage: this.options.offHand.maxDamage,
+        if (this.options.offHand && this.spec.extraStats.oh) {
+            this.spec.extraStats.oh = {
+                ...this.spec.extraStats.oh,
+                min: this.options.offHand.minDamage,
+                max: this.options.offHand.maxDamage,
                 speed: this.options.offHand.speed,
                 type: this.options.offHand.type,
             };
         } else if (this.options.offHand === null) {
-            this.spec.stats.offHandWeapon = undefined;
+            this.spec.extraStats.oh = undefined;
         }
 
         if (this.options.targetLevel !== undefined) {
@@ -179,23 +179,23 @@ export class SimulationRunner {
             if (name.startsWith('mh.')) {
                 const prop = name.substring('mh.'.length);
                 if (prop === 'type') {
-                    this.spec.stats.mainHandWeapon.type = parseInt(value) as WeaponType;
+                    this.spec.extraStats.mh.type = parseInt(value) as WeaponType;
                 } else {
-                    (this.spec.stats.mainHandWeapon as any)[prop] = parseFloat(value);
+                    (this.spec.extraStats.mh as any)[prop] = parseFloat(value);
                 }
             } else if (name.startsWith('oh.')) {
-                if (!this.spec.stats.offHandWeapon) {
+                if (!this.spec.extraStats.oh) {
                     console.warn(`Warning: No off-hand weapon in spec, cannot override "${name}"`);
                     continue;
                 }
                 const prop = name.substring('oh.'.length);
                 if (prop === 'type') {
-                    this.spec.stats.offHandWeapon.type = parseInt(value) as WeaponType;
+                    this.spec.extraStats.oh.type = parseInt(value) as WeaponType;
                 } else {
-                    (this.spec.stats.offHandWeapon as any)[prop] = parseFloat(value);
+                    (this.spec.extraStats.oh as any)[prop] = parseFloat(value);
                 }
-            } else if (name in this.spec.stats) {
-                (this.spec.stats as any)[name] = parseFloat(value);
+            } else if (name in this.spec.extraStats) {
+                (this.spec.extraStats as any)[name] = parseFloat(value);
             } else {
                 console.warn(`Warning: Gear stat "${name}" not found in spec file, ignoring.`);
             }
@@ -239,7 +239,7 @@ export class SimulationRunner {
         
         // Print gear stats nicely formatted
         console.log(`${c.cyan}Gear Stats:${c.reset}`);
-        const gs = this.spec.stats;
+        const gs = this.spec.extraStats;
         
         // Primary stats
         if (simulator.strength > 0) console.log(`  Strength: ${c.green}${simulator.strength}${c.reset}`);
@@ -264,9 +264,9 @@ export class SimulationRunner {
         if (gs.mana !== undefined && gs.mana > 0) console.log(`  Mana: ${c.green}${gs.mana}${c.reset}`);
         
         // Weapons
-        console.log(`  Main Hand: ${c.yellow}${gs.mainHandWeapon.minDamage}-${gs.mainHandWeapon.maxDamage}${c.reset} dmg, ${c.yellow}${gs.mainHandWeapon.speed}${c.reset} speed, ${c.yellow}${gs.mainHandWeapon.type}${c.reset}${gs.mainHandWeapon.enchant !== 'None' ? ` (${c.magenta}${gs.mainHandWeapon.enchant}${c.reset})` : ''}`);
-        if (gs.offHandWeapon) {
-            console.log(`  Off Hand: ${c.yellow}${gs.offHandWeapon.minDamage}-${gs.offHandWeapon.maxDamage}${c.reset} dmg, ${c.yellow}${gs.offHandWeapon.speed}${c.reset} speed, ${c.yellow}${gs.offHandWeapon.type}${c.reset}${gs.offHandWeapon.enchant !== 'None' ? ` (${c.magenta}${gs.offHandWeapon.enchant}${c.reset})` : ''}`);
+        console.log(`  Main Hand: ${c.yellow}${gs.mh.min}-${gs.mh.max}${c.reset} dmg, ${c.yellow}${gs.mh.speed}${c.reset} speed, ${c.yellow}${gs.mh.type}${c.reset}${gs.mh.enchant !== 'None' ? ` (${c.magenta}${gs.mh.enchant}${c.reset})` : ''}`);
+        if (gs.oh) {
+            console.log(`  Off Hand: ${c.yellow}${gs.oh.min}-${gs.oh.max}${c.reset} dmg, ${c.yellow}${gs.oh.speed}${c.reset} speed, ${c.yellow}${gs.oh.type}${c.reset}${gs.oh.enchant !== 'None' ? ` (${c.magenta}${gs.oh.enchant}${c.reset})` : ''}`);
         }
         
         console.log(`${c.cyan}Simulation params: ${c.reset}fightLength=${this.spec.fightLength}, targetLevel=${this.spec.targetLevel}, targetArmor=${this.spec.targetArmor}, iterations=${this.spec.iterations}, postCycleResourceGeneration=${this.spec.postCycleResourceGeneration}`);

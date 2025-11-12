@@ -46,10 +46,10 @@ export class ShamanHealingCalculator extends DamageCalculator {
    }
 
    get healingPower(): number {
-      let power = this.spec.stats.healingPower || 0;
+      let power = this.spec.extraStats.healingPower || 0;
 
       // Add spell power (healing power includes spell power)
-      power += this.spec.stats.spellPower || 0;
+      power += this.spec.extraStats.spellPower || 0;
 
       // Mental Quickness: adds % of attack power as healing power
       if (this.talents.mentalQuickness > 0) {
@@ -61,10 +61,10 @@ export class ShamanHealingCalculator extends DamageCalculator {
    }
 
    get healingCrit(): number {
-      let crit = this.spec.stats.spellCrit || 0;
+      let crit = this.spec.extraStats.spellCrit || 0;
 
       // Add intellect contribution (1% crit per 60 int at level 60)
-      const intellect = this.spec.stats.intellect || 0;
+      const intellect = this.spec.extraStats.intellect || 0;
       crit += intellect / 60;
 
       // Tidal Mastery

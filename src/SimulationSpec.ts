@@ -12,7 +12,7 @@ export interface SimulationSpec {
    rotation?: string[];
    setup?: SimulationSetup;
    talents: RogueTalents | WarriorTalents | MageTalents | ShamanTalents;
-   stats: GearBuffsStats; // from gear+buffs+consumes - not inc. base stats (from level) nor enchants, etc.
+   extraStats: Stats; // from gear+buffs+consumes - not inc. base stats (from level) nor enchants, etc.
    gear: EquippedItem[];
    worldBuffs?: WorldBuff[];
    consumables?: Consumable[];
@@ -67,7 +67,7 @@ export interface EquippedItem {
    spellId?: number;
 }
 
-export interface GearBuffsStats {
+export interface Stats {
    attackPower?: number;
    critChance: number;
    hitChance: number;
@@ -75,8 +75,8 @@ export interface GearBuffsStats {
    strength: number;
    weaponSkills: Map<WeaponType, number>;
 
-   mainHandWeapon: Weapon;
-   offHandWeapon?: Weapon;
+   mh: Weapon;
+   oh?: Weapon;
 
    // Mage stats
    spellPower?: number;

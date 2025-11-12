@@ -62,7 +62,7 @@ export class MageDamageCalculator extends DamageCalculator {
    }
 
    get spellPower(): number {
-      let power = this.spec.stats.spellPower || 0;
+      let power = this.spec.extraStats.spellPower || 0;
 
       // Add Arcane Power buff (+30% spell damage)
       if (this.buffsProvider.hasBuff('ArcanePower')) {
@@ -73,10 +73,10 @@ export class MageDamageCalculator extends DamageCalculator {
    }
 
    get spellCrit(): number {
-      let crit = this.spec.stats.spellCrit || 0;
+      let crit = this.spec.extraStats.spellCrit || 0;
 
       // Add intellect contribution (1% crit per 60 int at level 60)
-      const intellect = this.spec.stats.intellect || 0;
+      const intellect = this.spec.extraStats.intellect || 0;
       crit += intellect / 60;
 
       // Add Arcane Instability
@@ -95,7 +95,7 @@ export class MageDamageCalculator extends DamageCalculator {
    }
 
    get spellHit(): number {
-      let hit = this.spec.stats.spellHit || 0;
+      let hit = this.spec.extraStats.spellHit || 0;
 
       // Add Elemental Precision
       hit += this.talents.elementalPrecision * 2;
@@ -206,7 +206,7 @@ export class MageDamageCalculator extends DamageCalculator {
    }
 
    private getSpellHit(school: SpellSchool): number {
-      let hit = this.spec.stats.spellHit || 0;
+      let hit = this.spec.extraStats.spellHit || 0;
 
       // Elemental Precision (Fire/Frost)
       if (school === SpellSchool.Fire || school === SpellSchool.Frost) {
@@ -222,10 +222,10 @@ export class MageDamageCalculator extends DamageCalculator {
    }
 
    private getSpellCrit(school: SpellSchool): number {
-      let crit = this.spec.stats.spellCrit || 0;
+      let crit = this.spec.extraStats.spellCrit || 0;
 
       // Add intellect contribution (1% crit per 60 int at level 60)
-      const intellect = this.spec.stats.intellect || 0;
+      const intellect = this.spec.extraStats.intellect || 0;
       crit += intellect / 60;
 
       // Arcane Instability (all spells)

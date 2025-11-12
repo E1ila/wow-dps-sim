@@ -59,8 +59,8 @@ export enum TargetType {
 }
 
 export interface Weapon {
-   minDamage: number;
-   maxDamage: number;
+   min: number;
+   max: number;
    speed: number;
    type: WeaponType;
    enchant: WeaponEnchant;

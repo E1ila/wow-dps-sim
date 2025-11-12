@@ -1,6 +1,6 @@
 import {GearParser} from '../src/GearParser';
 import {Database} from '../src/Database';
-import {EquippedItem, GearBuffsStats} from '../src/SimulationSpec';
+import {EquippedItem, Stats} from '../src/SimulationSpec';
 import {WeaponEnchant, WeaponType} from '../src/types';
 import path from 'path';
 
@@ -24,16 +24,16 @@ describe('GearParser', () => {
             expect(result.hitChance).toBe(0);
             expect(result.weaponSkills).toBeDefined();
             expect(result.weaponSkills.size).toBe(0);
-            expect(result.mainHandWeapon).toBeDefined();
-            expect(result.mainHandWeapon.minDamage).toBe(1);
-            expect(result.mainHandWeapon.maxDamage).toBe(2);
+            expect(result.mh).toBeDefined();
+            expect(result.mh.min).toBe(1);
+            expect(result.mh.max).toBe(2);
         });
 
         it('should preserve existing mainhand weapon if no weapon in gear', () => {
-            const existingStats: Partial<GearBuffsStats> = {
-                mainHandWeapon: {
-                    minDamage: 100,
-                    maxDamage: 200,
+            const existingStats: Partial<Stats> = {
+                mh: {
+                    min: 100,
+                    max: 200,
                     speed: 2.5,
                     type: WeaponType.Dagger,
                     enchant: WeaponEnchant.Crusader,
@@ -42,11 +42,11 @@ describe('GearParser', () => {
 
             const result = gearParser.parse([], existingStats);
 
-            expect(result.mainHandWeapon.minDamage).toBe(100);
-            expect(result.mainHandWeapon.maxDamage).toBe(200);
-            expect(result.mainHandWeapon.speed).toBe(2.5);
-            expect(result.mainHandWeapon.type).toBe(WeaponType.Dagger);
-            expect(result.mainHandWeapon.enchant).toBe(WeaponEnchant.Crusader);
+            expect(result.mh.min).toBe(100);
+            expect(result.mh.max).toBe(200);
+            expect(result.mh.speed).toBe(2.5);
+            expect(result.mh.type).toBe(WeaponType.Dagger);
+            expect(result.mh.enchant).toBe(WeaponEnchant.Crusader);
         });
 
         it('should parse full Naxxramas Rogue gear set', () => {
@@ -64,17 +64,17 @@ describe('GearParser', () => {
             expect(result.weaponSkills).toBeDefined();
 
             // Verify weapons were parsed
-            expect(result.mainHandWeapon).toBeDefined();
-            expect(result.mainHandWeapon.minDamage).toBeGreaterThan(0);
-            expect(result.mainHandWeapon.maxDamage).toBeGreaterThan(0);
-            expect(result.mainHandWeapon.speed).toBeGreaterThan(0);
+            expect(result.mh).toBeDefined();
+            expect(result.mh.min).toBeGreaterThan(0);
+            expect(result.mh.max).toBeGreaterThan(0);
+            expect(result.mh.speed).toBeGreaterThan(0);
 
             // Check for Crusader enchant on main hand (spellId 1900)
-            expect(result.mainHandWeapon.enchant).toBe(WeaponEnchant.Crusader);
+            expect(result.mh.enchant).toBe(WeaponEnchant.Crusader);
 
             // Verify offhand weapon exists
-            expect(result.offHandWeapon).toBeDefined();
-            expect(result.offHandWeapon!.enchant).toBe(WeaponEnchant.Crusader);
+            expect(result.oh).toBeDefined();
+            expect(result.oh!.enchant).toBe(WeaponEnchant.Crusader);
         });
 
         it('should handle gear with no enchants', () => {
@@ -119,10 +119,10 @@ describe('GearParser', () => {
 
             const result = gearParser.parse(gear);
 
-            expect(result.mainHandWeapon).toBeDefined();
-            expect(result.offHandWeapon).toBeDefined();
-            expect(result.mainHandWeapon.enchant).toBe(WeaponEnchant.Crusader);
-            expect(result.offHandWeapon!.enchant).toBe(WeaponEnchant.Crusader);
+            expect(result.mh).toBeDefined();
+            expect(result.oh).toBeDefined();
+            expect(result.mh.enchant).toBe(WeaponEnchant.Crusader);
+            expect(result.oh!.enchant).toBe(WeaponEnchant.Crusader);
         });
 
         it('should handle single weapon (no offhand)', () => {
@@ -132,8 +132,8 @@ describe('GearParser', () => {
 
             const result = gearParser.parse(gear);
 
-            expect(result.mainHandWeapon).toBeDefined();
-            expect(result.offHandWeapon).toBeFalsy(); // Can be undefined or null
+            expect(result.mh).toBeDefined();
+            expect(result.oh).toBeFalsy(); // Can be undefined or null
         });
 
         it('should handle missing items gracefully', () => {
@@ -197,7 +197,7 @@ describe('GearParser', () => {
                 ];
 
                 const result = gearParser.parse(gear);
-                expect(result.mainHandWeapon.enchant).toBe(expected);
+                expect(result.mh.enchant).toBe(expected);
             });
         });
 
@@ -255,7 +255,7 @@ describe('GearParser', () => {
             ];
 
             const swordResult = gearParser.parse(swordGear);
-            expect(swordResult.mainHandWeapon.type).toBe(WeaponType.Sword);
+            expect(swordResult.mh.type).toBe(WeaponType.Sword);
         });
 
         it('should handle complete gear set stats accumulation', () => {
@@ -273,10 +273,10 @@ describe('GearParser', () => {
             expect(result.weaponSkills).toBeDefined();
             
             // Verify weapons
-            expect(result.mainHandWeapon.minDamage).toBeGreaterThan(50);
-            expect(result.mainHandWeapon.maxDamage).toBeGreaterThan(100);
-            expect(result.offHandWeapon).toBeDefined();
-            expect(result.offHandWeapon!.minDamage).toBeGreaterThan(0);
+            expect(result.mh.min).toBeGreaterThan(50);
+            expect(result.mh.max).toBeGreaterThan(100);
+            expect(result.oh).toBeDefined();
+            expect(result.oh!.min).toBeGreaterThan(0);
         });
 
         it('should not add optional stats if they are zero', () => {

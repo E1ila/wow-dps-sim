@@ -46,8 +46,8 @@ export abstract class MeleeDamageCalculator extends DamageCalculator {
    }
 
    protected getWeaponDamage(weapon: Weapon): number {
-      let minDamage = weapon.minDamage;
-      let maxDamage = weapon.maxDamage;
+      let minDamage = weapon.min;
+      let maxDamage = weapon.max;
       if (weapon.enchant === WeaponEnchant.Dmg5) {
          minDamage += 5;
          maxDamage += 5;
@@ -136,7 +136,7 @@ export abstract class MeleeDamageCalculator extends DamageCalculator {
    }
 
    calculateAutoAttackDamage(isOffhand: boolean = false): AttackResult {
-      const weapon = isOffhand ? this.spec.stats.offHandWeapon : this.spec.stats.mainHandWeapon;
+      const weapon = isOffhand ? this.spec.extraStats.oh : this.spec.extraStats.mh;
       if (!weapon) {
          return {
             type: AttackType.NoWeapon,
