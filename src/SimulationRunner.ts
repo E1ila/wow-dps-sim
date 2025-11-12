@@ -10,7 +10,8 @@ import {Database} from "./Database";
 import {SimulationOptions, SimulationSetup, SimulationSpec} from "./SimulationSpec";
 import {RogueTalents, ShamanTalents, WarriorTalents} from "./talents";
 import {GearParser} from "./GearParser";
-import {applyWorldBuffs} from "./WorldBuffs";
+import {applyWorldBuffs} from "./worldbuffs";
+import {applyConsumables} from "./consumables";
 
 export class SimulationRunner {
     private readonly options: SimulationOptions;
@@ -46,6 +47,8 @@ export class SimulationRunner {
         this.spec.gearStats = this.gearParser.parse(this.spec.gear, this.spec.gearStats);
         if (this.spec.worldBuffs)
             applyWorldBuffs(this.spec.worldBuffs, this.spec.gearStats)
+        if (this.spec.consumables)
+            applyConsumables(this.spec.consumables, this.spec.gearStats)
     }
 
     private applyCliOverrides(): void {

@@ -1,6 +1,7 @@
 import {CharacterClass, Race, TargetType, Weapon, WeaponType} from "./types";
 import {MageTalents, RogueTalents, ShamanTalents, WarriorTalents} from "./talents";
-import {WorldBuff} from "./WorldBuffs";
+import {WorldBuff} from "./worldbuffs";
+import {Consumable} from "./consumables";
 
 export interface SimulationSpec {
    name: string;
@@ -14,6 +15,7 @@ export interface SimulationSpec {
    gearStats: GearBuffsStats; // only from gear, not inc. base stats (from level) nor enchants, etc.
    gear: EquippedItem[];
    worldBuffs?: WorldBuff[];
+   consumables?: Consumable[];
    simulationConfig: SimulationConfig;
    fightLength: number;
    targetLevel: number;
