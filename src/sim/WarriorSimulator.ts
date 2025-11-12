@@ -740,7 +740,7 @@ export class WarriorSimulator extends MeleeSimulator {
          if (this.state.currentTime >= this.state.mainHandNextSwing) {
             this.processQueuedAbility();
             // Reset swing timer after queued ability
-            this.state.mainHandNextSwing = this.state.currentTime + (this.spec.gearStats.mainHandWeapon.speed * 1000 / this.getHasteMultiplier());
+            this.state.mainHandNextSwing = this.state.currentTime + (this.spec.stats.mainHandWeapon.speed * 1000 / this.getHasteMultiplier());
             return; // Skip normal auto-attack processing this cycle
          }
       }
@@ -762,9 +762,9 @@ export class WarriorSimulator extends MeleeSimulator {
    }
 
    getNormalizedWeaponDamage(): number {
-      const weapon = this.spec.gearStats.mainHandWeapon;
+      const weapon = this.spec.stats.mainHandWeapon;
       const avgDamage = (weapon.minDamage + weapon.maxDamage) / 2;
-      const is2H = !this.spec.gearStats.offHandWeapon;
+      const is2H = !this.spec.stats.offHandWeapon;
       const normalizedSpeed = is2H ? WARRIOR.normalizedWeaponSpeed2H : WARRIOR.normalizedWeaponSpeed1H;
 
       // Normalized damage = avg weapon damage + (normalized speed * AP / 14)
@@ -772,7 +772,7 @@ export class WarriorSimulator extends MeleeSimulator {
    }
 
    getWeaponDamage(isOffHand: boolean): number {
-      const weapon = isOffHand ? this.spec.gearStats.offHandWeapon : this.spec.gearStats.mainHandWeapon;
+      const weapon = isOffHand ? this.spec.stats.offHandWeapon : this.spec.stats.mainHandWeapon;
       if (!weapon) return 0;
 
       return weapon.minDamage + Math.random() * (weapon.maxDamage - weapon.minDamage);

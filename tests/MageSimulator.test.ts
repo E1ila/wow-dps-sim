@@ -66,7 +66,7 @@ function createTestSpec(stats: GearBuffsStats, config: SimulationConfig, talents
       class: CharacterClass.Mage,
       playerLevel: 60,
       gear: [],
-      gearStats: stats,
+      stats: stats,
       simulationConfig: config,
       talents,
       fightLength: config.fightLength ?? 60,

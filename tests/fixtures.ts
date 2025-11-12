@@ -10,17 +10,17 @@ export const createMockBuffsProvider = (activeBuffs: string[] = []): BuffsProvid
 
 export const createMockStatsProvider = (spec: SimulationSpec, buffsProvider: BuffsProvider): PlayerStatsProvider => {
   return {
-    attackCritChance: () => spec.gearStats.critChance,
+    attackCritChance: () => spec.stats.critChance,
     get weaponSkill() {
-      const mainHandType = spec.gearStats.mainHandWeapon.type;
-      const gearBonus = spec.gearStats.weaponSkills.get(mainHandType) || 0;
+      const mainHandType = spec.stats.mainHandWeapon.type;
+      const gearBonus = spec.stats.weaponSkills.get(mainHandType) || 0;
       return 300 + gearBonus;
     },
     get attackPower() {
       // Calculate attack power from stats (Rogue formula: level*2-20 + strength + agility)
       const baseAP = Math.max(1, spec.playerLevel * 2 - 20);
-      let strength = spec.gearStats.strength;
-      let agility = spec.gearStats.agility;
+      let strength = spec.stats.strength;
+      let agility = spec.stats.agility;
 
       if (buffsProvider.hasBuff(Buff.Crusader)) {
         strength += 100;
@@ -28,9 +28,9 @@ export const createMockStatsProvider = (spec: SimulationSpec, buffsProvider: Buf
 
       return baseAP + strength + agility;
     },
-    get hitChance() { return spec.gearStats.hitChance; },
+    get hitChance() { return spec.stats.hitChance; },
     get playerLevel() { return spec.playerLevel; },
-    get isDualWielding() { return spec.gearStats.offHandWeapon !== undefined; },
+    get isDualWielding() { return spec.stats.offHandWeapon !== undefined; },
     get targetLevel() { return spec.targetLevel; },
     get haste() { return 1; }
   };
@@ -105,7 +105,7 @@ export function createTestSpec(stats: GearBuffsStats, config: SimulationConfig, 
     class: CharacterClass.Rogue,
     playerLevel: 60,
     gear: [],
-    gearStats: stats,
+    stats: stats,
     simulationConfig: config,
     talents,
     fightLength: config.fightLength ?? 60,

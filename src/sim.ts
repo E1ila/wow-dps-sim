@@ -1,7 +1,8 @@
 import {Command} from 'commander';
 import {WeaponType} from './types';
-import {SimulationOptions, SimulationRunner} from './SimulationRunner';
+import {SimulationRunner} from './SimulationRunner';
 import {parseSpecString} from "./globals";
+import {SimulationOptions} from "./SimulationSpec";
 
 const program = new Command();
 
@@ -38,7 +39,11 @@ const opts = program.opts();
 const weaponTypeMap: { [key: string]: WeaponType } = {
    'dagger': WeaponType.Dagger,
    'sword': WeaponType.Sword,
+   'sword2h': WeaponType.TwoHandedSword,
+   'axe': WeaponType.Axe,
+   'axe2h': WeaponType.TwoHandedAxe,
    'mace': WeaponType.Mace,
+   'mace2h': WeaponType.TwoHandedMace,
    'fist': WeaponType.Fist,
 };
 

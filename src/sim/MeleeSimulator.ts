@@ -29,14 +29,14 @@ export abstract class MeleeSimulator extends BaseSimulator {
 
    protected onMainHandHit(result: AttackResult): void {
       if (isHit(result)) {
-         this.checkCrusaderProc(this.spec.gearStats.mainHandWeapon);
+         this.checkCrusaderProc(this.spec.stats.mainHandWeapon);
          // Override in subclasses for class-specific logic (e.g., Sword Specialization)
       }
    }
 
    protected onOffHandHit(result: AttackResult): void {
       if (isHit(result)) {
-         this.checkCrusaderProc(this.spec.gearStats.offHandWeapon!);
+         this.checkCrusaderProc(this.spec.stats.offHandWeapon!);
          // Override in subclasses for class-specific logic
       }
    }
@@ -78,13 +78,13 @@ export abstract class MeleeSimulator extends BaseSimulator {
       if (this.state.currentTime >= this.state.mainHandNextSwing) {
          const result = this.calculateMainHandDamage();
          onMainHandHit(result);
-         this.state.mainHandNextSwing = this.state.currentTime + (this.spec.gearStats.mainHandWeapon.speed * 1000 / this.getHasteMultiplier());
+         this.state.mainHandNextSwing = this.state.currentTime + (this.spec.stats.mainHandWeapon.speed * 1000 / this.getHasteMultiplier());
       }
 
-      if (this.spec.gearStats.offHandWeapon && onOffHandHit && this.state.currentTime >= this.state.offHandNextSwing) {
+      if (this.spec.stats.offHandWeapon && onOffHandHit && this.state.currentTime >= this.state.offHandNextSwing) {
          const result = this.calculateOffHandDamage();
          onOffHandHit(result);
-         this.state.offHandNextSwing = this.state.currentTime + (this.spec.gearStats.offHandWeapon.speed * 1000 / this.getHasteMultiplier());
+         this.state.offHandNextSwing = this.state.currentTime + (this.spec.stats.offHandWeapon.speed * 1000 / this.getHasteMultiplier());
       }
    }
 

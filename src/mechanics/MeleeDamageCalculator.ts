@@ -136,7 +136,7 @@ export abstract class MeleeDamageCalculator extends DamageCalculator {
    }
 
    calculateAutoAttackDamage(isOffhand: boolean = false): AttackResult {
-      const weapon = isOffhand ? this.spec.gearStats.offHandWeapon : this.spec.gearStats.mainHandWeapon;
+      const weapon = isOffhand ? this.spec.stats.offHandWeapon : this.spec.stats.mainHandWeapon;
       if (!weapon) {
          return {
             type: AttackType.NoWeapon,

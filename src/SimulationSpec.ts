@@ -12,7 +12,7 @@ export interface SimulationSpec {
    rotation?: string[];
    setup?: SimulationSetup;
    talents: RogueTalents | WarriorTalents | MageTalents | ShamanTalents;
-   gearStats: GearBuffsStats; // only from gear, not inc. base stats (from level) nor enchants, etc.
+   stats: GearBuffsStats; // from gear+buffs+consumes - not inc. base stats (from level) nor enchants, etc.
    gear: EquippedItem[];
    worldBuffs?: WorldBuff[];
    consumables?: Consumable[];

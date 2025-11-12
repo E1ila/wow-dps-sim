@@ -58,7 +58,7 @@ export class RogueDamageCalculator extends MeleeDamageCalculator {
    }
 
    calculateSinisterStrikeDamage(): AttackResult {
-      const weapon = this.spec.gearStats.mainHandWeapon;
+      const weapon = this.spec.stats.mainHandWeapon;
       const weaponDamage = this.getWeaponDamage(weapon);
       const baseDamage = weaponDamage + SINISTER_STRIKE_7 + this.calcAttackPowerDamage(weapon);
 
@@ -81,7 +81,7 @@ export class RogueDamageCalculator extends MeleeDamageCalculator {
    }
 
    calculateBackstabDamage(): AttackResult {
-      const weapon = this.spec.gearStats.mainHandWeapon;
+      const weapon = this.spec.stats.mainHandWeapon;
       const weaponDamage = this.getWeaponDamage(weapon);
       const apBonus = this.calcAttackPowerDamage(weapon);
       const baseDamage = weaponDamage + BACKSTAB_9 + apBonus;
@@ -105,7 +105,7 @@ export class RogueDamageCalculator extends MeleeDamageCalculator {
    }
 
    calculateHemorrhageDamage(): AttackResult {
-      const weapon = this.spec.gearStats.mainHandWeapon;
+      const weapon = this.spec.stats.mainHandWeapon;
       const weaponDamage = this.getWeaponDamage(weapon);
       // Hemorrhage uses actual weapon speed, NOT normalized speed
       const baseDamage = weaponDamage + this.calcAttackPowerDamage(weapon, false);
@@ -127,7 +127,7 @@ export class RogueDamageCalculator extends MeleeDamageCalculator {
    calculateEviscerateDamage(comboPoints: number): AttackResult {
       if (!comboPoints)
          throw new Error(`Can't cast Eviscerate with 0 combo points`);
-      const weapon = this.spec.gearStats.mainHandWeapon;
+      const weapon = this.spec.stats.mainHandWeapon;
       const range = EVISCERATE_9[comboPoints - 1];
       const cpDamage = Math.random() * (range[1] - range[0]) + range[0];
       // Eviscerate uses 3% of AP per combo point, NOT weapon damage

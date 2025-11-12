@@ -45,7 +45,7 @@ export class MageSimulator extends BaseSimulator {
    }
 
    private getMaxMana(): number {
-      const baseMana = this.spec.gearStats.mana || 3500;
+      const baseMana = this.spec.stats.mana || 3500;
       const intellectBonus = this.intellect * 15;
       let maxMana = baseMana + intellectBonus;
 

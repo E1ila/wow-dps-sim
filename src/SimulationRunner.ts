@@ -44,44 +44,44 @@ export class SimulationRunner {
     }
 
     private applyGearStats(): void {
-        this.spec.gearStats = this.gearParser.parse(this.spec.gear, this.spec.gearStats);
+        this.spec.stats = this.gearParser.parse(this.spec.gear, this.spec.stats);
         if (this.spec.worldBuffs)
-            applyWorldBuffs(this.spec.worldBuffs, this.spec.gearStats)
+            applyWorldBuffs(this.spec.worldBuffs, this.spec.stats)
         if (this.spec.consumables)
-            applyConsumables(this.spec.consumables, this.spec.gearStats)
+            applyConsumables(this.spec.consumables, this.spec.stats)
     }
 
     private applyCliOverrides(): void {
         if (this.options.critChance !== undefined) {
-            this.spec.gearStats.critChance = this.options.critChance;
+            this.spec.stats.critChance = this.options.critChance;
         }
         if (this.options.hitChance !== undefined) {
-            this.spec.gearStats.hitChance = this.options.hitChance;
+            this.spec.stats.hitChance = this.options.hitChance;
         }
         if (this.options.weaponSkill !== undefined) {
             // For backward compatibility, apply weapon skill to main hand weapon type
-            const mainHandType = this.spec.gearStats.mainHandWeapon.type;
-            this.spec.gearStats.weaponSkills.set(mainHandType, this.options.weaponSkill);
+            const mainHandType = this.spec.stats.mainHandWeapon.type;
+            this.spec.stats.weaponSkills.set(mainHandType, this.options.weaponSkill);
         }
         if (this.options.mainHand) {
-            this.spec.gearStats.mainHandWeapon = {
-                ...this.spec.gearStats.mainHandWeapon,
+            this.spec.stats.mainHandWeapon = {
+                ...this.spec.stats.mainHandWeapon,
                 minDamage: this.options.mainHand.minDamage,
                 maxDamage: this.options.mainHand.maxDamage,
                 speed: this.options.mainHand.speed,
                 type: this.options.mainHand.type,
             };
         }
-        if (this.options.offHand && this.spec.gearStats.offHandWeapon) {
-            this.spec.gearStats.offHandWeapon = {
-                ...this.spec.gearStats.offHandWeapon,
+        if (this.options.offHand && this.spec.stats.offHandWeapon) {
+            this.spec.stats.offHandWeapon = {
+                ...this.spec.stats.offHandWeapon,
                 minDamage: this.options.offHand.minDamage,
                 maxDamage: this.options.offHand.maxDamage,
                 speed: this.options.offHand.speed,
                 type: this.options.offHand.type,
             };
         } else if (this.options.offHand === null) {
-            this.spec.gearStats.offHandWeapon = undefined;
+            this.spec.stats.offHandWeapon = undefined;
         }
 
         if (this.options.targetLevel !== undefined) {
@@ -179,23 +179,23 @@ export class SimulationRunner {
             if (name.startsWith('mh.')) {
                 const prop = name.substring('mh.'.length);
                 if (prop === 'type') {
-                    this.spec.gearStats.mainHandWeapon.type = parseInt(value) as WeaponType;
+                    this.spec.stats.mainHandWeapon.type = parseInt(value) as WeaponType;
                 } else {
-                    (this.spec.gearStats.mainHandWeapon as any)[prop] = parseFloat(value);
+                    (this.spec.stats.mainHandWeapon as any)[prop] = parseFloat(value);
                 }
             } else if (name.startsWith('oh.')) {
-                if (!this.spec.gearStats.offHandWeapon) {
+                if (!this.spec.stats.offHandWeapon) {
                     console.warn(`Warning: No off-hand weapon in spec, cannot override "${name}"`);
                     continue;
                 }
                 const prop = name.substring('oh.'.length);
                 if (prop === 'type') {
-                    this.spec.gearStats.offHandWeapon.type = parseInt(value) as WeaponType;
+                    this.spec.stats.offHandWeapon.type = parseInt(value) as WeaponType;
                 } else {
-                    (this.spec.gearStats.offHandWeapon as any)[prop] = parseFloat(value);
+                    (this.spec.stats.offHandWeapon as any)[prop] = parseFloat(value);
                 }
-            } else if (name in this.spec.gearStats) {
-                (this.spec.gearStats as any)[name] = parseFloat(value);
+            } else if (name in this.spec.stats) {
+                (this.spec.stats as any)[name] = parseFloat(value);
             } else {
                 console.warn(`Warning: Gear stat "${name}" not found in spec file, ignoring.`);
             }
@@ -239,7 +239,7 @@ export class SimulationRunner {
         
         // Print gear stats nicely formatted
         console.log(`${c.cyan}Gear Stats:${c.reset}`);
-        const gs = this.spec.gearStats;
+        const gs = this.spec.stats;
         
         // Primary stats
         if (simulator.strength > 0) console.log(`  Strength: ${c.green}${simulator.strength}${c.reset}`);
