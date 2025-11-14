@@ -1,5 +1,5 @@
-import {CharacterClass, WeaponType} from './types';
-import {c, colorByClass} from './globals';
+import {CharacterClass} from './types';
+import {c, colorByClass, EQUIPMENT_SLOTS} from './globals';
 import {WarriorSimulator} from './sim/WarriorSimulator';
 import {BaseSimulator} from './sim/BaseSimulator';
 import {SpecLoader} from './SpecLoader';
@@ -44,7 +44,7 @@ export class SimulationRunner {
     }
 
     private applyGearStats(): void {
-        this.spec.extraStats = this.gearParser.parse(this.spec.gear, this.spec.extraStats);
+        this.spec.extraStats = this.gearParser.aggregateStats(this.spec.gear);
         if (this.spec.worldBuffs)
             applyWorldBuffs(this.spec.worldBuffs, this.spec.extraStats)
         if (this.spec.consumables)
@@ -176,30 +176,50 @@ export class SimulationRunner {
             const name = override.name;
             const value = override.value;
 
-            if (name.startsWith('mh.')) {
-                const prop = name.substring('mh.'.length);
-                if (prop === 'type') {
-                    this.spec.extraStats.mh.type = parseInt(value) as WeaponType;
-                } else {
-                    (this.spec.extraStats.mh as any)[prop] = parseFloat(value);
-                }
-            } else if (name.startsWith('oh.')) {
-                if (!this.spec.extraStats.oh) {
-                    console.warn(`Warning: No off-hand weapon in spec, cannot override "${name}"`);
-                    continue;
-                }
-                const prop = name.substring('oh.'.length);
-                if (prop === 'type') {
-                    this.spec.extraStats.oh.type = parseInt(value) as WeaponType;
-                } else {
-                    (this.spec.extraStats.oh as any)[prop] = parseFloat(value);
-                }
-            } else if (name in this.spec.extraStats) {
-                (this.spec.extraStats as any)[name] = parseFloat(value);
-            } else {
-                console.warn(`Warning: Gear stat "${name}" not found in spec file, ignoring.`);
+            // Check if this is the new format (slot:item_name:enchant)
+            const slotNames = EQUIPMENT_SLOTS.map(slot => slot.name);
+            if (slotNames.includes(name)) {
+                this.applySlotItemOverride(name, value);
             }
         }
+    }
+
+    private applySlotItemOverride(slotName: string, itemSpec: string): void {
+        // Parse itemSpec format: "Item_Name" or "Item_Name:enchantId"
+        const parts = itemSpec.split(':');
+        const itemNameWithUnderscores = parts[0];
+        const enchantId = parts[1] ? parseInt(parts[1]) : undefined;
+
+        // Convert underscores to spaces
+        const itemName = itemNameWithUnderscores.replace(/_/g, ' ');
+
+        // Find the item in the database
+        const item = this.db.findItemByName(itemName);
+        if (!item) {
+            console.warn(`Warning: Item "${itemName}" not found in database, ignoring gear override for slot "${slotName}"`);
+            return;
+        }
+
+        // Find the slot index
+        const slotIndex = EQUIPMENT_SLOTS.findIndex(slot => slot.name === slotName);
+        if (slotIndex === -1) {
+            console.warn(`Warning: Slot "${slotName}" not found, ignoring gear override`);
+            return;
+        }
+
+        // Ensure gear array exists and has enough slots
+        if (!this.spec.gear) {
+            this.spec.gear = [];
+        }
+
+        // Update or add the gear item at the slot index
+        this.spec.gear[slotIndex] = {
+            itemId: item.id,
+            spellId: enchantId || 0
+        };
+
+        // Recalculate gear stats after modification
+        this.applyGearStats();
     }
 
     private applyRotationOverrides(): void {

@@ -1,4 +1,4 @@
-import {AttackResult, AttackType, CharacterClass, SpecOverrides} from "./types";
+import {AttackResult, AttackType, CharacterClass, EquipmentSlot, ItemSlotType, SpecOverrides} from "./types";
 
 export const c = {
    black: '\x1b[30m',
@@ -52,3 +52,42 @@ const HitAttackTypes = [AttackType.Hit, AttackType.Crit, AttackType.Glancing];
 export function isHit(attackResult: AttackResult) {
    return HitAttackTypes.includes(attackResult.type);
 }
+
+// -- gear ---------------------------------------
+
+export function getEnchantTypesForItem(itemType: number): number[] {
+   const mapping: Record<number, number[]> = {
+      1: [1],      // Head → Head enchants
+      3: [3],      // Shoulders → Shoulder enchants
+      4: [4],      // Back → Cloak enchants
+      5: [5],      // Chest → Chest enchants
+      6: [6],      // Wrist → Bracer enchants
+      7: [7],      // Hands → Gloves enchants
+      9: [1],      // Legs → Head enchants (leg armor patches)
+      10: [10],    // Feet → Boot enchants
+      13: [13],    // Weapon → Weapon enchants
+      14: [14],    // Ranged → Ranged enchants
+      17: [13],    // TwoHand → Weapon enchants
+   };
+   return mapping[itemType] || [];
+}
+
+export const EQUIPMENT_SLOTS: EquipmentSlot[] = [
+   { name: 'head', slotTypes: [ItemSlotType.Head] },
+   { name: 'neck', slotTypes: [ItemSlotType.Neck] },
+   { name: 'shoulders', slotTypes: [ItemSlotType.Shoulders] },
+   { name: 'back', slotTypes: [ItemSlotType.Back] },
+   { name: 'chest', slotTypes: [ItemSlotType.Chest] },
+   { name: 'wrist', slotTypes: [ItemSlotType.Wrist] },
+   { name: 'hands', slotTypes: [ItemSlotType.Hands] },
+   { name: 'waist', slotTypes: [ItemSlotType.Waist] },
+   { name: 'legs', slotTypes: [ItemSlotType.Legs] },
+   { name: 'feet', slotTypes: [ItemSlotType.Feet] },
+   { name: 'finger1', slotTypes: [ItemSlotType.Finger] },
+   { name: 'finger2', slotTypes: [ItemSlotType.Finger] },
+   { name: 'trinket1', slotTypes: [ItemSlotType.Trinket] },
+   { name: 'trinket2', slotTypes: [ItemSlotType.Trinket] },
+   { name: 'mainhand', slotTypes: [ItemSlotType.Weapon, ItemSlotType.TwoHand] },
+   { name: 'offhand', slotTypes: [ItemSlotType.Weapon], optional: true },
+   { name: 'ranged', slotTypes: [ItemSlotType.Ranged], optional: true },
+];

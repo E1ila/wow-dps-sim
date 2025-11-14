@@ -16,7 +16,7 @@ describe('GearParser', () => {
 
     describe('parse', () => {
         it('should return minimal stats for empty gear array', () => {
-            const result = gearParser.parse([]);
+            const result = gearParser.aggregateStats([]);
 
             expect(result.strength).toBe(0);
             expect(result.agility).toBe(0);
@@ -40,7 +40,7 @@ describe('GearParser', () => {
                 },
             };
 
-            const result = gearParser.parse([], existingStats);
+            const result = gearParser.aggregateStats([]);
 
             expect(result.mh.min).toBe(100);
             expect(result.mh.max).toBe(200);
@@ -54,7 +54,7 @@ describe('GearParser', () => {
             const gearJson = `[{"itemId":22478,"spellId":2585},{"itemId":19377},{"itemId":22479,"spellId":2717},{"itemId":23045,"spellId":2621},{"itemId":22476,"spellId":1891},{"itemId":22483,"spellId":1885},{"itemId":22481,"spellId":856},{"itemId":21586},{"itemId":22477,"spellId":2585},{"itemId":22480,"spellId":1887},{"itemId":23060},{"itemId":23038},{"itemId":22954},{"itemId":19406},{"itemId":23054,"spellId":1900},{"itemId":23577,"spellId":1900},{"itemId":23557}]`;
             const gear: EquippedItem[] = JSON.parse(gearJson);
 
-            const result = gearParser.parse(gear);
+            const result = gearParser.aggregateStats(gear);
 
             // Verify that stats were calculated
             expect(result.strength).toBeGreaterThan(0);
@@ -82,7 +82,7 @@ describe('GearParser', () => {
                 { itemId: 19377, spellId: 0, randomSuffixId: 0 }, // Prestors Talisman of Conniving (neck)
             ];
 
-            const result = gearParser.parse(gear);
+            const result = gearParser.aggregateStats(gear);
 
             expect(result).toBeDefined();
             expect(result.agility).toBeGreaterThan(0); // This item has agility
@@ -93,7 +93,7 @@ describe('GearParser', () => {
                 { itemId: 862, spellId: 0, randomSuffixId: 213 }, // Random green with suffix
             ];
 
-            const result = gearParser.parse(gear);
+            const result = gearParser.aggregateStats(gear);
 
             expect(result).toBeDefined();
         });
@@ -105,7 +105,7 @@ describe('GearParser', () => {
                 { itemId: 23060, spellId: 0, randomSuffixId: 0 }, // Bonescythe Ring (has agi)
             ];
 
-            const result = gearParser.parse(gear);
+            const result = gearParser.aggregateStats(gear);
 
             // Both items should contribute to agility
             expect(result.agility).toBeGreaterThan(0);
@@ -117,7 +117,7 @@ describe('GearParser', () => {
                 { itemId: 23577, spellId: 1900, randomSuffixId: 0 }, // Offhand weapon with Crusader
             ];
 
-            const result = gearParser.parse(gear);
+            const result = gearParser.aggregateStats(gear);
 
             expect(result.mh).toBeDefined();
             expect(result.oh).toBeDefined();
@@ -130,7 +130,7 @@ describe('GearParser', () => {
                 { itemId: 23054, spellId: 0, randomSuffixId: 0 }, // Just mainhand
             ];
 
-            const result = gearParser.parse(gear);
+            const result = gearParser.aggregateStats(gear);
 
             expect(result.mh).toBeDefined();
             expect(result.oh).toBeFalsy(); // Can be undefined or null
@@ -143,7 +143,7 @@ describe('GearParser', () => {
             ];
 
             // Should not throw, just skip the missing item
-            const result = gearParser.parse(gear);
+            const result = gearParser.aggregateStats(gear);
 
             expect(result).toBeDefined();
             expect(result.agility).toBeGreaterThan(0); // From the valid item
@@ -154,13 +154,13 @@ describe('GearParser', () => {
                 { itemId: 22478, spellId: 2585, randomSuffixId: 0 }, // Bonescythe Helm with enchant
             ];
 
-            const resultWithEnchant = gearParser.parse(gear);
+            const resultWithEnchant = gearParser.aggregateStats(gear);
 
             const gearNoEnchant: EquippedItem[] = [
                 { itemId: 22478, spellId: 0, randomSuffixId: 0 }, // Same item, no enchant
             ];
 
-            const resultNoEnchant = gearParser.parse(gearNoEnchant);
+            const resultNoEnchant = gearParser.aggregateStats(gearNoEnchant);
 
             // With enchant should have more stats
             const totalStatsWithEnchant = resultWithEnchant.agility + resultWithEnchant.strength;
@@ -175,7 +175,7 @@ describe('GearParser', () => {
                 { itemId: 22481, spellId: 0, randomSuffixId: 0 }, // Bonescythe Gloves
             ];
 
-            const result = gearParser.parse(gear);
+            const result = gearParser.aggregateStats(gear);
 
             expect(result.weaponSkills).toBeDefined();
         });
@@ -196,7 +196,7 @@ describe('GearParser', () => {
                     { itemId: 23054, spellId, randomSuffixId: 0 },
                 ];
 
-                const result = gearParser.parse(gear);
+                const result = gearParser.aggregateStats(gear);
                 expect(result.mh.enchant).toBe(expected);
             });
         });
@@ -207,7 +207,7 @@ describe('GearParser', () => {
                 { itemId: 19406, spellId: 0, randomSuffixId: 0 }, // Drake Fang Talisman (has AP)
             ];
 
-            const result = gearParser.parse(gear);
+            const result = gearParser.aggregateStats(gear);
 
             if (result.attackPower !== undefined) {
                 expect(result.attackPower).toBeGreaterThan(0);
@@ -220,7 +220,7 @@ describe('GearParser', () => {
                 { itemId: 873, spellId: 0, randomSuffixId: 0 },
             ];
 
-            const result = gearParser.parse(gear);
+            const result = gearParser.aggregateStats(gear);
 
             // Should have intellect and/or spell power stats
             expect(result.intellect).toBeGreaterThan(0);
@@ -232,7 +232,7 @@ describe('GearParser', () => {
                 { itemId: 22954, spellId: 0, randomSuffixId: 0 }, // Kiss of the Spider (trinket with hit)
             ];
 
-            const result = gearParser.parse(gear);
+            const result = gearParser.aggregateStats(gear);
 
             expect(result.hitChance).toBeGreaterThanOrEqual(0);
         });
@@ -243,7 +243,7 @@ describe('GearParser', () => {
                 { itemId: 22954, spellId: 0, randomSuffixId: 0 }, // Kiss of the Spider
             ];
 
-            const result = gearParser.parse(gear);
+            const result = gearParser.aggregateStats(gear);
 
             expect(result.critChance).toBeGreaterThanOrEqual(0);
         });
@@ -254,7 +254,7 @@ describe('GearParser', () => {
                 { itemId: 23054, spellId: 0, randomSuffixId: 0 }, // Sword
             ];
 
-            const swordResult = gearParser.parse(swordGear);
+            const swordResult = gearParser.aggregateStats(swordGear);
             expect(swordResult.mh.type).toBe(WeaponType.Sword);
         });
 
@@ -263,7 +263,7 @@ describe('GearParser', () => {
                 `[{"itemId":22478,"spellId":2585},{"itemId":19377},{"itemId":22479,"spellId":2717},{"itemId":23045,"spellId":2621},{"itemId":22476,"spellId":1891},{"itemId":22483,"spellId":1885},{"itemId":22481,"spellId":856},{"itemId":21586},{"itemId":22477,"spellId":2585},{"itemId":22480,"spellId":1887},{"itemId":23060},{"itemId":23038},{"itemId":22954},{"itemId":19406},{"itemId":23054,"spellId":1900},{"itemId":23577,"spellId":1900},{"itemId":23557}]`
             );
 
-            const result = gearParser.parse(fullGear);
+            const result = gearParser.aggregateStats(fullGear);
 
             // Verify all major stat categories are present
             expect(result.strength).toBeGreaterThan(50); // T3 set has strength
@@ -285,7 +285,7 @@ describe('GearParser', () => {
                 { itemId: 22481, spellId: 0, randomSuffixId: 0 }, // Physical DPS gloves
             ];
 
-            const result = gearParser.parse(gear);
+            const result = gearParser.aggregateStats(gear);
 
             // Spell power may be 0 or undefined for physical gear
             if (result.spellPower !== undefined && result.spellPower !== 0) {
@@ -299,7 +299,7 @@ describe('GearParser', () => {
                 { itemId: 867, spellId: 0, randomSuffixId: 0 },
             ];
 
-            const result = gearParser.parse(gear);
+            const result = gearParser.aggregateStats(gear);
 
             // Check that the result is defined (item exists)
             expect(result).toBeDefined();
@@ -314,7 +314,7 @@ describe('GearParser', () => {
                 { itemId: 19377, spellId: 0, randomSuffixId: 0 }, // Prestor's Talisman (30 agi)
             ];
 
-            const resultNoGloves = gearParser.parse(gearWithoutGloves);
+            const resultNoGloves = gearParser.aggregateStats(gearWithoutGloves);
             const baseAgility = resultNoGloves.agility;
             expect(baseAgility).toBe(30); // Verify baseline
 
@@ -324,7 +324,7 @@ describe('GearParser', () => {
                 { itemId: 1302, spellId: 0, randomSuffixId: 0 },  // Black Whelp Gloves (+3 agi)
             ];
 
-            const resultWithGloves = gearParser.parse(gearWithGloves);
+            const resultWithGloves = gearParser.aggregateStats(gearWithGloves);
             const agilityWithGloves = resultWithGloves.agility;
 
             // Verify that agility increased by exactly 3
@@ -338,7 +338,7 @@ describe('GearParser', () => {
                 { itemId: 1302, spellId: 0, randomSuffixId: 0 },  // Black Whelp Gloves (+3 agi)
             ];
 
-            const resultNoEnchant = gearParser.parse(gearWithoutEnchant);
+            const resultNoEnchant = gearParser.aggregateStats(gearWithoutEnchant);
             const agilityNoEnchant = resultNoEnchant.agility;
             expect(agilityNoEnchant).toBe(33); // 30 + 3
 
@@ -348,7 +348,7 @@ describe('GearParser', () => {
                 { itemId: 1302, spellId: 25080, randomSuffixId: 0 },  // Black Whelp Gloves + Superior Agility (+15 agi)
             ];
 
-            const resultWithEnchant = gearParser.parse(gearWithEnchant);
+            const resultWithEnchant = gearParser.aggregateStats(gearWithEnchant);
             const agilityWithEnchant = resultWithEnchant.agility;
 
             // Verify that agility increased by exactly 15
@@ -362,7 +362,7 @@ describe('GearParser', () => {
                 { itemId: 19377, spellId: 0, randomSuffixId: 0 }, // Prestor's Talisman (no strength)
             ];
 
-            const baseResult = gearParser.parse(gearNoGloves);
+            const baseResult = gearParser.aggregateStats(gearNoGloves);
             const baseStrength = baseResult.strength;
             expect(baseStrength).toBe(0);
 
@@ -371,7 +371,7 @@ describe('GearParser', () => {
                 { itemId: 1302, spellId: 0, randomSuffixId: 0 },  // Black Whelp Gloves (+2 str, +3 agi)
             ];
 
-            const resultWithGloves = gearParser.parse(gearWithGloves);
+            const resultWithGloves = gearParser.aggregateStats(gearWithGloves);
             const strengthWithGloves = resultWithGloves.strength;
 
             // Verify that strength increased by exactly 2
@@ -386,7 +386,7 @@ describe('GearParser', () => {
                 { itemId: 1302, spellId: 0, randomSuffixId: 0 },      // Another pair (e.g., in different slot): +2 str, +3 agi
             ];
 
-            const result = gearParser.parse(gear);
+            const result = gearParser.aggregateStats(gear);
 
             // Total should be: (2+2=4 str) and (3+3+15=21 agi)
             expect(result.strength).toBe(4);
@@ -398,7 +398,7 @@ describe('GearParser', () => {
                 { itemId: 1121, spellId: 0, randomSuffixId: 0 },  // Feet of the Lynx (boots)
             ];
 
-            const resultNoEnchant = gearParser.parse(gearNoEnchant);
+            const resultNoEnchant = gearParser.aggregateStats(gearNoEnchant);
             const agilityNoEnchant = resultNoEnchant.agility;
 
             // Add Greater Agility enchant to boots (+7 agility)
@@ -406,7 +406,7 @@ describe('GearParser', () => {
                 { itemId: 1121, spellId: 20023, randomSuffixId: 0 },  // Feet of the Lynx + Greater Agility
             ];
 
-            const resultWithEnchant = gearParser.parse(gearWithEnchant);
+            const resultWithEnchant = gearParser.aggregateStats(gearWithEnchant);
             const agilityWithEnchant = resultWithEnchant.agility;
 
             // Verify exactly +7 agility from enchant
@@ -419,7 +419,7 @@ describe('GearParser', () => {
                 { itemId: 873, spellId: 0, randomSuffixId: 0 },  // Staff of Jordan (caster weapon, no agi)
             ];
 
-            const result = gearParser.parse(gear);
+            const result = gearParser.aggregateStats(gear);
 
             // Should have 0 agility from these items
             expect(result.agility).toBe(0);
@@ -431,7 +431,7 @@ describe('GearParser', () => {
                 { itemId: 1302, spellId: 0, randomSuffixId: 0 },  // Black Whelp Gloves
             ];
 
-            const resultNoEnchant = gearParser.parse(gearNoEnchant);
+            const resultNoEnchant = gearParser.aggregateStats(gearNoEnchant);
             
             // Note: We're verifying the base item stats are correct
             expect(resultNoEnchant.strength).toBe(2);

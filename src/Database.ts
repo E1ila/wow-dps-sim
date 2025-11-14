@@ -109,4 +109,8 @@ export class Database {
    getAllSpellIcons(): SpellIcon[] {
       return Array.from(this.spellIcons.values());
    }
+
+   findItemByName(name: string): Item | undefined {
+      return Array.from(this.items.values()).find(item => item.name === name);
+   }
 }

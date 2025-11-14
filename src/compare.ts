@@ -1,10 +1,11 @@
 import {Command} from 'commander';
 import {readFileSync} from 'fs';
-import {SimulationOptions, SimulationRunner} from './SimulationRunner';
+import {SimulationRunner} from './SimulationRunner';
 import * as fs from "node:fs";
 import path from "node:path";
 import {SpecOverrides} from './types';
 import {c, parseSpecString} from "./globals";
+import {SimulationOptions} from "./SimulationSpec";
 
 interface SimulationResult {
    name?: string;

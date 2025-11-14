@@ -61,10 +61,9 @@ export class GearParser {
     /**
      * Parse gear items from JSON and calculate aggregate stats
      * @param gear Array of equipped items
-     * @param existingGearStats Optional existing gear stats to preserve
      * @returns Calculated GearStats object
      */
-    parse(gear: EquippedItem[], existingGearStats?: Partial<Stats>): Stats {
+    aggregateStats(gear: EquippedItem[]): Stats {
         if (!gear || gear.length === 0) {
             // Return minimal stats if no gear provided
             return {
@@ -73,7 +72,7 @@ export class GearParser {
                 critChance: 0,
                 hitChance: 0,
                 weaponSkills: new Map<WeaponType, number>(),
-                mh: existingGearStats?.mh || {
+                mh: {
                     min: 1,
                     max: 2,
                     speed: 2.0,
@@ -161,7 +160,7 @@ export class GearParser {
         // Update with weapons
         if (!mainHandWeapon) {
             // If no weapon was found in gear, keep existing or use defaults
-            mainHandWeapon = existingGearStats?.mh || {
+            mainHandWeapon = {
                 minDamage: 1,
                 maxDamage: 2,
                 speed: 2.0,

@@ -370,3 +370,30 @@ export interface PlayerStatsProvider {
    get targetLevel(): number;
    get haste(): number;
 }
+
+// -- gear -------------------
+
+export enum ItemSlotType {
+   Head = 1,
+   Neck = 2,
+   Shoulders = 3,
+   Back = 4,
+   Chest = 5,
+   Wrist = 6,
+   Hands = 7,
+   Waist = 8,
+   Legs = 9,
+   Feet = 10,
+   Finger = 11,
+   Trinket = 12,
+   Weapon = 13,
+   Ranged = 14,
+   TwoHand = 17,
+   Tabard = 19,
+}
+
+export interface EquipmentSlot {
+   name: string;
+   slotTypes: ItemSlotType[];
+   optional?: boolean;
+}

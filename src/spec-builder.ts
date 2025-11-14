@@ -5,53 +5,9 @@ import * as fs from 'fs';
 import {Database} from './Database';
 import {Item} from './Database.types';
 import {EquippedItem} from './SimulationSpec';
-import {c} from "./globals";
+import {c, EQUIPMENT_SLOTS, getEnchantTypesForItem} from "./globals";
 import {SpecLoader} from './SpecLoader';
-
-enum ItemSlotType {
-    Head = 1,
-    Neck = 2,
-    Shoulders = 3,
-    Back = 4,
-    Chest = 5,
-    Wrist = 6,
-    Hands = 7,
-    Waist = 8,
-    Legs = 9,
-    Feet = 10,
-    Finger = 11,
-    Trinket = 12,
-    Weapon = 13,
-    Ranged = 14,
-    TwoHand = 17,
-    Tabard = 19,
-}
-
-interface EquipmentSlot {
-    name: string;
-    slotTypes: ItemSlotType[];
-    optional?: boolean;
-}
-
-const EQUIPMENT_SLOTS: EquipmentSlot[] = [
-    { name: 'head', slotTypes: [ItemSlotType.Head] },
-    { name: 'neck', slotTypes: [ItemSlotType.Neck] },
-    { name: 'shoulders', slotTypes: [ItemSlotType.Shoulders] },
-    { name: 'back', slotTypes: [ItemSlotType.Back] },
-    { name: 'chest', slotTypes: [ItemSlotType.Chest] },
-    { name: 'wrist', slotTypes: [ItemSlotType.Wrist] },
-    { name: 'hands', slotTypes: [ItemSlotType.Hands] },
-    { name: 'waist', slotTypes: [ItemSlotType.Waist] },
-    { name: 'legs', slotTypes: [ItemSlotType.Legs] },
-    { name: 'feet', slotTypes: [ItemSlotType.Feet] },
-    { name: 'finger1', slotTypes: [ItemSlotType.Finger] },
-    { name: 'finger2', slotTypes: [ItemSlotType.Finger] },
-    { name: 'trinket1', slotTypes: [ItemSlotType.Trinket] },
-    { name: 'trinket2', slotTypes: [ItemSlotType.Trinket] },
-    { name: 'mainhand', slotTypes: [ItemSlotType.Weapon, ItemSlotType.TwoHand] },
-    { name: 'offhand', slotTypes: [ItemSlotType.Weapon], optional: true },
-    { name: 'ranged', slotTypes: [ItemSlotType.Ranged], optional: true },
-];
+import {EquipmentSlot, ItemSlotType} from "./types";
 
 class SpecBuilder {
     private db: Database;
@@ -137,29 +93,12 @@ class SpecBuilder {
         return await this.promptForEnchantAndSuffix(selectedItem);
     }
 
-    private getEnchantTypesForItem(itemType: number): number[] {
-        const mapping: Record<number, number[]> = {
-            1: [1],      // Head → Head enchants
-            3: [3],      // Shoulders → Shoulder enchants
-            4: [4],      // Back → Cloak enchants
-            5: [5],      // Chest → Chest enchants
-            6: [6],      // Wrist → Bracer enchants
-            7: [7],      // Hands → Gloves enchants
-            9: [1],      // Legs → Head enchants (leg armor patches)
-            10: [10],    // Feet → Boot enchants
-            13: [13],    // Weapon → Weapon enchants
-            14: [14],    // Ranged → Ranged enchants
-            17: [13],    // TwoHand → Weapon enchants
-        };
-        return mapping[itemType] || [];
-    }
-
     private async promptForEnchantAndSuffix(item: Item): Promise<EquippedItem> {
         let spellId: number | undefined;
         let randomSuffixId: number | undefined;
 
         const allEnchants = this.db.getAllEnchants();
-        const enchantTypes = this.getEnchantTypesForItem(item.type);
+        const enchantTypes = getEnchantTypesForItem(item.type);
 
         const compatibleEnchants = allEnchants
             .filter(enchant =>

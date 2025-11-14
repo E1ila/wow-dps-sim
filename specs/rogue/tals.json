@@ -3,7 +3,8 @@
     "class": "Rogue",
     "setup": {
         "refreshSndSecondsBeforeExpiry": 0.2,
-        "waitForSndExpiry": 1.6
+        "waitForSndExpiry": 1.6,
+        "veiledShadowsSet": 1
     },
     "rotation": "snd?snd:sndw?skip:cp5?evis:bs",
     "talents": {
