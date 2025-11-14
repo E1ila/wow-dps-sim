@@ -185,19 +185,47 @@ export class SimulationRunner {
     }
 
     private applySlotItemOverride(slotName: string, itemSpec: string): void {
-        // Parse itemSpec format: "Item_Name" or "Item_Name:enchantId"
+        // Parse itemSpec format: "Item_Name:enchant" or "itemId:enchant"
         const parts = itemSpec.split(':');
-        const itemNameWithUnderscores = parts[0];
-        const enchantId = parts[1] ? parseInt(parts[1]) : undefined;
+        const itemSpecPart = parts[0];
+        const enchantSpec = parts[1];
 
-        // Convert underscores to spaces
-        const itemName = itemNameWithUnderscores.replace(/_/g, ' ');
+        // Determine if itemSpecPart is an item ID (number) or item name (string)
+        const itemId = parseInt(itemSpecPart);
+        let item;
 
-        // Find the item in the database
-        const item = this.db.findItemByName(itemName);
-        if (!item) {
-            console.warn(`Warning: Item "${itemName}" not found in database, ignoring gear override for slot "${slotName}"`);
-            return;
+        if (!isNaN(itemId)) {
+            // It's an item ID
+            item = this.db.getItem(itemId);
+            if (!item) {
+                console.warn(`Warning: Item with ID ${itemId} not found in database, ignoring gear override for slot "${slotName}"`);
+                return;
+            }
+        } else {
+            // It's an item name - convert underscores to spaces
+            const itemName = itemSpecPart.replace(/_/g, ' ');
+            item = this.db.findItemByName(itemName);
+            if (!item) {
+                console.warn(`Warning: Item "${itemName}" not found in database, ignoring gear override for slot "${slotName}"`);
+                return;
+            }
+        }
+
+        // Parse enchant - can be either a spell ID (number) or an enchant name (string)
+        let spellId: number | undefined;
+        if (enchantSpec) {
+            const enchantAsNumber = parseInt(enchantSpec);
+            if (!isNaN(enchantAsNumber)) {
+                // It's a spell ID
+                spellId = enchantAsNumber;
+            } else {
+                // It's an enchant name - convert underscores to spaces and look up spell ID
+                const enchantName = enchantSpec.replace(/_/g, ' ');
+                spellId = this.getSpellIdFromEnchantName(enchantName);
+                if (spellId === undefined) {
+                    console.warn(`Warning: Enchant "${enchantName}" not found, applying item without enchant`);
+                }
+            }
         }
 
         // Find the slot index
@@ -215,11 +243,25 @@ export class SimulationRunner {
         // Update or add the gear item at the slot index
         this.spec.gear[slotIndex] = {
             itemId: item.id,
-            spellId: enchantId || 0
+            spellId: spellId || 0
         };
 
         // Recalculate gear stats after modification
         this.applyGearStats();
+    }
+
+    private getSpellIdFromEnchantName(enchantName: string): number | undefined {
+        // Map of enchant names to spell IDs (from GearParser.ts weaponEnchantMap)
+        const enchantNameToSpellId: { [key: string]: number } = {
+            'Crusader': 1900,
+            '+3 damage': 803,
+            '+4 damage': 1894,
+            '+5 damage': 1898,
+            '+15 agility': 1897,
+            '+25 agility': 2646,
+        };
+
+        return enchantNameToSpellId[enchantName];
     }
 
     private applyRotationOverrides(): void {
