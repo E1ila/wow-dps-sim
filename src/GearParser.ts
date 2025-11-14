@@ -286,8 +286,8 @@ export class GearParser {
         }
 
         return {
-            minDamage: item.weaponDamageMin,
-            maxDamage: item.weaponDamageMax,
+            min: item.weaponDamageMin,
+            max: item.weaponDamageMax,
             speed: item.weaponSpeed,
             type: weaponTypeMap[item.weaponType || 6] || WeaponType.Sword,
             enchant: enchantType,

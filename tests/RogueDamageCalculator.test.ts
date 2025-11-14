@@ -473,7 +473,7 @@ describe('RogueDamageCalculator', () => {
     it('should return NoWeapon result when offhand does not exist', () => {
       const statsNoOffhand = {
         ...baseStats,
-        offHandWeapon: undefined,
+        oh: undefined,
       };
       const calculator = createCalculator(createTestSpec(statsNoOffhand, config, baseTalents));
 

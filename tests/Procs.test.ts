@@ -106,7 +106,7 @@ describe('Procs', () => {
       // Remove Crusader from offhand to test mainhand proc rate in isolation
       const statsOnlyMHCrusader = {
         ...baseStats,
-        offHandWeapon: {
+        oh: {
           ...baseStats.oh!,
           enchant: WeaponEnchant.Dmg5
         }
@@ -180,11 +180,11 @@ describe('Procs', () => {
     it('should not proc when enchant is not Crusader', () => {
       const statsNoCrusader = {
         ...baseStats,
-        mainHandWeapon: {
+        mh: {
           ...baseStats.mh,
           enchant: WeaponEnchant.Dmg5
         },
-        offHandWeapon: {
+        oh: {
           ...baseStats.oh!,
           enchant: WeaponEnchant.Dmg5
         }
