@@ -6,11 +6,11 @@
   "scripts": {
     "build": "tsc",
     "start": "node dist/sim.js",
-    "dev": "ts-node src/sim.ts",
+    "sim": "ts-node src/sim.ts",
     "verify": "tsc && node dist/verifyMechanics.js",
     "test": "jest",
     "compare": "ts-node src/compare.ts",
-    "gear": "ts-node src/gear-builder.ts",
+    "spec": "ts-node src/spec-builder.ts",
     "query": "ts-node src/query.ts"
   },
   "keywords": [

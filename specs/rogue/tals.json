@@ -30,34 +30,76 @@
         "swordSpecialization": 0,
         "weaponExpertise": 2
     },
-    "gearStats": {
-        "level": 60,
-        "attackPower": 844,
-        "critChance": 20,
-        "hitChance": 9,
-        "agility": 393,
-        "strength": 151,
-        "weaponSkill": 300,
-        "mainHandWeapon": {
-            "minDamage": 65,
-            "maxDamage": 121,
-            "speed": 1.8,
-            "type": "Dagger",
-            "enchant": "+5 damage"
-        },
-        "offHandWeapon": {
-            "minDamage": 57,
-            "maxDamage": 107,
-            "speed": 1.6,
-            "type": "Dagger",
-            "enchant": "+5 damage"
-        }
-    },
     "simulationConfig": {
-        "fightLength": 120,
         "targetLevel": 63,
         "targetArmor": 3731,
-        "iterations": 4000,
-        "postCycleResourceGeneration": true
-    }
+        "fightLength": 120,
+        "iterations": 4000
+    },
+    "race": "undead",
+    "playerLevel": 60,
+    "gear": [
+        {
+            "itemId": 21360,
+            "spellId": 0
+        },
+        {
+            "itemId": 21505
+        },
+        {
+            "itemId": 21361,
+            "spellId": 0
+        },
+        {
+            "itemId": 21406,
+            "spellId": 25083
+        },
+        {
+            "itemId": 21364,
+            "spellId": 13941
+        },
+        {
+            "itemId": 16911,
+            "spellId": 20010
+        },
+        {
+            "itemId": 16826,
+            "spellId": 25080
+        },
+        {
+            "itemId": 19396
+        },
+        {
+            "itemId": 21362,
+            "spellId": 22725
+        },
+        {
+            "itemId": 21359,
+            "spellId": 13890
+        },
+        {
+            "itemId": 21405
+        },
+        {
+            "itemId": 19384
+        },
+        {
+            "itemId": 13965
+        },
+        {
+            "itemId": 21180
+        },
+        {
+            "itemId": 21404,
+            "spellId": 20031
+        },
+        {
+            "itemId": 18805,
+            "spellId": 23800
+        },
+        {
+            "itemId": 2100,
+            "spellId": 0
+        }
+    ]
 }

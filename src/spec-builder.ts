@@ -1,10 +1,12 @@
 import {Command} from 'commander';
 import inquirer from 'inquirer';
 import * as path from 'path';
+import * as fs from 'fs';
 import {Database} from './Database';
 import {Item} from './Database.types';
 import {EquippedItem} from './SimulationSpec';
 import {c} from "./globals";
+import {SpecLoader} from './SpecLoader';
 
 enum ItemSlotType {
     Head = 1,
@@ -51,9 +53,11 @@ const EQUIPMENT_SLOTS: EquipmentSlot[] = [
     { name: 'ranged', slotTypes: [ItemSlotType.Ranged], optional: true },
 ];
 
-class GearBuilder {
+class SpecBuilder {
     private db: Database;
     private equippedItems: EquippedItem[] = [];
+    private spec: any = null;  // Raw JSON spec file format (gets transformed by SpecLoader when used)
+    private specPath: string | null = null;
 
     constructor(dbPath: string) {
         this.db = new Database(dbPath);
@@ -315,6 +319,295 @@ class GearBuilder {
         });
         console.log(c.green + JSON.stringify(gearSpec) + c.reset);
     }
+
+    loadSpecFile(specFile: string): void {
+        // Use SpecLoader for path resolution and loading
+        const fullPath = path.join(__dirname, '..', 'specs', specFile.endsWith('.json') ? specFile : `${specFile}.json`);
+        this.specPath = fullPath;
+
+        try {
+            // Load with allowInvalid=true to permit editing of incomplete specs
+            const loadedSpec = SpecLoader.load(specFile, true);
+            // Convert back to raw format (untransformed) for editing
+            this.spec = JSON.parse(fs.readFileSync(fullPath, 'utf-8'));
+            this.equippedItems = this.spec.gear || [];
+            console.log(`${c.green}Loaded spec from:${c.reset} ${specFile}`);
+
+            // Validate the spec can be loaded normally (non-blocking warning)
+            try {
+                SpecLoader.load(specFile, true);
+            } catch (error) {
+                console.log(`${c.yellow}Warning: Spec file has validation issues: ${(error as Error).message}${c.reset}`);
+                console.log(`${c.yellow}You can fix these issues using the editor.${c.reset}`);
+            }
+        } catch (error) {
+            if ((error as any).code === 'ENOENT') {
+                console.log(`${c.yellow}Spec file not found. Creating new spec:${c.reset} ${specFile}`);
+                this.createNewSpec();
+            } else if (error instanceof SyntaxError) {
+                console.log(`${c.red}Error parsing JSON: ${error.message}${c.reset}`);
+                console.log(`${c.yellow}Creating new spec instead.${c.reset}`);
+                this.createNewSpec();
+            } else {
+                throw error;
+            }
+        }
+    }
+
+    private createNewSpec(): void {
+        this.spec = {
+            name: '',
+            class: 'Rogue',
+            playerLevel: 60,
+            race: 'undead',
+            setup: {},
+            rotation: '',
+            talents: {},
+            gear: [],
+            simulationConfig: {
+                targetLevel: 63,
+                targetArmor: 3731,
+                fightLength: 120,
+                iterations: 4000,
+            }
+        };
+        this.equippedItems = [];
+    }
+
+    saveSpecFile(): void {
+        if (!this.specPath || !this.spec) return;
+
+        this.spec.gear = this.equippedItems;
+
+        const dir = path.dirname(this.specPath);
+        if (!fs.existsSync(dir)) {
+            fs.mkdirSync(dir, { recursive: true });
+        }
+
+        fs.writeFileSync(this.specPath, JSON.stringify(this.spec, null, 4));
+        console.log(`\n${c.green}Spec saved to:${c.reset} ${this.specPath}`);
+    }
+
+    async editSpecMenu(): Promise<void> {
+        if (!this.spec) return;
+
+        while (true) {
+            const choices = [
+                { name: `Name: ${this.spec.name || '(not set)'}`, value: 'name' },
+                { name: `Class: ${this.spec.class}`, value: 'class' },
+                { name: `Race: ${this.spec.race || '(not set)'}`, value: 'race' },
+                { name: `Player Level: ${this.spec.playerLevel}`, value: 'playerLevel' },
+                { name: 'Talents', value: 'talents' },
+                { name: `Rotation: ${this.spec.rotation || '(not set)'}`, value: 'rotation' },
+                { name: 'Setup', value: 'setup' },
+                { name: 'Simulation Config', value: 'simulationConfig' },
+                { name: `Gear (${this.equippedItems.length} items)`, value: 'gear' },
+                { name: '✓ Save and exit', value: 'save' },
+                { name: '✗ Exit without saving', value: 'exit' },
+            ];
+
+            const { action } = await inquirer.prompt<{ action: string }>([{
+                type: 'list',
+                name: 'action',
+                message: 'Select section to edit:',
+                choices,
+                pageSize: 15,
+            }]);
+
+            if (action === 'save') {
+                this.saveSpecFile();
+                break;
+            } else if (action === 'exit') {
+                break;
+            } else if (action === 'name') {
+                await this.editName();
+            } else if (action === 'class') {
+                await this.editClass();
+            } else if (action === 'race') {
+                await this.editRace();
+            } else if (action === 'playerLevel') {
+                await this.editPlayerLevel();
+            } else if (action === 'talents') {
+                await this.editTalents();
+            } else if (action === 'rotation') {
+                await this.editRotation();
+            } else if (action === 'setup') {
+                await this.editSetup();
+            } else if (action === 'simulationConfig') {
+                await this.editSimulationConfig();
+            } else if (action === 'gear') {
+                await this.editGear();
+            }
+        }
+    }
+
+    private async editName(): Promise<void> {
+        const { name } = await inquirer.prompt([{
+            type: 'input',
+            name: 'name',
+            message: 'Enter spec name:',
+            default: this.spec!.name,
+        }]);
+        this.spec!.name = name;
+    }
+
+    private async editClass(): Promise<void> {
+        const { className } = await inquirer.prompt([{
+            type: 'list',
+            name: 'className',
+            message: 'Select class:',
+            choices: ['Rogue', 'Warrior', 'Mage', 'Shaman'],
+            default: this.spec!.class,
+        }]);
+        this.spec!.class = className;
+    }
+
+    private async editRace(): Promise<void> {
+        const { race } = await inquirer.prompt([{
+            type: 'list',
+            name: 'race',
+            message: 'Select race:',
+            choices: ['human', 'orc', 'undead', 'troll', 'gnome', 'dwarf', 'nightelf', 'tauren'],
+            default: this.spec!.race,
+        }]);
+        this.spec!.race = race;
+    }
+
+    private async editPlayerLevel(): Promise<void> {
+        const { level } = await inquirer.prompt([{
+            type: 'number',
+            name: 'level',
+            message: 'Enter player level:',
+            default: this.spec!.playerLevel,
+        }]);
+        this.spec!.playerLevel = level;
+    }
+
+    private async editTalents(): Promise<void> {
+        console.log(`\n${c.yellow}Current talents:${c.reset}`);
+        console.log(JSON.stringify(this.spec!.talents, null, 2));
+
+        const { editMode } = await inquirer.prompt([{
+            type: 'list',
+            name: 'editMode',
+            message: 'How would you like to edit talents?',
+            choices: [
+                { name: 'Edit as JSON', value: 'json' },
+                { name: 'Interactive edit (one by one)', value: 'interactive' },
+                { name: '← Back', value: 'back' },
+            ],
+        }]);
+
+        if (editMode === 'json') {
+            const { talentsJson } = await inquirer.prompt([{
+                type: 'editor',
+                name: 'talentsJson',
+                message: 'Edit talents (JSON):',
+                default: JSON.stringify(this.spec!.talents, null, 2),
+            }]);
+            try {
+                this.spec!.talents = JSON.parse(talentsJson);
+            } catch (error) {
+                console.log(`${c.red}Invalid JSON. Changes not saved.${c.reset}`);
+            }
+        } else if (editMode === 'interactive') {
+            await this.editTalentsInteractive();
+        }
+    }
+
+    private async editTalentsInteractive(): Promise<void> {
+        const talentKeys = Object.keys(this.spec!.talents);
+
+        for (const key of talentKeys) {
+            const currentValue = this.spec!.talents[key];
+            const isBoolean = typeof currentValue === 'boolean';
+
+            if (isBoolean) {
+                const { value } = await inquirer.prompt([{
+                    type: 'confirm',
+                    name: 'value',
+                    message: `${key}:`,
+                    default: currentValue,
+                }]);
+                this.spec!.talents[key] = value;
+            } else {
+                const { value } = await inquirer.prompt([{
+                    type: 'number',
+                    name: 'value',
+                    message: `${key}:`,
+                    default: currentValue,
+                }]);
+                this.spec!.talents[key] = value;
+            }
+        }
+    }
+
+    private async editRotation(): Promise<void> {
+        const { rotation } = await inquirer.prompt([{
+            type: 'input',
+            name: 'rotation',
+            message: 'Enter rotation:',
+            default: this.spec!.rotation,
+        }]);
+        this.spec!.rotation = rotation;
+    }
+
+    private async editSetup(): Promise<void> {
+        console.log(`\n${c.yellow}Current setup:${c.reset}`);
+        console.log(JSON.stringify(this.spec!.setup, null, 2));
+
+        const { setupJson } = await inquirer.prompt([{
+            type: 'editor',
+            name: 'setupJson',
+            message: 'Edit setup (JSON):',
+            default: JSON.stringify(this.spec!.setup, null, 2),
+        }]);
+
+        try {
+            this.spec!.setup = JSON.parse(setupJson);
+        } catch (error) {
+            console.log(`${c.red}Invalid JSON. Changes not saved.${c.reset}`);
+        }
+    }
+
+    private async editSimulationConfig(): Promise<void> {
+        const config = this.spec!.simulationConfig;
+
+        const { targetLevel } = await inquirer.prompt([{
+            type: 'number',
+            name: 'targetLevel',
+            message: 'Target level:',
+            default: config.targetLevel,
+        }]);
+
+        const { targetArmor } = await inquirer.prompt([{
+            type: 'number',
+            name: 'targetArmor',
+            message: 'Target armor:',
+            default: config.targetArmor,
+        }]);
+
+        const { fightLength } = await inquirer.prompt([{
+            type: 'number',
+            name: 'fightLength',
+            message: 'Fight length (seconds):',
+            default: config.fightLength,
+        }]);
+
+        const { iterations } = await inquirer.prompt([{
+            type: 'number',
+            name: 'iterations',
+            message: 'Number of iterations:',
+            default: config.iterations,
+        }]);
+
+        this.spec!.simulationConfig = {
+            targetLevel,
+            targetArmor,
+            fightLength,
+            iterations,
+        };
+    }
 }
 
 async function main() {
@@ -324,22 +617,29 @@ async function main() {
         .name('gear-builder')
         .description('Interactive gear builder for WoW Classic DPS Simulator')
         .version('1.0.0')
+        .option('-s, --spec <path>', 'Spec file path (e.g., "rogue/tals" for specs/rogue/tals.json)')
         .option('-e, --edit <json>', 'Edit existing gear (provide JSON array of EquippedItem[])');
 
     program.parse();
 
-    const options = program.opts<{ edit?: string }>();
+    const options = program.opts<{ spec?: string; edit?: string }>();
     const dbPath = path.resolve(__dirname, 'db.json');
-    const builder = new GearBuilder(dbPath);
+    const builder = new SpecBuilder(dbPath);
 
     try {
-        if (options.edit) {
+        if (options.spec) {
+            builder.loadSpecFile(options.spec);
+            await builder.editSpecMenu();
+        } else if (options.edit) {
             builder.loadExistingGear(options.edit);
             await builder.editGear();
         } else {
             await builder.buildGear();
         }
-        builder.displayGear();
+
+        if (!options.spec) {
+            builder.displayGear();
+        }
     } catch (error) {
         if (error instanceof Error) {
             console.error('Error:', error.message);

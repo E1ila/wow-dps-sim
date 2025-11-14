@@ -4,7 +4,7 @@ import path from "node:path";
 import {SimulationSpec} from "./SimulationSpec";
 
 export class SpecLoader {
-   static load(specFile: string): SimulationSpec {
+   static load(specFile: string, allowInvalid: boolean = false): SimulationSpec {
       try {
          if (!specFile.endsWith('.json'))
             specFile += '.json';
@@ -12,17 +12,19 @@ export class SpecLoader {
          const fileContent = readFileSync(filePath, 'utf-8');
          const spec: any = JSON.parse(fileContent);
 
-        if (!spec.name || !spec.class || !spec.talents) {
-            throw new Error('Invalid spec file: missing required fields (name, class, talents)');
-        }
+        if (!allowInvalid) {
+            if (!spec.name || !spec.class || !spec.talents) {
+                throw new Error('Invalid spec file: missing required fields (name, class, talents)');
+            }
 
-        // gearStats is optional now - can be built from gear array or provided directly
-        if (!spec.gearStats && !spec.gear) {
-            throw new Error('Invalid spec file: must have either gearStats or gear array');
-        }
+            // gearStats is optional now - can be built from gear array or provided directly
+            if (!spec.gearStats && !spec.gear) {
+                throw new Error('Invalid spec file: must have either gearStats or gear array');
+            }
 
-        if (!spec.playerLevel) {
-            throw new Error('Invalid spec file: missing required field playerLevel');
+            if (!spec.playerLevel) {
+                throw new Error('Invalid spec file: missing required field playerLevel');
+            }
         }
 
          // Set defaults for simulation parameters if not provided
@@ -44,14 +46,17 @@ export class SpecLoader {
             'shaman': CharacterClass.Shaman,
         };
 
-        const characterClass = classMap[spec.class.toLowerCase()];
-        if (!characterClass) {
-            throw new Error(`Unknown class "${spec.class}". Available classes: rogue, warrior, mage, shaman`);
+        if (spec.class) {
+            const characterClass = classMap[spec.class.toLowerCase()];
+            if (!characterClass && !allowInvalid) {
+                throw new Error(`Unknown class "${spec.class}". Available classes: rogue, warrior, mage, shaman`);
+            }
+            if (characterClass) {
+                spec.class = characterClass;
+                // Determine if this is a healer spec based on class
+                spec.isHealerSpec = characterClass === CharacterClass.Shaman;
+            }
         }
-        spec.class = characterClass;
-
-        // Determine if this is a healer spec based on class
-        spec.isHealerSpec = characterClass === CharacterClass.Shaman;
 
          return spec as SimulationSpec;
       } catch (error) {
