@@ -10,7 +10,7 @@ import {SimulationOptions} from "./SimulationSpec";
 interface SimulationResult {
    name?: string;
    dps: number;
-   talentOverrides: Record<string, number>;
+   specOverrides: string;
    executionTimeMs: number;
    iterations: number;
    abilityBreakdown: Record<string, {
@@ -35,7 +35,7 @@ interface SimulationResult {
    };
 }
 
-function runSimulation(baseOptions: SimulationOptions, overrides: SpecOverrides): SimulationResult {
+function runSimulation(baseOptions: SimulationOptions, overrides: SpecOverrides, specString: string): SimulationResult {
    try {
       const options = {...baseOptions};
       options.talentOverrides = overrides.talents;
@@ -44,9 +44,11 @@ function runSimulation(baseOptions: SimulationOptions, overrides: SpecOverrides)
       options.rotationOverrides = overrides.rotation;
 
       const runner = new SimulationRunner(options);
-      return runner.runAndGetResults();
+      const result = runner.runAndGetResults();
+      result.specOverrides = specString;
+      return result;
    } catch (error) {
-      console.error(`Error running simulation for spec: ${overrides.talents}${overrides.setup ? ` | ${overrides.setup}` : ''}${overrides.gear ? ` | ${overrides.gear}` : ''}${overrides.rotation ? ` | ${overrides.rotation}` : ''}`);
+      console.error(`Error running simulation for spec: ${specString}`);
       throw error;
    }
 }
@@ -57,26 +59,21 @@ function printTable(results: SimulationResult[]): void {
    console.log('='.repeat(120));
    console.log(`Iterations: ${results[0].iterations}\n`);
 
-   console.log(`${'Spec'.padEnd(10)} | ${'DPS'.padStart(10)} | Talents`);
+   console.log(`${'Spec'.padEnd(10)} | ${'DPS'.padStart(10)} | Spec String`);
    console.log('-'.repeat(120));
 
    // Find the maximum DPS
    const maxDPS = Math.max(...results.map(r => r.dps));
-   let index = 1;
 
-   for (const result of results) {
-      const talentString = Object.entries(result.talentOverrides)
-         .map(([name, value]) => `${name}:${value >= 0 ? +value : "0"}`)
-         .join(', ');
+   results.forEach((result, index) => result.name ??= `Spec ${index+1}`);
+   results
+      .sort((a,b)=>b.dps-a.dps)
+      .forEach((result) => {
 
       const dpsString = result.dps.toFixed(2).padStart(10);
       const coloredDPS = result.dps === maxDPS ? `${c.brightGreen}${dpsString}${c.reset}` : dpsString;
-
-      console.log(
-         `${(result.name ?? `Spec ${index}`).padEnd(10)} | ${coloredDPS} | ${talentString}`
-      );
-      index++;
-   }
+      console.log(`${result.name!.padEnd(10)} | ${coloredDPS} | ${result.specOverrides}`);
+   });
 }
 
 function parseSpecOverrides(specArg?: string, specFile?: string): SpecOverrides[] {
@@ -133,12 +130,20 @@ try {
 
    for (let i = 0; i < specs.length; i++) {
       console.log(`Simulating spec #${i+1}...`);
+      const spec = specs[i];
+      const specString = [
+         spec.talents,
+         spec.setup,
+         spec.gear,
+         spec.rotation
+      ].filter(part => part !== undefined).join('|');
+
       const result = runSimulation({
          specFile,
          quiet: true,
          iterations: opts.iterations,
          fightLength: opts.fightLength,
-      }, specs[i]);
+      }, spec, specString);
       if (!results) {
          console.log(`Failed running simulation!`);
          process.exit(1);
