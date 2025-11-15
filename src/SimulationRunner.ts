@@ -32,10 +32,10 @@ export class SimulationRunner {
     private loadSpec(): void {
         try {
             this.spec = SpecLoader.load(this.options.specFile);
+            this.applySpecOverrides();
             this.applyGearStats();
             this.applyTalentOverrides();
             this.applySetupOverrides();
-            this.applySpecOverrides();
             this.applyRotationOverrides();
             this.applyCliOverrides();
         } catch (error) {

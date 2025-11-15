@@ -720,11 +720,16 @@ export abstract class BaseSimulator implements Simulator, BuffsProvider, PlayerS
       return this.spec.extraStats.meleeHaste || 1;
    }
 
+   /**
+    * Final attack power of player
+    */
    get attackPower(): number {
+      let extra = this.spec.extraStats.attackPower ?? 0;
+      // add 150 AP if mark of the champion is worn and target is of type demon or undead.
       return Math.max(1, this.playerLevel * this.attackPowerPerLevel - 20)
          + this.strength * this.strengthToAttackPower
          + this.agility * this.agilityToAttackPower
-         + (this.spec.extraStats.attackPower || 0);
+         + extra;
    }
 
    get weaponSkill(): number {
