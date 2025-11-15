@@ -12,6 +12,7 @@ import {
    SimulationResult,
    SimulationState,
    SimulationStatistics,
+   TargetType,
    WeaponEnchant
 } from '../types';
 import {c} from '../globals';
@@ -55,6 +56,9 @@ export abstract class BaseSimulator implements Simulator, BuffsProvider, PlayerS
 
    protected attackPowerPerLevel = 1;
 
+   hasMarkOfChampion!: boolean;
+   targetIsDemonOrUndead!: boolean;
+
    statistics: SimulationStatistics = {
       critCount: 0,
       hitCount: 0,
@@ -66,6 +70,8 @@ export abstract class BaseSimulator implements Simulator, BuffsProvider, PlayerS
    protected constructor(
       protected spec: SimulationSpec
    ) {
+      this.hasMarkOfChampion = this.spec.gear?.some(item => item.itemId === 23206 || item.itemId === 23207);
+      this.targetIsDemonOrUndead = this.spec.targetType === TargetType.Demon || this.spec.targetType === TargetType.Undead;
    }
 
    protected abstract initializeState(): SimulationState;
@@ -725,7 +731,11 @@ export abstract class BaseSimulator implements Simulator, BuffsProvider, PlayerS
     */
    get attackPower(): number {
       let extra = this.spec.extraStats.attackPower ?? 0;
-      // add 150 AP if mark of the champion is worn and target is of type demon or undead.
+
+      if (this.hasMarkOfChampion && this.targetIsDemonOrUndead) {
+         extra += 150;
+      }
+
       return Math.max(1, this.playerLevel * this.attackPowerPerLevel - 20)
          + this.strength * this.strengthToAttackPower
          + this.agility * this.agilityToAttackPower

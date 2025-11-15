@@ -31,6 +31,7 @@ export class SpecLoader {
          spec.fightLength = spec.fightLength ?? spec.simulationConfig?.fightLength ?? 60;
          spec.targetLevel = spec.targetLevel ?? spec.simulationConfig?.targetLevel ?? 63;
          spec.targetArmor = spec.targetArmor ?? spec.simulationConfig?.targetArmor ?? 3731;
+         spec.targetType = spec.targetType ?? spec.simulationConfig?.targetType;
          spec.iterations = spec.iterations ?? spec.simulationConfig?.iterations ?? 1000;
          spec.postCycleResourceGeneration = spec.postCycleResourceGeneration ?? spec.simulationConfig?.postCycleResourceGeneration ?? false;
 

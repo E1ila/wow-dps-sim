@@ -37,6 +37,7 @@
         "fightLength": 120,
         "targetLevel": 63,
         "targetArmor": 3731,
+        "targetType": "undead",
         "iterations": 4000,
         "postCycleResourceGeneration": true
     }
