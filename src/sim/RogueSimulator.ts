@@ -8,6 +8,7 @@ import {
    RogueBuffEvent,
    RogueDamageEvent,
    RogueSimulationState,
+   Weapon,
    WeaponType,
 } from '../types';
 import {c, isHit} from '../globals';
@@ -302,6 +303,38 @@ export class RogueSimulator extends MeleeSimulator {
    override onOffHandHit(result: AttackResult): void {
       super.onOffHandHit(result);
       this.trySwordSpecProc(result, this.spec.extraStats.oh?.type, `EXTRA(off) ${c.yellow}⚔${c.reset}`);
+   }
+
+   private checkDarkmantle4Proc(result: AttackResult, weapon: Weapon): void {
+      if (!this.setup.darkmantle4 || !isHit(result)) {
+         return;
+      }
+
+      // 1 PPM (Procs Per Minute): proc_chance = weapon_speed / 60
+      const procChance = weapon.speed / 60;
+      if (Math.random() < procChance) {
+         this.addProc(`Darkmantle ${c.yellow}█████${c.reset}`, true);
+         this.addEnergy(35);
+      }
+   }
+
+   override handleAutoAttacks(): void {
+      if (this.spec.setup?.disableAutoAttacks)
+         return;
+      this.processAutoAttacks(
+         (result) => {
+            this.onMainHandHit(result);
+            this.checkDarkmantle4Proc(result, this.spec.extraStats.mh);
+            this.logDamage('MH', result);
+         },
+         (result) => {
+            this.onOffHandHit(result);
+            if (this.spec.extraStats.oh) {
+               this.checkDarkmantle4Proc(result, this.spec.extraStats.oh);
+            }
+            this.logDamage('OH', result);
+         }
+      );
    }
 
    protected checkCondition(cond: string): boolean {
