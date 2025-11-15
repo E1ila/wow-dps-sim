@@ -1,4 +1,12 @@
-import {AttackResult, AttackType, CharacterClass, EquipmentSlot, ItemSlotType, SpecOverrides} from "./types";
+import {
+   AttackResult,
+   AttackType,
+   CharacterClass,
+   EquipmentSlot,
+   ItemSlotType,
+   SpecOverrides,
+   WeaponType
+} from "./types";
 
 export const c = {
    black: '\x1b[30m',
@@ -87,7 +95,20 @@ export const EQUIPMENT_SLOTS: EquipmentSlot[] = [
    { name: 'finger2', slotTypes: [ItemSlotType.Finger] },
    { name: 'trinket1', slotTypes: [ItemSlotType.Trinket] },
    { name: 'trinket2', slotTypes: [ItemSlotType.Trinket] },
-   { name: 'mainhand', slotTypes: [ItemSlotType.Weapon, ItemSlotType.TwoHand] },
-   { name: 'offhand', slotTypes: [ItemSlotType.Weapon], optional: true },
+   { name: 'mh', slotTypes: [ItemSlotType.Weapon, ItemSlotType.TwoHand] },
+   { name: 'oh', slotTypes: [ItemSlotType.Weapon], optional: true },
    { name: 'ranged', slotTypes: [ItemSlotType.Ranged], optional: true },
 ];
+
+export const weaponTypeMap: { [key: string]: WeaponType } = {
+   'dagger': WeaponType.Dagger,
+   'sword': WeaponType.Sword,
+   'sword2h': WeaponType.TwoHandedSword,
+   'axe': WeaponType.Axe,
+   'axe2h': WeaponType.TwoHandedAxe,
+   'mace': WeaponType.Mace,
+   'mace2h': WeaponType.TwoHandedMace,
+   'fist': WeaponType.Fist,
+};
+
+export const GEAR_SLOT_NAMES = EQUIPMENT_SLOTS.map(slot => slot.name);

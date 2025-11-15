@@ -104,6 +104,7 @@ export interface SimulationSetup {
    refreshSndSecondsBeforeExpiry?: number;
    avoidEviscerate?: boolean;
    veiledShadowsSet?: boolean;
+   darkmantle4?: boolean;
    disableAutoAttacks?: boolean;
    prefer5EvisOverSnd?: boolean;
 }

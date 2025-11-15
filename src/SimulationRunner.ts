@@ -1,5 +1,5 @@
-import {CharacterClass} from './types';
-import {c, colorByClass, EQUIPMENT_SLOTS} from './globals';
+import {CharacterClass, ENCHANT_NAME_TO_SPELL_ID} from './types';
+import {c, colorByClass, EQUIPMENT_SLOTS, GEAR_SLOT_NAMES} from './globals';
 import {WarriorSimulator} from './sim/WarriorSimulator';
 import {BaseSimulator} from './sim/BaseSimulator';
 import {SpecLoader} from './SpecLoader';
@@ -35,7 +35,7 @@ export class SimulationRunner {
             this.applyGearStats();
             this.applyTalentOverrides();
             this.applySetupOverrides();
-            this.applyGearOverrides();
+            this.applySpecOverrides();
             this.applyRotationOverrides();
             this.applyCliOverrides();
         } catch (error) {
@@ -101,14 +101,10 @@ export class SimulationRunner {
         }
     }
 
-    private parseOverrides(overrideString: string, type: string): Array<{name: string; value: string}> {
+    private parseOverrides(overrideString: string, type: string): string[][] {
         try {
             return overrideString.split(',').map((pair: string) => {
-                const [name, value] = pair.split(':');
-                if (!name || value === undefined) {
-                    throw new Error(`Invalid ${type} format: ${pair}`);
-                }
-                return {name: name.trim(), value: value.trim()};
+                return pair.split(':').map(o => o.trim());
             });
         } catch (error) {
             throw new Error(
@@ -137,10 +133,10 @@ export class SimulationRunner {
         const overrides = this.parseOverrides(this.options.talentOverrides, 'talent');
 
         for (const override of overrides) {
-            const talentName = override.name;
+            const talentName = override[0];
             if (talentName in this.spec.talents) {
                 const originalValue = (this.spec.talents as any)[talentName];
-                const newValue = this.parseValue(override.value, originalValue);
+                const newValue = this.parseValue(override[1], originalValue);
                 (this.spec.talents as any)[talentName] = newValue;
                 this.appliedTalentOverrides[talentName] = newValue;
             } else {
@@ -161,11 +157,11 @@ export class SimulationRunner {
         const overrides = this.parseOverrides(this.options.setupOverrides, 'setup');
 
         for (const override of overrides) {
-            (this.spec.setup as any)[override.name] = this.parseValue(override.value);
+            (this.spec.setup as any)[override[0]] = this.parseValue(override[1]);
         }
     }
 
-    private applyGearOverrides(): void {
+    private applySpecOverrides(): void {
         if (!this.options.gearOverrides) {
             return;
         }
@@ -173,29 +169,20 @@ export class SimulationRunner {
         const overrides = this.parseOverrides(this.options.gearOverrides, 'gear');
 
         for (const override of overrides) {
-            const name = override.name;
-            const value = override.value;
-
-            // Check if this is the new format (slot:item_name:enchant)
-            const slotNames = EQUIPMENT_SLOTS.map(slot => slot.name);
-            if (slotNames.includes(name)) {
-                this.applySlotItemOverride(name, value);
+            const name = override[0];
+            if (GEAR_SLOT_NAMES.includes(name)) {
+                this.applySlotItemOverride(name, override[1], override[2]);
             }
         }
     }
 
-    private applySlotItemOverride(slotName: string, itemSpec: string): void {
-        // Parse itemSpec format: "Item_Name:enchant" or "itemId:enchant"
-        const parts = itemSpec.split(':');
-        const itemSpecPart = parts[0];
-        const enchantSpec = parts[1];
-
-        // Determine if itemSpecPart is an item ID (number) or item name (string)
-        const itemId = parseInt(itemSpecPart);
+    private applySlotItemOverride(slotName: string, itemSpec: string, enchant: string): void {
+        // Determine if itemSpec is an item ID (number) or item name (string)
         let item;
 
-        if (!isNaN(itemId)) {
-            // It's an item ID
+        if (/^\d+$/.test(itemSpec)) {
+            // It's an item ID (pure numeric string)
+            const itemId = parseInt(itemSpec);
             item = this.db.getItem(itemId);
             if (!item) {
                 console.warn(`Warning: Item with ID ${itemId} not found in database, ignoring gear override for slot "${slotName}"`);
@@ -203,7 +190,7 @@ export class SimulationRunner {
             }
         } else {
             // It's an item name - convert underscores to spaces
-            const itemName = itemSpecPart.replace(/_/g, ' ');
+            const itemName = itemSpec.replace(/_/g, ' ');
             item = this.db.findItemByName(itemName);
             if (!item) {
                 console.warn(`Warning: Item "${itemName}" not found in database, ignoring gear override for slot "${slotName}"`);
@@ -213,14 +200,13 @@ export class SimulationRunner {
 
         // Parse enchant - can be either a spell ID (number) or an enchant name (string)
         let spellId: number | undefined;
-        if (enchantSpec) {
-            const enchantAsNumber = parseInt(enchantSpec);
-            if (!isNaN(enchantAsNumber)) {
-                // It's a spell ID
-                spellId = enchantAsNumber;
+        if (enchant) {
+            if (/^\d+$/.test(enchant)) {
+                // It's a spell ID (pure numeric string)
+                spellId = parseInt(enchant);
             } else {
                 // It's an enchant name - convert underscores to spaces and look up spell ID
-                const enchantName = enchantSpec.replace(/_/g, ' ');
+                const enchantName = enchant.replace(/_/g, ' ');
                 spellId = this.getSpellIdFromEnchantName(enchantName);
                 if (spellId === undefined) {
                     console.warn(`Warning: Enchant "${enchantName}" not found, applying item without enchant`);
@@ -251,17 +237,7 @@ export class SimulationRunner {
     }
 
     private getSpellIdFromEnchantName(enchantName: string): number | undefined {
-        // Map of enchant names to spell IDs (from GearParser.ts weaponEnchantMap)
-        const enchantNameToSpellId: { [key: string]: number } = {
-            'Crusader': 1900,
-            '+3 damage': 803,
-            '+4 damage': 1894,
-            '+5 damage': 1898,
-            '+15 agility': 1897,
-            '+25 agility': 2646,
-        };
-
-        return enchantNameToSpellId[enchantName];
+        return ENCHANT_NAME_TO_SPELL_ID[enchantName];
     }
 
     private applyRotationOverrides(): void {

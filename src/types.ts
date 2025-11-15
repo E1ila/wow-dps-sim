@@ -76,6 +76,19 @@ export enum WeaponEnchant {
    Agility15 = '+15 agility',
 }
 
+export const WEAPON_ENCHANT_SPELL_IDS: { [key: number]: WeaponEnchant } = {
+   1900: WeaponEnchant.Crusader,
+   803: WeaponEnchant.Dmg3,
+   1894: WeaponEnchant.Dmg4,
+   1898: WeaponEnchant.Dmg5,
+   1897: WeaponEnchant.Agility15,
+   2646: WeaponEnchant.Agility25,
+};
+
+export const ENCHANT_NAME_TO_SPELL_ID: { [key: string]: number } = Object.fromEntries(
+   Object.entries(WEAPON_ENCHANT_SPELL_IDS).map(([spellId, enchantName]) => [enchantName, parseInt(spellId)])
+);
+
 export enum WeaponType {
    Unknown = 0,
    Axe = 1,

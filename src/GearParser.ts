@@ -1,6 +1,6 @@
 import {Database} from './Database';
 import {EquippedItem, Stats} from './SimulationSpec';
-import {WeaponEnchant, WeaponType} from './types';
+import {WEAPON_ENCHANT_SPELL_IDS, WeaponEnchant, WeaponType} from './types';
 import {Enchant, Item} from "./Database.types";
 
 // Stat index mapping based on WoW Classic database format
@@ -270,18 +270,9 @@ export class GearParser {
             15: WeaponType.Dagger,
         };
 
-        const weaponEnchantMap: { [key: number]: string } = {
-            1900: 'Crusader',
-            803: '+3 damage',
-            1894: '+4 damage',
-            1898: '+5 damage',
-            1897: '+15 agility',
-            2646: '+25 agility',
-        };
-
         let enchantType = WeaponEnchant.None;
-        if (spellId && weaponEnchantMap[spellId]) {
-            enchantType = weaponEnchantMap[spellId] as WeaponEnchant;
+        if (spellId && WEAPON_ENCHANT_SPELL_IDS[spellId]) {
+            enchantType = WEAPON_ENCHANT_SPELL_IDS[spellId];
         }
 
         return {
