@@ -4,7 +4,8 @@
     "setup": {
         "refreshSndSecondsBeforeExpiry": 0.2,
         "waitForSndExpiry": 1.6,
-        "veiledShadowsSet": 1
+        "veiledShadowsSet": 1,
+        "deathdealers5": 1
     },
     "rotation": "snd?snd:sndw?skip:cp5?evis:bs",
     "talents": {

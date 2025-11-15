@@ -105,6 +105,7 @@ export interface SimulationSetup {
    avoidEviscerate?: boolean;
    veiledShadowsSet?: boolean;
    darkmantle4?: boolean;
+   deathdealers5?: boolean;
    disableAutoAttacks?: boolean;
    prefer5EvisOverSnd?: boolean;
 }

@@ -50,6 +50,10 @@ export class RogueDamageCalculator extends MeleeDamageCalculator {
       return (this.talents.improvedEviscerate ?? 0) * 0.05;
    }
 
+   get deathdealers5Bonus() {
+      return this.spec.setup?.deathdealers5 ? 0.15 : 0;
+   }
+
    get murderMultiplier(): number {
       if (this.talents.murder && this.spec.targetType && [TargetType.Humanoid, TargetType.Beast, TargetType.Giant, TargetType.Dragonkin].includes(this.spec.targetType)) {
          return 1 + this.talents.murder * 0.01;
@@ -135,7 +139,7 @@ export class RogueDamageCalculator extends MeleeDamageCalculator {
       const baseDamage = Math.round(cpDamage + apBonus);
 
       // Ability-specific talents are additive with each other
-      const abilityMultiplier = 1 + this.improvedEviscerateBonus + this.aggressionBonus;
+      const abilityMultiplier = 1 + this.improvedEviscerateBonus + this.aggressionBonus + this.deathdealers5Bonus;
       // Murder is applied separately (at attack table level in reference)
       const multipliers = [
          abilityMultiplier,
