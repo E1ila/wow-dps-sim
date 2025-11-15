@@ -14,7 +14,7 @@ import {
 import {c, isHit} from '../globals';
 import {RogueDamageCalculator} from '../mechanics/RogueDamageCalculator';
 import {MeleeSimulator} from './MeleeSimulator';
-import {SimulationSetup, SimulationSpec} from "../SimulationSpec";
+import {PlayerSetup, SimulationSpec} from "../SimulationSpec";
 import {RogueTalents} from "../talents";
 
 export const ROGUE = {
@@ -30,7 +30,7 @@ export class RogueSimulator extends MeleeSimulator {
    override damageCalculator: RogueDamageCalculator;
    override events: (RogueDamageEvent | RogueBuffEvent | ProcEvent)[] = [];
    damageBreakdown: Map<string, number> = new Map();
-   setup: SimulationSetup;
+   setup: PlayerSetup;
    talents: RogueTalents;
 
    protected strengthPerLevel = 1;
@@ -54,7 +54,7 @@ export class RogueSimulator extends MeleeSimulator {
       this.talents = spec.talents as RogueTalents;
       this.damageCalculator = new RogueDamageCalculator(spec, this, this);
       this.state = this.initializeState();
-      this.setup = spec.setup as SimulationSetup ?? {};
+      this.setup = spec.setup as PlayerSetup ?? {};
    }
 
    initializeState(): RogueSimulationState {

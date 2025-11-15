@@ -7,7 +7,7 @@ import {RogueSimulator} from "./sim/RogueSimulator";
 import {ShamanSimulator} from "./sim/ShamanSimulator";
 import path from "node:path";
 import {Database} from "./Database";
-import {SimulationOptions, SimulationSetup, SimulationSpec} from "./SimulationSpec";
+import {PlayerSetup, SimulationOptions, SimulationSpec} from "./SimulationSpec";
 import {RogueTalents, ShamanTalents, WarriorTalents} from "./talents";
 import {GearParser} from "./GearParser";
 import {applyWorldBuffs} from "./worldbuffs";
@@ -254,7 +254,7 @@ export class SimulationRunner {
     private createSimulator(): BaseSimulator {
         switch (this.spec.class) {
             case CharacterClass.Rogue:
-                return new RogueSimulator(this.spec as SimulationSpec & { talents: RogueTalents; setup?: SimulationSetup });
+                return new RogueSimulator(this.spec as SimulationSpec & { talents: RogueTalents; setup?: PlayerSetup });
 
             case CharacterClass.Warrior:
                 return new WarriorSimulator(this.spec as SimulationSpec & { talents: WarriorTalents });

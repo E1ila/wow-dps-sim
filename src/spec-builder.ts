@@ -7,7 +7,7 @@ import {Item} from './Database.types';
 import {EquippedItem} from './SimulationSpec';
 import {c, EQUIPMENT_SLOTS, getEnchantTypesForItem} from "./globals";
 import {SpecLoader} from './SpecLoader';
-import {EquipmentSlot, ItemSlotType} from "./types";
+import {EquipmentSlot, ItemSlotType, TargetType} from "./types";
 
 class SpecBuilder {
     private db: Database;
@@ -338,7 +338,7 @@ class SpecBuilder {
                 { name: `Player Level: ${this.spec.playerLevel}`, value: 'playerLevel' },
                 { name: 'Talents', value: 'talents' },
                 { name: `Rotation: ${this.spec.rotation || '(not set)'}`, value: 'rotation' },
-                { name: 'Setup', value: 'setup' },
+                { name: 'Player Setup', value: 'setup' },
                 { name: 'Simulation Config', value: 'simulationConfig' },
                 { name: `Gear (${this.equippedItems.length} items)`, value: 'gear' },
                 { name: '✓ Save and exit', value: 'save' },
@@ -519,6 +519,23 @@ class SpecBuilder {
             default: config.targetLevel,
         }]);
 
+        const { targetType } = await inquirer.prompt([{
+            type: 'list',
+            name: 'targetType',
+            message: 'Target type:',
+            choices: [
+                { name: 'Undefined', value: TargetType.Undefined },
+                { name: 'Humanoid', value: TargetType.Humanoid },
+                { name: 'Beast', value: TargetType.Beast },
+                { name: 'Dragonkin', value: TargetType.Dragonkin },
+                { name: 'Giant', value: TargetType.Giant },
+                { name: 'Undead', value: TargetType.Undead },
+                { name: 'Demon', value: TargetType.Demon },
+                { name: 'Elemental', value: TargetType.Elemental },
+            ],
+            default: config.targetType || TargetType.Undefined,
+        }]);
+
         const { targetArmor } = await inquirer.prompt([{
             type: 'number',
             name: 'targetArmor',
@@ -542,6 +559,7 @@ class SpecBuilder {
 
         this.spec!.simulationConfig = {
             targetLevel,
+            targetType,
             targetArmor,
             fightLength,
             iterations,

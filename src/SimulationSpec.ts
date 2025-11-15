@@ -10,7 +10,7 @@ export interface SimulationSpec {
    race?: Race;
    playerLevel: number;
    rotation?: string[];
-   setup?: SimulationSetup;
+   setup?: PlayerSetup;
    talents: RogueTalents | WarriorTalents | MageTalents | ShamanTalents;
    extraStats: Stats; // from gear+buffs+consumes - not inc. base stats (from level) nor enchants, etc.
    gear: EquippedItem[];
@@ -96,7 +96,7 @@ export interface Stats {
    meleeHaste?: number; // Haste multiplier (1.15 = 15% faster)
 }
 
-export interface SimulationSetup {
+export interface PlayerSetup {
    // general
    wbs?: boolean; // apply world buffs
    // rogue
