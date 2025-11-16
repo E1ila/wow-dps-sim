@@ -62,6 +62,7 @@ export interface SimulationOptions {
 }
 
 export interface EquippedItem {
+   name?: string;
    itemId: number;
    randomSuffixId?: number;
    spellId?: number;

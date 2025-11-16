@@ -313,7 +313,7 @@ export class RogueSimulator extends MeleeSimulator {
       // 1 PPM (Procs Per Minute): proc_chance = weapon_speed / 60
       const procChance = weapon.speed / 60;
       if (Math.random() < procChance) {
-         this.addProc(`Darkmantle ${c.yellow}█████${c.reset}`, true);
+         this.addProc(`Darkmantle ${c.yellow}█████${c.reset}`);
          this.addEnergy(35);
       }
    }

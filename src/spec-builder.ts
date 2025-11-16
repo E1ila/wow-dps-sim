@@ -251,9 +251,18 @@ class SpecBuilder {
 
         console.log('\n=== GEAR SPEC (Copy this to your spec file) ===\n');
         const gearSpec = this.equippedItems.map(item => {
-            const obj: any = { itemId: item.itemId };
+            const itemData = this.db.getItem(item.itemId);
+            const enchantData = item.spellId ? this.db.getEnchant(item.spellId) : null;
+
+            const obj: any = {
+                itemId: item.itemId,
+                itemName: itemData?.name || 'Unknown'
+            };
             if (item.randomSuffixId) obj.randomSuffixId = item.randomSuffixId;
-            if (item.spellId) obj.spellId = item.spellId;
+            if (item.spellId) {
+                obj.spellId = item.spellId;
+                obj.enchantName = enchantData?.name || 'Unknown';
+            }
             return obj;
         });
         console.log(c.green + JSON.stringify(gearSpec) + c.reset);
