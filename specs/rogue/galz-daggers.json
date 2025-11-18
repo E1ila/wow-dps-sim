@@ -31,7 +31,7 @@
         "swordSpecialization": 0,
         "weaponExpertise": 2
     },
-    "gear": [{"itemId":22478,"enchantId":2585},{"itemId":19377},{"itemId":22479,"enchantId":2717},{"itemId":23045,"enchantId":2621},{"itemId":22476,"enchantId":1891},{"itemId":22483,"enchantId":1885},{"itemId":22481,"enchantId":25080},{"itemId":21586},{"itemId":22477,"enchantId":2585},{"itemId":22480,"enchantId":1887},{"itemId":23060},{"itemId":23038},{"itemId":22954},{"itemId":19406},{"itemId":22802,"enchantId":20031},{"itemId":23044,"enchantId":23800},{"itemId":23557}],
+    "gear":[{"itemId":22478,"enchantId":2585},{"itemId":19377},{"itemId":22479,"enchantId":2717},{"itemId":23045,"enchantId":2621},{"itemId":22476,"enchantId":1891},{"itemId":22483,"enchantId":1885},{"itemId":22481,"enchantId":25080},{"itemId":21586},{"itemId":22477,"enchantId":2585},{"itemId":22480,"enchantId":1887},{"itemId":23060},{"itemId":23038},{"itemId":22954},{"itemId":19406},{"itemId":22802,"spellId":20034},{"itemId":21126,"spellId":20034},{"itemId":23557}],
     "simulationConfig": {
         "fightLength": 120,
         "targetLevel": 63,

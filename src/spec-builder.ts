@@ -178,6 +178,40 @@ class SpecBuilder {
         }
     }
 
+    loadSpecString(specString: string): void {
+        if (!this.spec) {
+            this.createNewSpec();
+        }
+
+        const parts = specString.split('|');
+
+        // Parse talents (first part)
+        if (parts[0]) {
+            const talentPairs = parts[0].split(',');
+            for (const pair of talentPairs) {
+                const [key, value] = pair.split(':');
+                if (key && value !== undefined) {
+                    const numValue = parseInt(value, 10);
+                    this.spec!.talents[key] = isNaN(numValue) ? value : numValue;
+                }
+            }
+            console.log(`Loaded talents from spec string.`);
+        }
+
+        // Parse setup/rotation (second part)
+        if (parts[1]) {
+            const setupPairs = parts[1].split(',');
+            for (const pair of setupPairs) {
+                const [key, value] = pair.split(':');
+                if (key && value !== undefined) {
+                    const numValue = parseInt(value, 10);
+                    this.spec!.setup[key] = isNaN(numValue) ? value : numValue;
+                }
+            }
+            console.log(`Loaded setup from spec string.`);
+        }
+    }
+
     async buildGear(): Promise<EquippedItem[]> {
         console.log('=== WoW Classic Gear Builder ===\n');
         console.log('Build your character\'s equipment by searching for items.');
@@ -583,23 +617,38 @@ async function main() {
         .name('gear-builder')
         .description('Interactive gear builder for WoW Classic DPS Simulator')
         .version('1.0.0')
-        .argument('[spec]', 'Spec file path (e.g., "rogue/tals" for specs/rogue/tals.json)');
+        .argument('[specFile]', 'Spec file path (e.g., "rogue/tals" for specs/rogue/tals.json)')
+        .option('-e, --edit <json>', 'Edit existing gear (provide JSON array of EquippedItem[])')
+        .option('-s, --spec <spec>', 'Load spec string (e.g., "ruthlessness:3,murder:2|avoidEviscerate:1")');
 
     program.parse();
 
-    const specPath = program.args[0];
+    const specFilePath = program.args[0];
+    const options = program.opts<{ edit?: string; spec?: string }>();
     const dbPath = path.resolve(__dirname, 'db.json');
     const builder = new SpecBuilder(dbPath);
 
     try {
-        if (specPath) {
-            builder.loadSpecFile(specPath);
+        if (specFilePath) {
+            builder.loadSpecFile(specFilePath);
+            if (options.spec) {
+                builder.loadSpecString(options.spec);
+            }
+            await builder.editSpecMenu();
+        } else if (options.edit) {
+            if (options.spec) {
+                builder.loadSpecString(options.spec);
+            }
+            builder.loadExistingGear(options.edit);
+            await builder.editGear();
+        } else if (options.spec) {
+            builder.loadSpecString(options.spec);
             await builder.editSpecMenu();
         } else {
             await builder.buildGear();
         }
 
-        if (!specPath) {
+        if (!specFilePath && !options.spec) {
             builder.displayGear();
         }
     } catch (error) {

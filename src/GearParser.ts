@@ -117,6 +117,8 @@ export class GearParser {
             this.addItemStats(item.stats, STAT_IDS, stats, item);
 
             // Handle weapon skills
+            // Note: weaponSkills array indices match our WeaponType enum values
+            // Both follow wow-sims/classic/proto/common.proto WeaponSkill enum
             if (item.weaponSkills) {
                 for (let i = 0; i < item.weaponSkills.length; i++) {
                     const skillBonus = item.weaponSkills[i];
@@ -256,18 +258,19 @@ export class GearParser {
     }
 
     private parseWeapon(item: any, spellId?: number): any {
+        // Maps database WeaponType enum to our WeaponType enum
+        // Based on wow-sims/classic/proto/common.proto WeaponType
         const weaponTypeMap: { [key: number]: WeaponType } = {
-            0: WeaponType.Axe,
+            0: WeaponType.Unknown,
             1: WeaponType.Axe,
-            2: WeaponType.Bow,
-            3: WeaponType.Gun,
+            2: WeaponType.Dagger,
+            3: WeaponType.Fist,
             4: WeaponType.Mace,
-            5: WeaponType.Polearm,
-            6: WeaponType.Sword,
-            7: WeaponType.Staff,
-            10: WeaponType.Fist,
-            13: WeaponType.Dagger,
-            15: WeaponType.Dagger,
+            5: WeaponType.Unknown,  // OffHand - not a real weapon type for our purposes
+            6: WeaponType.Polearm,
+            7: WeaponType.Unknown,  // Shield - not a damage weapon
+            8: WeaponType.Staff,
+            9: WeaponType.Sword,
         };
 
         let enchantType = WeaponEnchant.None;
@@ -279,7 +282,7 @@ export class GearParser {
             min: item.weaponDamageMin,
             max: item.weaponDamageMax,
             speed: item.weaponSpeed,
-            type: weaponTypeMap[item.weaponType || 6] || WeaponType.Sword,
+            type: weaponTypeMap[item.weaponType || 0] || WeaponType.Unknown,
             enchant: enchantType,
         };
     }
