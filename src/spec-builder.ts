@@ -583,27 +583,23 @@ async function main() {
         .name('gear-builder')
         .description('Interactive gear builder for WoW Classic DPS Simulator')
         .version('1.0.0')
-        .option('-s, --spec <path>', 'Spec file path (e.g., "rogue/tals" for specs/rogue/tals.json)')
-        .option('-e, --edit <json>', 'Edit existing gear (provide JSON array of EquippedItem[])');
+        .argument('[spec]', 'Spec file path (e.g., "rogue/tals" for specs/rogue/tals.json)');
 
     program.parse();
 
-    const options = program.opts<{ spec?: string; edit?: string }>();
+    const specPath = program.args[0];
     const dbPath = path.resolve(__dirname, 'db.json');
     const builder = new SpecBuilder(dbPath);
 
     try {
-        if (options.spec) {
-            builder.loadSpecFile(options.spec);
+        if (specPath) {
+            builder.loadSpecFile(specPath);
             await builder.editSpecMenu();
-        } else if (options.edit) {
-            builder.loadExistingGear(options.edit);
-            await builder.editGear();
         } else {
             await builder.buildGear();
         }
 
-        if (!options.spec) {
+        if (!specPath) {
             builder.displayGear();
         }
     } catch (error) {
