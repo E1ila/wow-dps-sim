@@ -1,5 +1,5 @@
 import {BaseSimulator} from './BaseSimulator';
-import {AttackResult, Buff, MeleeSimulationState, Weapon, WeaponEnchant} from '../types';
+import {AttackResult, AttackType, Buff, MeleeSimulationState, Weapon, WeaponEnchant} from '../types';
 import {isHit} from '../globals';
 import {MeleeDamageCalculator} from "../mechanics/MeleeDamageCalculator";
 
@@ -30,6 +30,7 @@ export abstract class MeleeSimulator extends BaseSimulator {
    protected onMainHandHit(result: AttackResult): void {
       if (isHit(result)) {
          this.checkCrusaderProc(this.spec.extraStats.mh);
+         this.checkThunderfuryProc(this.spec.extraStats.mh);
          // Override in subclasses for class-specific logic (e.g., Sword Specialization)
       }
    }
@@ -37,6 +38,7 @@ export abstract class MeleeSimulator extends BaseSimulator {
    protected onOffHandHit(result: AttackResult): void {
       if (isHit(result)) {
          this.checkCrusaderProc(this.spec.extraStats.oh!);
+         this.checkThunderfuryProc(this.spec.extraStats.oh!);
          // Override in subclasses for class-specific logic
       }
    }
@@ -49,6 +51,24 @@ export abstract class MeleeSimulator extends BaseSimulator {
          if (Math.random() < procChance) {
             this.addProc(Buff.Crusader, true);
             this.activateBuff(Buff.Crusader, 15000); // 15 seconds duration
+         }
+      }
+   }
+
+   protected checkThunderfuryProc(weapon: Weapon): void {
+      // Thunderfury procs 6 times per minute on average (6.0 PPM)
+      // Proc chance per hit = (weapon_speed / 60) * 6.0
+      if (this.hasThunderfury) {
+         const procChance = (weapon.speed / 60) * 6.0;
+         if (Math.random() < procChance) {
+            this.addProc('Thunderfury');
+            // Deal 300 Nature damage (flat, not affected by spell power)
+            this.logDamage('Thunderfury', {
+               type: AttackType.Hit,
+               amountModifier: 1,
+               baseAmount: 300,
+               amount: 300,
+            });
          }
       }
    }

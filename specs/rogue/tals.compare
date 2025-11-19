@@ -1,11 +1,14 @@
 ||mh:Blessed_Qiraji_Pugio:+5_damage,oh:Dagger_of_Veiled_Shadows:+15_agility
 ||
-|darkmantle4:1,deathdealers5:0|mh:Blessed_Qiraji_Pugio:+5_damage,oh:Dagger_of_Veiled_Shadows:+15_agility,waist:Darkmantle Belt,bracers:Darkmantle Bracers:20010,hands:Darkmantle Gloves:25080,chest:Darkmantle Tunic:13941
-|darkmantle4:1,deathdealers5:0|mh:Blessed_Qiraji_Pugio:+5_damage,oh:Dagger_of_Veiled_Shadows:+15_agility,waist:Darkmantle Belt,bracers:Darkmantle Bracers:20010,hands:Darkmantle Gloves:25080,feet:Darkmantle Boots:13890
-|darkmantle4:1,deathdealers5:0|mh:Blessed_Qiraji_Pugio:+5_damage,oh:Dagger_of_Veiled_Shadows:+15_agility,waist:Darkmantle Belt,bracers:Darkmantle Bracers:20010,hands:Darkmantle Gloves:25080,head:Darkmantle Cap
+relentlessStrikes:1,lethality:4||
 |darkmantle4:1,deathdealers5:0|mh:Blessed_Qiraji_Pugio:+5_damage,oh:Dagger_of_Veiled_Shadows:+15_agility,waist:Darkmantle Belt,bracers:Darkmantle Bracers:20010,hands:Darkmantle Gloves:25080,shoulder:Darkmantle Spaulders
-|darkmantle4:1,deathdealers5:0|mh:Blessed_Qiraji_Pugio:+5_damage,oh:Dagger_of_Veiled_Shadows:+15_agility,waist:Darkmantle Belt,bracers:Darkmantle Bracers:20010,hands:Darkmantle Gloves:25080,legs:Darkmantle Pants:22725
-|darkmantle4:1,deathdealers5:0|mh:Blessed_Qiraji_Pugio:+5_damage,oh:Dagger_of_Veiled_Shadows:+15_agility,waist:Mugger's Belt,bracers:Darkmantle Bracers:20010,hands:Darkmantle Gloves:25080,head:Darkmantle Cap,shoulder:Darkmantle Spaulders
+
+#|darkmantle4:1,deathdealers5:0|mh:Blessed_Qiraji_Pugio:+5_damage,oh:Dagger_of_Veiled_Shadows:+15_agility,waist:Darkmantle Belt,bracers:Darkmantle Bracers:20010,hands:Darkmantle Gloves:25080,chest:Darkmantle Tunic:13941
+#|darkmantle4:1,deathdealers5:0|mh:Blessed_Qiraji_Pugio:+5_damage,oh:Dagger_of_Veiled_Shadows:+15_agility,waist:Darkmantle Belt,bracers:Darkmantle Bracers:20010,hands:Darkmantle Gloves:25080,feet:Darkmantle Boots:13890
+#|darkmantle4:1,deathdealers5:0|mh:Blessed_Qiraji_Pugio:+5_damage,oh:Dagger_of_Veiled_Shadows:+15_agility,waist:Darkmantle Belt,bracers:Darkmantle Bracers:20010,hands:Darkmantle Gloves:25080,head:Darkmantle Cap
+#|darkmantle4:1,deathdealers5:0|mh:Blessed_Qiraji_Pugio:+5_damage,oh:Dagger_of_Veiled_Shadows:+15_agility,waist:Darkmantle Belt,bracers:Darkmantle Bracers:20010,hands:Darkmantle Gloves:25080,legs:Darkmantle Pants:22725
+
+#|darkmantle4:1,deathdealers5:0|mh:Blessed_Qiraji_Pugio:+5_damage,oh:Dagger_of_Veiled_Shadows:+15_agility,waist:Mugger's Belt,bracers:Darkmantle Bracers:20010,hands:Darkmantle Gloves:25080,head:Darkmantle Cap,shoulder:Darkmantle Spaulders
 
 #|darkmantle4:1,deathdealers5:0|mh:Blessed_Qiraji_Pugio:+5_damage,oh:Dagger_of_Veiled_Shadows:+15_agility,waist:Mugger's Belt,bracers:Darkmantle Bracers:20010,hands:Darkmantle Gloves:25080,chest:Darkmantle Tunic:13941,feet:Darkmantle Boots:13890
 #|darkmantle4:1,deathdealers5:0|mh:Blessed_Qiraji_Pugio:+5_damage,oh:Dagger_of_Veiled_Shadows:+15_agility,waist:Mugger's Belt,bracers:Darkmantle Bracers:20010,hands:Darkmantle Gloves:25080,chest:Darkmantle Tunic:13941,head:Darkmantle Cap

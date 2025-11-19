@@ -57,6 +57,7 @@ export abstract class BaseSimulator implements Simulator, BuffsProvider, PlayerS
    protected attackPowerPerLevel = 1;
 
    hasMarkOfChampion!: boolean;
+   hasThunderfury!: boolean;
    targetIsDemonOrUndead!: boolean;
 
    statistics: SimulationStatistics = {
@@ -71,6 +72,7 @@ export abstract class BaseSimulator implements Simulator, BuffsProvider, PlayerS
       protected spec: SimulationSpec
    ) {
       this.hasMarkOfChampion = this.spec.gear?.some(item => item.itemId === 23206 || item.itemId === 23207);
+      this.hasThunderfury = this.spec.gear?.some(item => item.itemId === 19019);
       this.targetIsDemonOrUndead = this.spec.targetType === TargetType.Demon || this.spec.targetType === TargetType.Undead;
    }
 
