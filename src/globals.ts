@@ -42,16 +42,26 @@ export function colorByClass(characterClass: CharacterClass): string {
 }
 
 export function parseSpecString(specStr: string): SpecOverrides {
-   const parts = specStr.split('|');
+   let name: string | undefined;
+   let remainingSpec = specStr;
+
+   const nameDelimiterIndex = specStr.indexOf('!');
+   if (nameDelimiterIndex !== -1) {
+      name = specStr.substring(0, nameDelimiterIndex).trim();
+      remainingSpec = specStr.substring(nameDelimiterIndex + 1);
+   }
+
+   const parts = remainingSpec.split('|');
    if (parts.length >= 1 &&  parts.length <= 4) {
       return {
+         name,
          talents: parts[0].trim(),
          setup: parts.length >= 2 && parts[1].trim() || undefined,
          gear: parts.length >= 3 && parts[2].trim() || undefined,
          rotation: parts.length >= 4 && parts[3].trim() || undefined
       };
    } else {
-      throw new Error(`Invalid spec format: ${specStr}. Expected format: talents|setup|gear|rotation (setup, gear, and rotation optional)`);
+      throw new Error(`Invalid spec format: ${specStr}. Expected format: [name!]talents|setup|gear|rotation (name, setup, gear, and rotation optional)`);
    }
 }
 

@@ -20,7 +20,7 @@ program
    .option('--iterations <number>', 'Number of iterations')
    .option('--post-res-gen <number>', 'Generate resource AFTER cycle, simulates a more realistic latency')
    .option('-d, --speed <number>', 'Playback speed (0 = instant, 1 = real-time, 0.5 = half speed, etc.)')
-   .option('-s, --spec <spec>', 'Override simulation spec (format: talents|setup|gear|rotation, setup, gear, and rotation optional). Example: "sealFate:5|avoidEviscerate:1|backstab,sinisterStrike"')
+   .option('-s, --spec <spec>', 'Override simulation spec (format: [name!]talents|setup|gear|rotation, name, setup, gear, and rotation optional). Example: "MySpec!sealFate:5|avoidEviscerate:1|backstab,sinisterStrike"')
    .option('-q, --quiet', 'Quiet mode: only print final average DPS')
    .parse(process.argv);
 

@@ -1,4 +1,5 @@
 export interface SpecOverrides {
+   name?: string;
    talents: string;
    setup?: string;
    gear?: string;
