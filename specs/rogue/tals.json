@@ -10,7 +10,7 @@
     "rotation": "snd?snd:sndw?skip:cp5?evis:bs",
     "talents": {
         "adrenalineRush": true,
-        "aggression": 0,
+        "aggression": 2,
         "bladeFurry": true,
         "daggerSpecialization": 5,
         "dualWieldSpecialization": 5,
@@ -20,13 +20,13 @@
         "improvedEviscerate": 0,
         "improvedSinisterStrike": 2,
         "improvedSliceAndDice": 3,
-        "lethality": 5,
+        "lethality": 4,
         "maceSpecialization": 0,
         "malice": 5,
         "murder": 0,
         "opportunity": 5,
         "precision": 5,
-        "relentlessStrikes": 0,
+        "relentlessStrikes": 1,
         "ruthlessness": 2,
         "sealFate": 0,
         "swordSpecialization": 0,
@@ -69,7 +69,7 @@
             "spellId": 25080
         },
         {
-            "itemId": 19396
+            "itemId": 16827
         },
         {
             "itemId": 21362,
