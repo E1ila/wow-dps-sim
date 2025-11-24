@@ -1,5 +1,19 @@
 current!||
-||waist:Nightslayer Belt
+|darkmantle4:1,deathdealers5:0|waist:Darkmantle Belt,bracers:Darkmantle Bracers:20010,hands:Darkmantle Gloves:25080,shoulder:Darkmantle Spaulders
+|darkmantle4:1,deathdealers5:0|waist:Darkmantle Belt,bracers:Darkmantle Bracers:20010,hands:Darkmantle Gloves:25080,legs:Darkmantle Pants:22725
+|darkmantle4:1,deathdealers5:0|waist:Darkmantle Belt,bracers:Darkmantle Bracers:20010,hands:Darkmantle Gloves:25080,feet:Darkmantle Boots:13890
+|darkmantle4:1,deathdealers5:0|waist:Darkmantle Belt,bracers:Darkmantle Bracers:20010,legs:Darkmantle Pants:22725,shoulder:Darkmantle Spaulders
+|darkmantle4:1,deathdealers5:0|waist:Darkmantle Belt,bracers:Darkmantle Bracers:20010,legs:Darkmantle Pants:22725,feet:Darkmantle Boots:13890
+|darkmantle4:1,deathdealers5:0|waist:Darkmantle Belt,bracers:Darkmantle Bracers:20010,shoulder:Darkmantle Spaulders,feet:Darkmantle Boots:13890
+|darkmantle4:1,deathdealers5:0|waist:Darkmantle Belt,hands:Darkmantle Gloves:25080,legs:Darkmantle Pants:22725,shoulder:Darkmantle Spaulders
+|darkmantle4:1,deathdealers5:0|waist:Darkmantle Belt,hands:Darkmantle Gloves:25080,legs:Darkmantle Pants:22725,feet:Darkmantle Boots:13890
+|darkmantle4:1,deathdealers5:0|waist:Darkmantle Belt,hands:Darkmantle Gloves:25080,shoulder:Darkmantle Spaulders,feet:Darkmantle Boots:13890
+|darkmantle4:1,deathdealers5:0|waist:Darkmantle Belt,legs:Darkmantle Pants:22725,shoulder:Darkmantle Spaulders,feet:Darkmantle Boots:13890
+|darkmantle4:1,deathdealers5:0|bracers:Darkmantle Bracers:20010,hands:Darkmantle Gloves:25080,legs:Darkmantle Pants:22725,shoulder:Darkmantle Spaulders
+|darkmantle4:1,deathdealers5:0|bracers:Darkmantle Bracers:20010,hands:Darkmantle Gloves:25080,legs:Darkmantle Pants:22725,feet:Darkmantle Boots:13890
+|darkmantle4:1,deathdealers5:0|bracers:Darkmantle Bracers:20010,hands:Darkmantle Gloves:25080,shoulder:Darkmantle Spaulders,feet:Darkmantle Boots:13890
+|darkmantle4:1,deathdealers5:0|bracers:Darkmantle Bracers:20010,legs:Darkmantle Pants:22725,shoulder:Darkmantle Spaulders,feet:Darkmantle Boots:13890
+|darkmantle4:1,deathdealers5:0|hands:Darkmantle Gloves:25080,legs:Darkmantle Pants:22725,shoulder:Darkmantle Spaulders,feet:Darkmantle Boots:13890
 
 #lethality:4,relentlessStrikes:1||
 #lethality:4,improvedSliceAndDice:2,relentlessStrikes:1,ruthlessness:3||
