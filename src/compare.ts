@@ -59,7 +59,7 @@ function printTable(results: SimulationResult[]): void {
    console.log('='.repeat(120));
    console.log(`Iterations: ${results[0].iterations}\n`);
 
-   console.log(`${'Spec'.padEnd(10)} | ${'DPS'.padStart(10)} | Spec String`);
+   console.log(`${'Spec'.padEnd(20)} | ${'DPS'.padStart(10)} | Spec String`);
    console.log('-'.repeat(120));
 
    // Find the maximum DPS
@@ -72,7 +72,7 @@ function printTable(results: SimulationResult[]): void {
 
       const dpsString = result.dps.toFixed(2).padStart(10);
       const coloredDPS = result.dps === maxDPS ? `${c.brightGreen}${dpsString}${c.reset}` : dpsString;
-      console.log(`${result.name!.padEnd(10)} | ${coloredDPS} | ${result.specOverrides}`);
+      console.log(`${result.name!.padEnd(20)} | ${coloredDPS} | ${result.specOverrides}`);
    });
 }
 
@@ -148,6 +148,7 @@ try {
          console.log(`Failed running simulation!`);
          process.exit(1);
       }
+      result.name = spec.name;
       results.push(result);
    }
 
