@@ -5,7 +5,8 @@
         "refreshSndSecondsBeforeExpiry": 0.2,
         "waitForSndExpiry": 1.6,
         "veiledShadowsSet": 1,
-        "deathdealers5": 1
+        "deathdealers5": 0,
+        "darkmantle4": 1
     },
     "rotation": "snd?snd:sndw?skip:cp5?evis:bs",
     "talents": {
@@ -49,7 +50,7 @@
             "itemId": 21505
         },
         {
-            "itemId": 21361,
+            "itemId": 22008,
             "spellId": 0
         },
         {
@@ -61,15 +62,15 @@
             "spellId": 13941
         },
         {
-            "itemId": 16911,
+            "itemId": 22004,
             "spellId": 20010
         },
         {
-            "itemId": 16826,
+            "itemId": 22006,
             "spellId": 25080
         },
         {
-            "itemId": 16827
+            "itemId": 22002
         },
         {
             "itemId": 21362,
@@ -93,11 +94,11 @@
         },
         {
             "itemId": 21404,
-            "spellId": 20031
+            "spellId": 20034
         },
         {
             "itemId": 18805,
-            "spellId": 23800
+            "spellId": 20034
         },
         {
             "itemId": 2100,

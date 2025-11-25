@@ -274,11 +274,30 @@ export class SimulationRunner {
 
         console.log(`${c.brightMagenta}WoW Classic Era - DPS Simulator${c.reset}`);
         console.log(` ## ${colorByClass(this.spec.class)}${this.spec.class.toUpperCase()}${c.reset} [${this.spec.playerLevel}] ##`);
-        
+
+        console.log(`\n${c.cyan}Equipped Gear:${c.reset}`);
+        this.spec.gear.forEach((equippedItem, index) => {
+            const slotName = EQUIPMENT_SLOTS[index]?.name;
+            if (!slotName || equippedItem.itemId === 0) return;
+
+            const item = this.db.getItem(equippedItem.itemId);
+            const itemName = item?.name || `Unknown Item (${equippedItem.itemId})`;
+
+            let enchantText = '';
+            if (equippedItem.spellId) {
+                const enchant = this.db.getEnchant(equippedItem.spellId);
+                const enchantName = enchant?.name || `Unknown Enchant (${equippedItem.spellId})`;
+                enchantText = ` ${c.magenta}[${enchantName}]${c.reset}`;
+            }
+
+            console.log(`  ${slotName.padEnd(10)}: ${c.white}${itemName}${c.reset}${enchantText}`);
+        });
+        console.log();
+
         // Print gear stats nicely formatted
-        console.log(`${c.cyan}Gear Stats:${c.reset}`);
+        console.log(`${c.cyan}Total Stats:${c.reset}`);
         const gs = this.spec.extraStats;
-        
+
         // Primary stats
         if (simulator.strength > 0) console.log(`  Strength: ${c.green}${simulator.strength}${c.reset}`);
         if (simulator.agility > 0) console.log(`  Agility: ${c.green}${simulator.agility}${c.reset}`);
