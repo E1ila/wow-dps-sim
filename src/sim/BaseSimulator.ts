@@ -12,8 +12,7 @@ import {
    SimulationResult,
    SimulationState,
    SimulationStatistics,
-   TargetType,
-   WeaponEnchant
+   TargetType
 } from '../types';
 import {c} from '../globals';
 import {BuffsProvider, DamageCalculator} from "../mechanics/DamageCalculator";
@@ -695,17 +694,10 @@ export abstract class BaseSimulator implements Simulator, BuffsProvider, PlayerS
    }
 
    get agility(): number {
-      let agi =
-         this.playerLevel * this.agilityPerLevel + this.agilityLevel1 +
-         this.spec.extraStats.agility +
-         this.racialAgilityDelta;
-      if (this.spec.extraStats.mh.enchant == WeaponEnchant.Agility15)
-         agi += 15;
-      if (this.spec.extraStats.mh.enchant == WeaponEnchant.Agility25)
-         agi += 25;
-      if (this.spec.extraStats.oh?.enchant == WeaponEnchant.Agility15)
-         agi += 15;
-      return agi;
+      // agility enchant is counted already in GearParser
+      return this.playerLevel * this.agilityPerLevel + this.agilityLevel1 +
+             this.spec.extraStats.agility +
+             this.racialAgilityDelta;
    }
 
    get stamina(): number {
