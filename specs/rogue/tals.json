@@ -44,7 +44,7 @@
     "gear": [
         {
             "itemId": 21360,
-            "spellId": 0
+            "spellId": 24161
         },
         {
             "itemId": 21505
@@ -74,11 +74,11 @@
         },
         {
             "itemId": 21362,
-            "spellId": 22725
+            "spellId": 24161
         },
         {
             "itemId": 21359,
-            "spellId": 13890
+            "spellId": 20023
         },
         {
             "itemId": 21405
@@ -90,7 +90,7 @@
             "itemId": 13965
         },
         {
-            "itemId": 21180
+            "itemId": 18465
         },
         {
             "itemId": 21404,
