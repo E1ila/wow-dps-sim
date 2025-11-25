@@ -9,7 +9,8 @@
       "Bash(tree:*)",
       "Bash(npx tsc:*)",
       "Bash(node dist/compare.js:*)",
-      "Bash(cat:*)"
+      "Bash(cat:*)",
+      "Bash(node dist/query.js:*)"
     ],
     "deny": [],
     "ask": []

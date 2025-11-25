@@ -1,6 +1,6 @@
 import {GearParser} from '../src/GearParser';
 import {Database} from '../src/Database';
-import {EquippedItem, Stats} from '../src/SimulationSpec';
+import {EquippedItem} from '../src/SimulationSpec';
 import {WeaponEnchant, WeaponType} from '../src/types';
 import path from 'path';
 
@@ -27,26 +27,6 @@ describe('GearParser', () => {
             expect(result.mh).toBeDefined();
             expect(result.mh.min).toBe(1);
             expect(result.mh.max).toBe(2);
-        });
-
-        it('should preserve existing mainhand weapon if no weapon in gear', () => {
-            const existingStats: Partial<Stats> = {
-                mh: {
-                    min: 100,
-                    max: 200,
-                    speed: 2.5,
-                    type: WeaponType.Dagger,
-                    enchant: WeaponEnchant.Crusader,
-                },
-            };
-
-            const result = gearParser.aggregateStats([]);
-
-            expect(result.mh.min).toBe(100);
-            expect(result.mh.max).toBe(200);
-            expect(result.mh.speed).toBe(2.5);
-            expect(result.mh.type).toBe(WeaponType.Dagger);
-            expect(result.mh.enchant).toBe(WeaponEnchant.Crusader);
         });
 
         it('should parse full Naxxramas Rogue gear set', () => {

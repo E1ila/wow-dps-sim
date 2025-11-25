@@ -60,6 +60,14 @@ export abstract class MeleeDamageCalculator extends DamageCalculator {
          minDamage += 3;
          maxDamage += 3;
       }
+      else if (weapon.enchant === WeaponEnchant.Dmg2) {
+         minDamage += 2;
+         maxDamage += 2;
+      }
+      else if (weapon.enchant === WeaponEnchant.Dmg1) {
+         minDamage += 1;
+         maxDamage += 1;
+      }
       return minDamage + Math.random() * (maxDamage - minDamage);
    }
 
