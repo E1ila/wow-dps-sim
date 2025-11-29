@@ -1,5 +1,5 @@
 {
-    "name": "PvE Combat Daggers",
+    "name": "PvE Combat Swords",
     "class": "Rogue",
     "setup": {
         "refreshSndSecondsBeforeExpiry": 0.2,
@@ -8,29 +8,29 @@
         "deathdealers5": 0,
         "darkmantle4": 1
     },
-    "rotation": "snd?snd:sndw?skip:cp5?evis:bs",
+    "rotation": "snd?snd:sndw?skip:cp5?evis:ss",
     "talents": {
         "adrenalineRush": true,
-        "aggression": 2,
+        "aggression": 3,
         "bladeFurry": true,
-        "daggerSpecialization": 5,
+        "daggerSpecialization": 0,
         "dualWieldSpecialization": 5,
         "fistWeaponSpecialization": 0,
         "hemorrhage": false,
-        "improvedBackstab": 3,
-        "improvedEviscerate": 0,
+        "improvedBackstab": 0,
+        "improvedEviscerate": 2,
         "improvedSinisterStrike": 2,
         "improvedSliceAndDice": 3,
-        "lethality": 4,
+        "lethality": 5,
         "maceSpecialization": 0,
         "malice": 5,
         "murder": 0,
         "opportunity": 5,
         "precision": 5,
         "relentlessStrikes": 1,
-        "ruthlessness": 2,
+        "ruthlessness": 3,
         "sealFate": 0,
-        "swordSpecialization": 0,
+        "swordSpecialization": 5,
         "weaponExpertise": 2
     },
     "simulationConfig": {
@@ -93,12 +93,12 @@
             "itemId": 18465
         },
         {
-            "itemId": 21404,
-            "spellId": 20031
+            "itemId": 19352,
+            "spellId": 20034
         },
         {
-            "itemId": 18805,
-            "spellId": 23800
+            "itemId": 21404,
+            "spellId": 20034
         },
         {
             "itemId": 2100,

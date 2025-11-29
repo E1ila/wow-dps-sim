@@ -1,19 +1,28 @@
 current!||
-|darkmantle4:1,deathdealers5:0|waist:Darkmantle Belt,bracers:Darkmantle Bracers:20010,hands:Darkmantle Gloves:25080,legs:Darkmantle Pants:22725
-|darkmantle4:1,deathdealers5:0|waist:Darkmantle Belt,bracers:Darkmantle Bracers:20010,hands:Darkmantle Gloves:25080,feet:Darkmantle Boots:13890
-|darkmantle4:1,deathdealers5:0|waist:Darkmantle Belt,bracers:Darkmantle Bracers:20010,hands:Darkmantle Gloves:25080,shoulder:Darkmantle Spaulders
-|darkmantle4:1,deathdealers5:0|waist:Darkmantle Belt,bracers:Darkmantle Bracers:20010,legs:Darkmantle Pants:22725,shoulder:Darkmantle Spaulders
-|darkmantle4:1,deathdealers5:0|waist:Darkmantle Belt,bracers:Darkmantle Bracers:20010,legs:Darkmantle Pants:22725,feet:Darkmantle Boots:13890
-|darkmantle4:1,deathdealers5:0|waist:Darkmantle Belt,bracers:Darkmantle Bracers:20010,shoulder:Darkmantle Spaulders,feet:Darkmantle Boots:13890
-|darkmantle4:1,deathdealers5:0|waist:Darkmantle Belt,hands:Darkmantle Gloves:25080,legs:Darkmantle Pants:22725,shoulder:Darkmantle Spaulders
-|darkmantle4:1,deathdealers5:0|waist:Darkmantle Belt,hands:Darkmantle Gloves:25080,legs:Darkmantle Pants:22725,feet:Darkmantle Boots:13890
-|darkmantle4:1,deathdealers5:0|waist:Darkmantle Belt,hands:Darkmantle Gloves:25080,shoulder:Darkmantle Spaulders,feet:Darkmantle Boots:13890
-|darkmantle4:1,deathdealers5:0|waist:Darkmantle Belt,legs:Darkmantle Pants:22725,shoulder:Darkmantle Spaulders,feet:Darkmantle Boots:13890
-|darkmantle4:1,deathdealers5:0|bracers:Darkmantle Bracers:20010,hands:Darkmantle Gloves:25080,legs:Darkmantle Pants:22725,shoulder:Darkmantle Spaulders
-|darkmantle4:1,deathdealers5:0|bracers:Darkmantle Bracers:20010,hands:Darkmantle Gloves:25080,legs:Darkmantle Pants:22725,feet:Darkmantle Boots:13890
-|darkmantle4:1,deathdealers5:0|bracers:Darkmantle Bracers:20010,hands:Darkmantle Gloves:25080,shoulder:Darkmantle Spaulders,feet:Darkmantle Boots:13890
-|darkmantle4:1,deathdealers5:0|bracers:Darkmantle Bracers:20010,legs:Darkmantle Pants:22725,shoulder:Darkmantle Spaulders,feet:Darkmantle Boots:13890
-|darkmantle4:1,deathdealers5:0|hands:Darkmantle Gloves:25080,legs:Darkmantle Pants:22725,shoulder:Darkmantle Spaulders,feet:Darkmantle Boots:13890
+||neck:Prestor's Talisman of Connivery
+adrenalineRush:1,aggression:3,bladeFurry:1,daggerSpecialization:0,dualWieldSpecialization:5,improvedBackstab:0,improvedEviscerate:2,improvedSinisterStrike:2,improvedSliceAndDice:3,lethality:5,malice:5,opportunity:5,precision:5,relentlessStrikes:1,ruthlessness:3,swordSpecialization:5,weaponExpertise:2||mh:Chromatically Tempered Sword:20034,oh:Dagger of Veiled Shadows:20034|snd?snd:sndw?skip:cp5?evis:ss
+
+#||mh:Perdition's Blade:20031
+#||ring2:Band of Accuria
+#||ring2:Quick Strike Ring
+#|veiledShadowsSet:0|ring1:Quick Strike Ring
+#|veiledShadowsSet:0|ring1:Band of Accuria
+
+#|darkmantle4:1,deathdealers5:0|waist:Darkmantle Belt,bracers:Darkmantle Bracers:20010,hands:Darkmantle Gloves:25080,legs:Darkmantle Pants:22725
+#|darkmantle4:1,deathdealers5:0|waist:Darkmantle Belt,bracers:Darkmantle Bracers:20010,hands:Darkmantle Gloves:25080,feet:Darkmantle Boots:13890
+#|darkmantle4:1,deathdealers5:0|waist:Darkmantle Belt,bracers:Darkmantle Bracers:20010,hands:Darkmantle Gloves:25080,shoulder:Darkmantle Spaulders
+#|darkmantle4:1,deathdealers5:0|waist:Darkmantle Belt,bracers:Darkmantle Bracers:20010,legs:Darkmantle Pants:22725,shoulder:Darkmantle Spaulders
+#|darkmantle4:1,deathdealers5:0|waist:Darkmantle Belt,bracers:Darkmantle Bracers:20010,legs:Darkmantle Pants:22725,feet:Darkmantle Boots:13890
+#|darkmantle4:1,deathdealers5:0|waist:Darkmantle Belt,bracers:Darkmantle Bracers:20010,shoulder:Darkmantle Spaulders,feet:Darkmantle Boots:13890
+#|darkmantle4:1,deathdealers5:0|waist:Darkmantle Belt,hands:Darkmantle Gloves:25080,legs:Darkmantle Pants:22725,shoulder:Darkmantle Spaulders
+#|darkmantle4:1,deathdealers5:0|waist:Darkmantle Belt,hands:Darkmantle Gloves:25080,legs:Darkmantle Pants:22725,feet:Darkmantle Boots:13890
+#|darkmantle4:1,deathdealers5:0|waist:Darkmantle Belt,hands:Darkmantle Gloves:25080,shoulder:Darkmantle Spaulders,feet:Darkmantle Boots:13890
+#|darkmantle4:1,deathdealers5:0|waist:Darkmantle Belt,legs:Darkmantle Pants:22725,shoulder:Darkmantle Spaulders,feet:Darkmantle Boots:13890
+#|darkmantle4:1,deathdealers5:0|bracers:Darkmantle Bracers:20010,hands:Darkmantle Gloves:25080,legs:Darkmantle Pants:22725,shoulder:Darkmantle Spaulders
+#|darkmantle4:1,deathdealers5:0|bracers:Darkmantle Bracers:20010,hands:Darkmantle Gloves:25080,legs:Darkmantle Pants:22725,feet:Darkmantle Boots:13890
+#|darkmantle4:1,deathdealers5:0|bracers:Darkmantle Bracers:20010,hands:Darkmantle Gloves:25080,shoulder:Darkmantle Spaulders,feet:Darkmantle Boots:13890
+#|darkmantle4:1,deathdealers5:0|bracers:Darkmantle Bracers:20010,legs:Darkmantle Pants:22725,shoulder:Darkmantle Spaulders,feet:Darkmantle Boots:13890
+#|darkmantle4:1,deathdealers5:0|hands:Darkmantle Gloves:25080,legs:Darkmantle Pants:22725,shoulder:Darkmantle Spaulders,feet:Darkmantle Boots:13890
 
 #2 crusader!||mh:Dagger of Veiled Shadows:20034,oh:Core Hound Tooth:20034
 #2 agility!||mh:Dagger of Veiled Shadows:23800
