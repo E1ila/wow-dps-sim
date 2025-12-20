@@ -4,14 +4,14 @@ import * as path from 'path';
 import * as fs from 'fs';
 import {Database} from './Database';
 import {Item} from './Database.types';
-import {EquippedItem} from './SimulationSpec';
+import {EquippedItem, EquippedItemSlot, getItemFromSlot} from './SimulationSpec';
 import {c, EQUIPMENT_SLOTS, getEnchantTypesForItem} from "./globals";
 import {SpecLoader} from './SpecLoader';
 import {EquipmentSlot, ItemSlotType, TargetType} from "./types";
 
 class SpecBuilder {
     private db: Database;
-    private equippedItems: EquippedItem[] = [];
+    private equippedItems: EquippedItemSlot[] = [];
     private spec: any = null;  // Raw JSON spec file format (gets transformed by SpecLoader when used)
     private specPath: string | null = null;
 
@@ -212,7 +212,7 @@ class SpecBuilder {
         }
     }
 
-    async buildGear(): Promise<EquippedItem[]> {
+    async buildGear(): Promise<EquippedItemSlot[]> {
         console.log('=== WoW Classic Gear Builder ===\n');
         console.log('Build your character\'s equipment by searching for items.');
         console.log('You can use partial item names to search.\n');
@@ -227,13 +227,14 @@ class SpecBuilder {
         return this.equippedItems;
     }
 
-    async editGear(): Promise<EquippedItem[]> {
+    async editGear(): Promise<EquippedItemSlot[]> {
         console.log('=== WoW Classic Gear Editor ===\n');
         console.log('Current gear loaded. Select slots to edit.\n');
 
         while (true) {
             const slotChoices = EQUIPMENT_SLOTS.map((slot, index) => {
-                const equipped = this.equippedItems[index];
+                const slotData = this.equippedItems[index];
+                const equipped = slotData ? getItemFromSlot(slotData) : null;
                 const item = equipped ? this.db.getItem(equipped.itemId) : null;
                 const itemName = item ? item.name : '(empty)';
                 return {
@@ -271,7 +272,10 @@ class SpecBuilder {
 
     displayGear(): void {
         console.log('\n=== SUMMARY ===');
-        this.equippedItems.forEach((equipped, index) => {
+        this.equippedItems.forEach((slot, index) => {
+            const equipped = getItemFromSlot(slot);
+            if (!equipped) return;
+
             const item = this.db.getItem(equipped.itemId);
             const enchant = equipped.spellId ? this.db.getEnchant(equipped.spellId) : null;
             const suffix = equipped.randomSuffixId ? this.db.getRandomSuffix(equipped.randomSuffixId) : null;
@@ -284,7 +288,10 @@ class SpecBuilder {
         });
 
         console.log('\n=== GEAR SPEC (Copy this to your spec file) ===\n');
-        const gearSpec = this.equippedItems.map(item => {
+        const gearSpec = this.equippedItems.map(slot => {
+            const item = getItemFromSlot(slot);
+            if (!item) return null;
+
             const itemData = this.db.getItem(item.itemId);
             const enchantData = item.spellId ? this.db.getEnchant(item.spellId) : null;
 
@@ -298,7 +305,7 @@ class SpecBuilder {
                 obj.enchantName = enchantData?.name || 'Unknown';
             }
             return obj;
-        });
+        }).filter(item => item !== null);
         console.log(c.green + JSON.stringify(gearSpec) + c.reset);
     }
 

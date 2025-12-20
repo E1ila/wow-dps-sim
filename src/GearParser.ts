@@ -1,5 +1,5 @@
 import {Database} from './Database';
-import {EquippedItem, Stats} from './SimulationSpec';
+import {EquippedItemSlot, getItemFromSlot, Stats} from './SimulationSpec';
 import {WEAPON_ENCHANT_SPELL_IDS, WeaponEnchant, WeaponType} from './types';
 import {Enchant, Item} from "./Database.types";
 
@@ -60,10 +60,10 @@ export class GearParser {
 
     /**
      * Parse gear items from JSON and calculate aggregate stats
-     * @param gear Array of equipped items
+     * @param gear Array of equipped item slots
      * @returns Calculated GearStats object
      */
-    aggregateStats(gear: EquippedItem[]): Stats {
+    aggregateStats(gear: EquippedItemSlot[]): Stats {
         if (!gear || gear.length === 0) {
             // Return minimal stats if no gear provided
             return {
@@ -106,7 +106,12 @@ export class GearParser {
         let weaponSlotIndex = 0;
 
         // Process each gear item
-        for (const equippedItem of gear) {
+        for (const slot of gear) {
+            const equippedItem = getItemFromSlot(slot);
+            if (!equippedItem) {
+                continue;
+            }
+
             const item = this.db.getItem(equippedItem.itemId);
             if (!item) {
                 // console.warn(`Warning: Item ${equippedItem.itemId} not found in database`);

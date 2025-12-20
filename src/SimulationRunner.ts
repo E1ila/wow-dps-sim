@@ -7,7 +7,7 @@ import {RogueSimulator} from "./sim/RogueSimulator";
 import {ShamanSimulator} from "./sim/ShamanSimulator";
 import path from "node:path";
 import {Database} from "./Database";
-import {PlayerSetup, SimulationOptions, SimulationSpec} from "./SimulationSpec";
+import {getItemFromSlot, PlayerSetup, SimulationOptions, SimulationSpec} from "./SimulationSpec";
 import {RogueTalents, ShamanTalents, WarriorTalents} from "./talents";
 import {GearParser} from "./GearParser";
 import {applyWorldBuffs} from "./worldbuffs";
@@ -276,9 +276,10 @@ export class SimulationRunner {
         console.log(` ## ${colorByClass(this.spec.class)}${this.spec.class.toUpperCase()}${c.reset} [${this.spec.playerLevel}] ##`);
 
         console.log(`\n${c.cyan}Equipped Gear:${c.reset}`);
-        this.spec.gear.forEach((equippedItem, index) => {
+        this.spec.gear.forEach((slot, index) => {
             const slotName = EQUIPMENT_SLOTS[index]?.name;
-            if (!slotName || equippedItem.itemId === 0) return;
+            const equippedItem = getItemFromSlot(slot);
+            if (!slotName || !equippedItem || equippedItem.itemId === 0) return;
 
             const item = this.db.getItem(equippedItem.itemId);
             const itemName = item?.name || `Unknown Item (${equippedItem.itemId})`;

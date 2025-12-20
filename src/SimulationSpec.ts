@@ -13,7 +13,7 @@ export interface SimulationSpec {
    setup?: PlayerSetup;
    talents: RogueTalents | WarriorTalents | MageTalents | ShamanTalents;
    extraStats: Stats; // from gear+buffs+consumes - not inc. base stats (from level) nor enchants, etc.
-   gear: EquippedItem[];
+   gear: EquippedItemSlot[];
    worldBuffs?: WorldBuff[];
    consumables?: Consumable[];
    simulationConfig: SimulationConfig;
@@ -66,6 +66,21 @@ export interface EquippedItem {
    itemId: number;
    randomSuffixId?: number;
    spellId?: number;
+}
+
+export type EquippedItemQueue = EquippedItem[];
+export type EquippedItemSlot = EquippedItem|EquippedItemQueue;
+
+/**
+ * Extracts the relevant EquippedItem from an EquippedItemSlot.
+ * For now, returns the item directly if it's a single item, or the first item if it's a queue.
+ * Later this will include more sophisticated logic for item selection.
+ */
+export function getItemFromSlot(slot: EquippedItemSlot): EquippedItem | undefined {
+   if (Array.isArray(slot)) {
+      return slot[0];
+   }
+   return slot;
 }
 
 export interface Stats {
