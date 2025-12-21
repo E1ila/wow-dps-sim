@@ -7,7 +7,7 @@ import {RogueSimulator} from "./sim/RogueSimulator";
 import {ShamanSimulator} from "./sim/ShamanSimulator";
 import path from "node:path";
 import {Database} from "./Database";
-import {getItemFromSlot, PlayerSetup, SimulationOptions, SimulationSpec} from "./SimulationSpec";
+import {EquippedItemQueue, getItemFromSlot, PlayerSetup, SimulationOptions, SimulationSpec} from "./SimulationSpec";
 import {RogueTalents, ShamanTalents, WarriorTalents} from "./talents";
 import {GearParser} from "./GearParser";
 import {applyWorldBuffs} from "./worldbuffs";
@@ -177,43 +177,6 @@ export class SimulationRunner {
     }
 
     private applySlotItemOverride(slotName: string, itemSpec: string, enchant: string): void {
-        // Determine if itemSpec is an item ID (number) or item name (string)
-        let item;
-
-        if (/^\d+$/.test(itemSpec)) {
-            // It's an item ID (pure numeric string)
-            const itemId = parseInt(itemSpec);
-            item = this.db.getItem(itemId);
-            if (!item) {
-                console.warn(`Warning: Item with ID ${itemId} not found in database, ignoring gear override for slot "${slotName}"`);
-                return;
-            }
-        } else {
-            // It's an item name - convert underscores to spaces
-            const itemName = itemSpec.replace(/_/g, ' ');
-            item = this.db.findItemByName(itemName);
-            if (!item) {
-                console.warn(`Warning: Item "${itemName}" not found in database, ignoring gear override for slot "${slotName}"`);
-                return;
-            }
-        }
-
-        // Parse enchant - can be either a spell ID (number) or an enchant name (string)
-        let spellId: number | undefined;
-        if (enchant) {
-            if (/^\d+$/.test(enchant)) {
-                // It's a spell ID (pure numeric string)
-                spellId = parseInt(enchant);
-            } else {
-                // It's an enchant name - convert underscores to spaces and look up spell ID
-                const enchantName = enchant.replace(/_/g, ' ');
-                spellId = this.getSpellIdFromEnchantName(enchantName);
-                if (spellId === undefined) {
-                    console.warn(`Warning: Enchant "${enchantName}" not found, applying item without enchant`);
-                }
-            }
-        }
-
         // Find the slot index
         const slotIndex = EQUIPMENT_SLOTS.findIndex(slot => slot.name === slotName);
         if (slotIndex === -1) {
@@ -226,14 +189,89 @@ export class SimulationRunner {
             this.spec.gear = [];
         }
 
-        // Update or add the gear item at the slot index
-        this.spec.gear[slotIndex] = {
-            itemId: item.id,
-            spellId: spellId || 0
-        };
+        // Check if itemSpec is a queue (wrapped in brackets)
+        if (itemSpec.startsWith('(') && itemSpec.endsWith(')')) {
+            // Parse as queue - extract content and split by dots
+            const queueContent = itemSpec.slice(1, -1);
+            const itemSpecs = queueContent.split('.');
+
+            const queue: EquippedItemQueue = [];
+            for (let i = 0; i < itemSpecs.length; i++) {
+                const singleItemSpec = itemSpecs[i].trim();
+                if (!singleItemSpec) continue;
+
+                const item = this.parseItemSpec(singleItemSpec, slotName);
+                if (!item) continue;
+
+                // Apply enchant only to the first item in the queue
+                const spellId = (i === 0) ? this.parseEnchant(enchant) : undefined;
+
+                queue.push({
+                    itemId: item.id,
+                    spellId: spellId || 0
+                });
+            }
+
+            if (queue.length === 0) {
+                console.warn(`Warning: No valid items found in queue for slot "${slotName}"`);
+                return;
+            }
+
+            this.spec.gear[slotIndex] = queue;
+        } else {
+            // Parse as single item
+            const item = this.parseItemSpec(itemSpec, slotName);
+            if (!item) return;
+
+            const spellId = this.parseEnchant(enchant);
+
+            this.spec.gear[slotIndex] = {
+                itemId: item.id,
+                spellId: spellId || 0
+            };
+        }
 
         // Recalculate gear stats after modification
         this.applyGearStats();
+    }
+
+    private parseItemSpec(itemSpec: string, slotName: string): any {
+        if (/^\d+$/.test(itemSpec)) {
+            // It's an item ID (pure numeric string)
+            const itemId = parseInt(itemSpec);
+            const item = this.db.getItem(itemId);
+            if (!item) {
+                console.warn(`Warning: Item with ID ${itemId} not found in database, ignoring for slot "${slotName}"`);
+                return null;
+            }
+            return item;
+        } else {
+            // It's an item name - convert underscores to spaces
+            const itemName = itemSpec.replace(/_/g, ' ');
+            const item = this.db.findItemByName(itemName);
+            if (!item) {
+                console.warn(`Warning: Item "${itemName}" not found in database, ignoring for slot "${slotName}"`);
+                return null;
+            }
+            return item;
+        }
+    }
+
+    private parseEnchant(enchant: string): number | undefined {
+        if (!enchant) return undefined;
+
+        if (/^\d+$/.test(enchant)) {
+            // It's a spell ID (pure numeric string)
+            return parseInt(enchant);
+        } else {
+            // It's an enchant name - convert underscores to spaces and look up spell ID
+            const enchantName = enchant.replace(/_/g, ' ');
+            const spellId = this.getSpellIdFromEnchantName(enchantName);
+            if (spellId === undefined) {
+                console.warn(`Warning: Enchant "${enchantName}" not found, applying item without enchant`);
+            }
+            return spellId;
+        }
     }
 
     private getSpellIdFromEnchantName(enchantName: string): number | undefined {

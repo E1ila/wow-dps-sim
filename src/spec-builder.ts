@@ -4,7 +4,7 @@ import * as path from 'path';
 import * as fs from 'fs';
 import {Database} from './Database';
 import {Item} from './Database.types';
-import {EquippedItem, EquippedItemSlot, getItemFromSlot} from './SimulationSpec';
+import {EquippedItem, EquippedItemSlot} from './SimulationSpec';
 import {c, EQUIPMENT_SLOTS, getEnchantTypesForItem} from "./globals";
 import {SpecLoader} from './SpecLoader';
 import {EquipmentSlot, ItemSlotType, TargetType} from "./types";
@@ -41,59 +41,100 @@ class SpecBuilder {
         });
     }
 
-    private async promptForItem(slot: EquipmentSlot): Promise<EquippedItem | null> {
+    private async promptForItem(slot: EquipmentSlot): Promise<EquippedItemSlot | null> {
         console.log(`\n--- ${slot.name.toUpperCase()} ---`);
 
-        const { query } = await inquirer.prompt([{
-            type: 'input',
-            name: 'query',
-            message: `Search for ${slot.name} item (or press Enter to skip):`,
-        }]);
+        const isTrinketSlot = slot.name === 'trinket1' || slot.name === 'trinket2';
+        const itemQueue: EquippedItem[] = [];
 
-        if (!query.trim()) {
-            if (slot.optional) {
-                return null;
+        while (true) {
+            const isFirstItem = itemQueue.length === 0;
+            const promptMessage = isFirstItem
+                ? `Search for ${slot.name} item (or press Enter to skip):`
+                : `Search for another ${slot.name} item (or press Enter to finish):`;
+
+            const { query } = await inquirer.prompt([{
+                type: 'input',
+                name: 'query',
+                message: promptMessage,
+            }]);
+
+            if (!query.trim()) {
+                if (isFirstItem && !slot.optional) {
+                    console.log('This slot is required. Please enter a search term.');
+                    continue;
+                }
+                // If it's the first item and optional, or subsequent items, break
+                break;
             }
-            console.log('This slot is required. Please enter a search term.');
-            return this.promptForItem(slot);
+
+            const matchingItems = this.searchItems(query, slot.slotTypes);
+
+            if (matchingItems.length === 0) {
+                console.log('No items found. Please try again.');
+                continue;
+            }
+
+            let selectedItem: Item | null;
+
+            if (matchingItems.length === 1) {
+                selectedItem = matchingItems[0];
+                console.log(`\n${c.yellow}${selectedItem.name}${c.reset} (ID: ${selectedItem.id}, iLvl: ${selectedItem.ilvl})\n`);
+            } else {
+                const choices: Array<{ name: string; value: Item | null }> = matchingItems.slice(0, 20).map(item => ({
+                    name: `${item.name} (ID: ${item.id}, iLvl: ${item.ilvl})`,
+                    value: item,
+                }));
+
+                choices.push({ name: '← Search again', value: null });
+
+                const result = await inquirer.prompt<{ selectedItem: Item | null }>([{
+                    type: 'list',
+                    name: 'selectedItem',
+                    message: `Select ${slot.name}:`,
+                    choices,
+                    pageSize: 15,
+                }]);
+
+                selectedItem = result.selectedItem;
+
+                if (!selectedItem) {
+                    continue;
+                }
+            }
+
+            // Apply enchant only to the first item
+            const equippedItem = await this.promptForEnchantAndSuffix(selectedItem, isFirstItem);
+            itemQueue.push(equippedItem);
+
+            // For trinket slots, ask if they want to add more items
+            if (isTrinketSlot) {
+                const { addMore } = await inquirer.prompt([{
+                    type: 'confirm',
+                    name: 'addMore',
+                    message: 'Add another item to this trinket slot queue?',
+                    default: false,
+                }]);
+
+                if (!addMore) {
+                    break;
+                }
+            } else {
+                // For non-trinket slots, only allow one item
+                break;
+            }
         }
 
-        const matchingItems = this.searchItems(query, slot.slotTypes);
-
-        if (matchingItems.length === 0) {
-            console.log('No items found. Please try again.');
-            return this.promptForItem(slot);
+        if (itemQueue.length === 0) {
+            return null;
+        } else if (itemQueue.length === 1) {
+            return itemQueue[0];
+        } else {
+            return itemQueue;
         }
-
-        if (matchingItems.length === 1) {
-            const item = matchingItems[0];
-            console.log(`\n${c.yellow}${item.name}${c.reset} (ID: ${item.id}, iLvl: ${item.ilvl})\n`);
-            return await this.promptForEnchantAndSuffix(item);
-        }
-
-        const choices: Array<{ name: string; value: Item | null }> = matchingItems.slice(0, 20).map(item => ({
-            name: `${item.name} (ID: ${item.id}, iLvl: ${item.ilvl})`,
-            value: item,
-        }));
-
-        choices.push({ name: '← Search again', value: null });
-
-        const { selectedItem } = await inquirer.prompt<{ selectedItem: Item | null }>([{
-            type: 'list',
-            name: 'selectedItem',
-            message: `Select ${slot.name}:`,
-            choices,
-            pageSize: 15,
-        }]);
-
-        if (!selectedItem) {
-            return this.promptForItem(slot);
-        }
-
-        return await this.promptForEnchantAndSuffix(selectedItem);
     }
 
-    private async promptForEnchantAndSuffix(item: Item): Promise<EquippedItem> {
+    private async promptForEnchantAndSuffix(item: Item, allowEnchant: boolean = true): Promise<EquippedItem> {
         let spellId: number | undefined;
         let randomSuffixId: number | undefined;
 
@@ -110,7 +151,8 @@ class SpecBuilder {
                 return a.name.localeCompare(b.name);
             });
 
-        if (compatibleEnchants.length > 0) {
+        // Only prompt for enchant if allowed (first item in queue)
+        if (allowEnchant && compatibleEnchants.length > 0) {
             const qualityColors = ['', c.white, c.green, c.blue, c.magenta, c.yellow];
             const enchantChoices = [
                 { name: 'None', value: 0 },
@@ -234,11 +276,22 @@ class SpecBuilder {
         while (true) {
             const slotChoices = EQUIPMENT_SLOTS.map((slot, index) => {
                 const slotData = this.equippedItems[index];
-                const equipped = slotData ? getItemFromSlot(slotData) : null;
-                const item = equipped ? this.db.getItem(equipped.itemId) : null;
-                const itemName = item ? item.name : '(empty)';
+
+                let displayName: string;
+                if (!slotData) {
+                    displayName = '(empty)';
+                } else if (Array.isArray(slotData)) {
+                    // It's a queue
+                    const firstItem = this.db.getItem(slotData[0].itemId);
+                    displayName = `[Queue: ${slotData.length} items] ${firstItem?.name || 'Unknown'}`;
+                } else {
+                    // Single item
+                    const item = this.db.getItem(slotData.itemId);
+                    displayName = item ? item.name : 'Unknown';
+                }
+
                 return {
-                    name: `${slot.name}: ${itemName}`,
+                    name: `${slot.name}: ${displayName}`,
                     value: index,
                 };
             });
@@ -273,40 +326,79 @@ class SpecBuilder {
     displayGear(): void {
         console.log('\n=== SUMMARY ===');
         this.equippedItems.forEach((slot, index) => {
-            const equipped = getItemFromSlot(slot);
-            if (!equipped) return;
+            // Check if it's a queue or single item
+            if (Array.isArray(slot)) {
+                // It's a queue - display all items
+                console.log(`${index + 1}. [Queue with ${slot.length} items]`);
+                slot.forEach((equipped, queueIndex) => {
+                    const item = this.db.getItem(equipped.itemId);
+                    const enchant = equipped.spellId ? this.db.getEnchant(equipped.spellId) : null;
+                    const suffix = equipped.randomSuffixId ? this.db.getRandomSuffix(equipped.randomSuffixId) : null;
 
-            const item = this.db.getItem(equipped.itemId);
-            const enchant = equipped.spellId ? this.db.getEnchant(equipped.spellId) : null;
-            const suffix = equipped.randomSuffixId ? this.db.getRandomSuffix(equipped.randomSuffixId) : null;
+                    let description = `   ${queueIndex + 1}) ${item?.name || 'Unknown'} (ID: ${equipped.itemId})`;
+                    if (enchant) description += ` + ${enchant.name}`;
+                    if (suffix) description += ` of ${suffix.name}`;
 
-            let description = `${index + 1}. ${item?.name || 'Unknown'} (ID: ${equipped.itemId})`;
-            if (enchant) description += ` + ${enchant.name}`;
-            if (suffix) description += ` of ${suffix.name}`;
+                    console.log(description);
+                });
+            } else {
+                // Single item
+                const equipped = slot;
+                if (!equipped) return;
 
-            console.log(description);
+                const item = this.db.getItem(equipped.itemId);
+                const enchant = equipped.spellId ? this.db.getEnchant(equipped.spellId) : null;
+                const suffix = equipped.randomSuffixId ? this.db.getRandomSuffix(equipped.randomSuffixId) : null;
+
+                let description = `${index + 1}. ${item?.name || 'Unknown'} (ID: ${equipped.itemId})`;
+                if (enchant) description += ` + ${enchant.name}`;
+                if (suffix) description += ` of ${suffix.name}`;
+
+                console.log(description);
+            }
         });
 
         console.log('\n=== GEAR SPEC (Copy this to your spec file) ===\n');
         const gearSpec = this.equippedItems.map(slot => {
-            const item = getItemFromSlot(slot);
-            if (!item) return null;
+            if (!slot) return null;
 
-            const itemData = this.db.getItem(item.itemId);
-            const enchantData = item.spellId ? this.db.getEnchant(item.spellId) : null;
+            // Check if it's a queue or single item
+            if (Array.isArray(slot)) {
+                // It's a queue - output with itemIds array
+                const firstItem = slot[0];
+                const itemIds = slot.map(item => item.itemId);
+                const obj: any = {
+                    itemIds: itemIds,
+                };
+                // Add enchant from first item if present
+                if (firstItem.spellId) {
+                    obj.spellId = firstItem.spellId;
+                    const enchantData = this.db.getEnchant(firstItem.spellId);
+                    obj.enchantName = enchantData?.name || 'Unknown';
+                }
+                if (firstItem.randomSuffixId) {
+                    obj.randomSuffixId = firstItem.randomSuffixId;
+                }
+                return obj;
+            } else {
+                // Single item
+                const item = slot;
+                const itemData = this.db.getItem(item.itemId);
+                const enchantData = item.spellId ? this.db.getEnchant(item.spellId) : null;
 
-            const obj: any = {
-                itemId: item.itemId,
-                itemName: itemData?.name || 'Unknown'
-            };
-            if (item.randomSuffixId) obj.randomSuffixId = item.randomSuffixId;
-            if (item.spellId) {
-                obj.spellId = item.spellId;
-                obj.enchantName = enchantData?.name || 'Unknown';
+                const obj: any = {
+                    itemId: item.itemId,
+                    itemName: itemData?.name || 'Unknown'
+                };
+                if (item.randomSuffixId) obj.randomSuffixId = item.randomSuffixId;
+                if (item.spellId) {
+                    obj.spellId = item.spellId;
+                    obj.enchantName = enchantData?.name || 'Unknown';
+                }
+                return obj;
             }
-            return obj;
         }).filter(item => item !== null);
-        console.log(c.green + JSON.stringify(gearSpec) + c.reset);
+        console.log(c.green + JSON.stringify(gearSpec, null, 2) + c.reset);
     }
 
     loadSpecFile(specFile: string): void {

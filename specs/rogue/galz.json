@@ -32,7 +32,77 @@
         "swordSpecialization": 5,
         "weaponExpertise": 2
     },
-    "gear": [{"itemId":22478,"spellId":24161},{"itemId":19377},{"itemId":22479,"spellId":29483},{"itemId":23045,"spellId":25084},{"itemId":22476,"spellId":20025},{"itemId":22483,"spellId":20010},{"itemId":22481,"spellId":25080},{"itemId":21586},{"itemId":22477,"spellId":24161},{"itemId":22480,"spellId":20023},{"itemId":23060},{"itemId":23038},{"itemId":22954},{"itemId":19406},{"itemId":23054,"spellId":20034},{"itemId":23577,"spellId":20034},{"itemId":23557}],
+    "gear": [
+        {
+            "itemId": 22478,
+            "spellId": 24161
+        },
+        {
+            "itemId": 19377
+        },
+        {
+            "itemId": 22479,
+            "spellId": 29483
+        },
+        {
+            "itemId": 23045,
+            "spellId": 25084
+        },
+        {
+            "itemId": 22476,
+            "spellId": 20025
+        },
+        {
+            "itemId": 22483,
+            "spellId": 20010
+        },
+        {
+            "itemId": 22481,
+            "spellId": 25080
+        },
+        {
+            "itemId": 21586
+        },
+        {
+            "itemId": 22477,
+            "spellId": 24161
+        },
+        {
+            "itemId": 22480,
+            "spellId": 20023
+        },
+        {
+            "itemId": 23060
+        },
+        {
+            "itemId": 23038
+        },
+        {
+            "itemId": 22954
+        },
+        [
+            {
+                "itemId": 23570
+            },
+            {
+                "itemId": 21180
+            },
+            {
+                "itemId": 19406
+            }
+        ],
+        {
+            "itemId": 23054,
+            "spellId": 20034
+        },
+        {
+            "itemId": 23577,
+            "spellId": 20034
+        },
+        {
+            "itemId": 23557
+        }
+    ],
     "simulationConfig": {
         "fightLength": 120,
         "targetLevel": 63,

@@ -1,7 +1,7 @@
 import {readFileSync} from 'fs';
 import {CharacterClass,} from './types';
 import path from "node:path";
-import {SimulationSpec} from "./SimulationSpec";
+import {EquippedItem, EquippedItemQueue, EquippedItemSlot, SimulationSpec} from "./SimulationSpec";
 
 export class SpecLoader {
    static load(specFile: string, allowInvalid: boolean = false): SimulationSpec {
@@ -57,6 +57,32 @@ export class SpecLoader {
                 // Determine if this is a healer spec based on class
                 spec.isHealerSpec = characterClass === CharacterClass.Shaman;
             }
+        }
+
+        // Normalize gear items: convert itemIds arrays to EquippedItemQueue
+        if (spec.gear && Array.isArray(spec.gear)) {
+            spec.gear = spec.gear.map((item: any): EquippedItemSlot => {
+                if (!item) return item;
+
+                // If item has itemIds (array), create a queue
+                if (item.itemIds && Array.isArray(item.itemIds)) {
+                    const queue: EquippedItemQueue = item.itemIds.map((itemId: number, index: number) => {
+                        const equippedItem: EquippedItem = {
+                            itemId: itemId,
+                            randomSuffixId: item.randomSuffixId,
+                        };
+                        // Apply spellId only to the first item in the queue
+                        if (index === 0 && item.spellId) {
+                            equippedItem.spellId = item.spellId;
+                        }
+                        return equippedItem;
+                    });
+                    return queue;
+                }
+
+                // Otherwise, keep as single item
+                return item as EquippedItem;
+            });
         }
 
          return spec as SimulationSpec;
