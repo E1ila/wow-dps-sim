@@ -35,72 +35,89 @@
     "gear": [
         {
             "itemId": 22478,
+            "name": "Bonescythe Helmet",
             "spellId": 24161
         },
         {
-            "itemId": 19377
+            "itemId": 19377,
+            "name": "Prestor's Talisman of Connivery"
         },
         {
             "itemId": 22479,
+            "name": "Bonescythe Pauldrons",
             "spellId": 29483
         },
         {
             "itemId": 23045,
+            "name": "Shroud of Dominion",
             "spellId": 25084
         },
         {
             "itemId": 22476,
+            "name": "Bonescythe Breastplate",
             "spellId": 20025
         },
         {
             "itemId": 22483,
+            "name": "Bonescythe Bracers",
             "spellId": 20010
         },
         {
             "itemId": 22481,
+            "name": "Bonescythe Gauntlets",
             "spellId": 25080
         },
         {
-            "itemId": 21586
+            "itemId": 21586,
+            "name": "Belt of Never-ending Agony"
         },
         {
             "itemId": 22477,
+            "name": "Bonescythe Legplates",
             "spellId": 24161
         },
         {
             "itemId": 22480,
+            "name": "Bonescythe Sabatons",
             "spellId": 20023
         },
         {
-            "itemId": 23060
+            "itemId": 23060,
+            "name": "Bonescythe Ring"
         },
         {
-            "itemId": 23038
+            "itemId": 23038,
+            "name": "Band of Unnatural Forces"
         },
         {
-            "itemId": 22954
+            "itemId": 22954,
+            "name": "Kiss of the Spider"
         },
-        [
-            {
-                "itemId": 23570
-            },
-            {
-                "itemId": 21180
-            },
-            {
-                "itemId": 19406
-            }
-        ],
+        {
+            "itemIds": [
+                23570,
+                21180,
+                19406
+            ],
+            "names": [
+                "Jom Gabbar",
+                "Earthstrike",
+                "Drake Fang Talisman"
+            ]
+        },
         {
             "itemId": 23054,
+            "name": "Gressil, Dawn of Ruin",
             "spellId": 20034
         },
         {
             "itemId": 23577,
+            "name": "The Hungering Cold",
             "spellId": 20034
         },
         {
-            "itemId": 23557
+            "itemId": 23557,
+            "name": "Larvae of the Great Worm"
         }
     ],
     "simulationConfig": {

@@ -64,7 +64,16 @@ export class SpecLoader {
             spec.gear = spec.gear.map((item: any): EquippedItemSlot => {
                 if (!item) return item;
 
-                // If item has itemIds (array), create a queue
+                // Check if it's already an array (old format: direct array of items)
+                if (Array.isArray(item)) {
+                    return item.map((subItem: any): EquippedItem => ({
+                        itemId: subItem.itemId,
+                        spellId: subItem.spellId,
+                        randomSuffixId: subItem.randomSuffixId,
+                    }));
+                }
+
+                // If item has itemIds (new format), create a queue
                 if (item.itemIds && Array.isArray(item.itemIds)) {
                     const queue: EquippedItemQueue = item.itemIds.map((itemId: number, index: number) => {
                         const equippedItem: EquippedItem = {

@@ -367,8 +367,14 @@ class SpecBuilder {
                 // It's a queue - output with itemIds array
                 const firstItem = slot[0];
                 const itemIds = slot.map(item => item.itemId);
+                const itemNames = slot.map(item => {
+                    const itemData = this.db.getItem(item.itemId);
+                    return itemData?.name || 'Unknown';
+                });
+
                 const obj: any = {
                     itemIds: itemIds,
+                    names: itemNames,
                 };
                 // Add enchant from first item if present
                 if (firstItem.spellId) {
@@ -388,7 +394,7 @@ class SpecBuilder {
 
                 const obj: any = {
                     itemId: item.itemId,
-                    itemName: itemData?.name || 'Unknown'
+                    name: itemData?.name || 'Unknown'
                 };
                 if (item.randomSuffixId) obj.randomSuffixId = item.randomSuffixId;
                 if (item.spellId) {
@@ -411,7 +417,42 @@ class SpecBuilder {
             const loadedSpec = SpecLoader.load(specFile, true);
             // Convert back to raw format (untransformed) for editing
             this.spec = JSON.parse(fs.readFileSync(fullPath, 'utf-8'));
-            this.equippedItems = this.spec.gear || [];
+
+            // Transform raw gear JSON into EquippedItemSlot format
+            this.equippedItems = (this.spec.gear || []).map((rawItem: any): EquippedItemSlot => {
+                if (!rawItem) return rawItem;
+
+                // Check if it's already an array (old format: direct array of items)
+                if (Array.isArray(rawItem)) {
+                    return rawItem.map((item: any): EquippedItem => {
+                        const equipped: EquippedItem = { itemId: item.itemId };
+                        if (item.spellId) equipped.spellId = item.spellId;
+                        if (item.randomSuffixId) equipped.randomSuffixId = item.randomSuffixId;
+                        return equipped;
+                    });
+                }
+
+                // Check if it's a queue (new format: has itemIds array)
+                if (rawItem.itemIds && Array.isArray(rawItem.itemIds)) {
+                    return rawItem.itemIds.map((itemId: number, index: number): EquippedItem => {
+                        const equipped: EquippedItem = { itemId };
+                        if (index === 0 && rawItem.spellId) {
+                            equipped.spellId = rawItem.spellId;
+                        }
+                        if (rawItem.randomSuffixId) {
+                            equipped.randomSuffixId = rawItem.randomSuffixId;
+                        }
+                        return equipped;
+                    });
+                }
+
+                // Single item
+                const equipped: EquippedItem = { itemId: rawItem.itemId };
+                if (rawItem.spellId) equipped.spellId = rawItem.spellId;
+                if (rawItem.randomSuffixId) equipped.randomSuffixId = rawItem.randomSuffixId;
+                return equipped;
+            });
+
             console.log(`${c.green}Loaded spec from:${c.reset} ${specFile}`);
 
             // Validate the spec can be loaded normally (non-blocking warning)
@@ -458,7 +499,47 @@ class SpecBuilder {
     saveSpecFile(): void {
         if (!this.specPath || !this.spec) return;
 
-        this.spec.gear = this.equippedItems;
+        // Transform equipped items to include names
+        this.spec.gear = this.equippedItems.map(slot => {
+            if (!slot) return slot;
+
+            // Check if it's a queue or single item
+            if (Array.isArray(slot)) {
+                // It's a queue
+                const firstItem = slot[0];
+                const itemIds = slot.map(item => item.itemId);
+                const itemNames = slot.map(item => {
+                    const itemData = this.db.getItem(item.itemId);
+                    return itemData?.name || 'Unknown';
+                });
+
+                const obj: any = {
+                    itemIds: itemIds,
+                    names: itemNames,
+                };
+                if (firstItem.spellId) {
+                    obj.spellId = firstItem.spellId;
+                }
+                if (firstItem.randomSuffixId) {
+                    obj.randomSuffixId = firstItem.randomSuffixId;
+                }
+                return obj;
+            } else {
+                // Single item
+                const itemData = this.db.getItem(slot.itemId);
+                const obj: any = {
+                    itemId: slot.itemId,
+                    name: itemData?.name || 'Unknown'
+                };
+                if (slot.randomSuffixId) {
+                    obj.randomSuffixId = slot.randomSuffixId;
+                }
+                if (slot.spellId) {
+                    obj.spellId = slot.spellId;
+                }
+                return obj;
+            }
+        });
 
         const dir = path.dirname(this.specPath);
         if (!fs.existsSync(dir)) {
