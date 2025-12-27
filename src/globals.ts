@@ -28,6 +28,17 @@ export const c = {
    reset: '\x1b[0m',
 } as const;
 
+// Item IDs
+export const ITEM_IDS = {
+   // Trinkets
+   KissOfTheSpider: 22954,
+   MarkOfTheChampionSpells: 23207,
+   MarkOfTheChampionMelee: 23206,
+
+   // Weapons
+   Thunderfury: 19019,
+} as const;
+
 export function colorByClass(characterClass: CharacterClass): string {
    switch (characterClass) {
       case CharacterClass.Rogue:

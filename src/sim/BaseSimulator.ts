@@ -14,15 +14,16 @@ import {
    SimulationStatistics,
    TargetType
 } from '../types';
-import {c} from '../globals';
+import {c, ITEM_IDS} from '../globals';
 import {BuffsProvider, DamageCalculator} from "../mechanics/DamageCalculator";
 import {getItemFromSlot, SimulationSpec} from "../SimulationSpec";
 
 const LATENCY_LAG = 200;
 
+const trinketCooldowns: Map<number, number> = new Map();
+
 export interface Simulator {
    simulate(): SimulationResult;
-   runMultipleIterations(): { results: SimulationResult[], executionTimeMs: number };
    simulateWithPlayback(speed: number): Promise<void>;
 }
 
@@ -55,9 +56,16 @@ export abstract class BaseSimulator implements Simulator, BuffsProvider, PlayerS
 
    protected attackPowerPerLevel = 1;
 
-   hasMarkOfChampion!: boolean;
-   hasThunderfury!: boolean;
    targetIsDemonOrUndead!: boolean;
+
+   // Set of equipped item IDs
+   protected equippedItemIds: Set<number> = new Set();
+
+   // Current iteration number (used for item queues)
+   protected iteration: number = 0;
+
+   // Starting time for this simulation (used for persisting time across iterations)
+   protected startTime: number = 0;
 
    statistics: SimulationStatistics = {
       critCount: 0,
@@ -68,17 +76,27 @@ export abstract class BaseSimulator implements Simulator, BuffsProvider, PlayerS
    };
 
    protected constructor(
-      protected spec: SimulationSpec
+      protected spec: SimulationSpec,
+      iteration: number = 0,
+      startTime: number = 0
    ) {
-      this.hasMarkOfChampion = this.spec.gear?.some(slot => {
-         const item = getItemFromSlot(slot);
-         return item && (item.itemId === 23206 || item.itemId === 23207);
-      });
-      this.hasThunderfury = this.spec.gear?.some(slot => {
-         const item = getItemFromSlot(slot);
-         return item && item.itemId === 19019;
-      });
+      this.iteration = iteration;
+      this.startTime = startTime;
+      this.checkTrinketPresence();
       this.targetIsDemonOrUndead = this.spec.targetType === TargetType.Demon || this.spec.targetType === TargetType.Undead;
+   }
+
+   private checkTrinketPresence() {
+      this.spec.gear?.forEach(slot => {
+         const item = getItemFromSlot(slot, this.iteration);
+         if (item) {
+            this.equippedItemIds.add(item.itemId);
+         }
+      });
+   }
+
+   protected hasEquippedItem(...itemIds: number[]): boolean {
+      return itemIds.some(id => this.equippedItemIds.has(id));
    }
 
    protected abstract initializeState(): SimulationState;
@@ -90,6 +108,32 @@ export abstract class BaseSimulator implements Simulator, BuffsProvider, PlayerS
 
    protected advanceTime() {
       this.state.currentTime += 10;
+   }
+
+   protected activateTrinkets(): void {
+      this.activateKissOfTheSpider();
+   }
+
+   private canActivateTrinket(itemId: number, cooldown: number): boolean {
+      const lastActivation = trinketCooldowns.get(itemId);
+      return lastActivation === undefined || this.state.currentTime >= lastActivation + cooldown;
+   }
+
+   private trinketActivated(itemId: number): void {
+      trinketCooldowns.set(itemId, this.state.currentTime);
+   }
+
+   private activateKissOfTheSpider(): void {
+      if (this.hasEquippedItem(ITEM_IDS.KissOfTheSpider)) {
+         const itemId = ITEM_IDS.KissOfTheSpider;
+         const cooldown = 120000; // 2 minutes
+         const duration = 15000; // 15 seconds
+
+         if (this.canActivateTrinket(itemId, cooldown)) {
+            this.activateBuff(Buff.KissOfTheSpider, duration);
+            this.trinketActivated(itemId);
+         }
+      }
    }
 
    protected executeInstructionWithCondition(instruction: string): boolean {
@@ -457,19 +501,6 @@ export abstract class BaseSimulator implements Simulator, BuffsProvider, PlayerS
       }
    }
 
-   runMultipleIterations(): { results: SimulationResult[], executionTimeMs: number } {
-      const startTime = Date.now();
-      const results: SimulationResult[] = [];
-
-      for (let i = 0; i < this.spec.iterations; i++) {
-         results.push(this.simulate());
-      }
-
-      const executionTimeMs = Date.now() - startTime;
-
-      return {results, executionTimeMs};
-   }
-
    static calculateAverageDPS(results: SimulationResult[]): number {
       const totalDPS = results.reduce((sum, result) => sum + result.dps, 0);
       return totalDPS / results.length;
@@ -725,7 +756,14 @@ export abstract class BaseSimulator implements Simulator, BuffsProvider, PlayerS
    }
 
    get haste(): number {
-      return this.spec.extraStats.meleeHaste || 1;
+      let haste = this.spec.extraStats.meleeHaste || 1;
+
+      // Kiss of the Spider: +20% attack speed
+      if (this.hasBuff(Buff.KissOfTheSpider)) {
+         haste *= 1.2;
+      }
+
+      return haste;
    }
 
    /**
@@ -734,7 +772,7 @@ export abstract class BaseSimulator implements Simulator, BuffsProvider, PlayerS
    get attackPower(): number {
       let extra = this.spec.extraStats.attackPower ?? 0;
 
-      if (this.hasMarkOfChampion && this.targetIsDemonOrUndead) {
+      if (this.hasEquippedItem(ITEM_IDS.MarkOfTheChampionMelee, ITEM_IDS.MarkOfTheChampionSpells) && this.targetIsDemonOrUndead) {
          extra += 150;
       }
 

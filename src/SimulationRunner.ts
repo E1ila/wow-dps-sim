@@ -289,16 +289,16 @@ export class SimulationRunner {
             .filter(ability => ability.length > 0);
     }
 
-    private createSimulator(): BaseSimulator {
+    private createSimulator(iteration: number = 0, startTime: number = 0): BaseSimulator {
         switch (this.spec.class) {
             case CharacterClass.Rogue:
-                return new RogueSimulator(this.spec as SimulationSpec & { talents: RogueTalents; setup?: PlayerSetup });
+                return new RogueSimulator(this.spec as SimulationSpec & { talents: RogueTalents; setup?: PlayerSetup }, iteration, startTime);
 
             case CharacterClass.Warrior:
-                return new WarriorSimulator(this.spec as SimulationSpec & { talents: WarriorTalents });
+                return new WarriorSimulator(this.spec as SimulationSpec & { talents: WarriorTalents }, iteration, startTime);
 
             case CharacterClass.Shaman:
-                return new ShamanSimulator(this.spec as SimulationSpec & { talents: ShamanTalents });
+                return new ShamanSimulator(this.spec as SimulationSpec & { talents: ShamanTalents }, iteration, startTime);
 
             default:
                 throw new Error(`Class ${this.spec.class} is not implemented yet.`);
@@ -397,7 +397,7 @@ export class SimulationRunner {
         const progress = ((current + 1) / total) * 100;
         const barLength = 30;
         const filledLength = Math.floor((current + 1) / total * barLength);
-        const bar = '='.repeat(filledLength) + ' '.repeat(barLength - filledLength);
+        const bar = '#'.repeat(filledLength) + ' '.repeat(barLength - filledLength);
         process.stdout.write(`\r${c.cyan}Progress:${c.reset} [${bar}] ${progress.toFixed(1)}% (${current + 1}/${total})`);
     }
 
@@ -410,6 +410,7 @@ export class SimulationRunner {
     private executeIterations(): { results: any[], executionTimeMs: number } {
         const startTime = Date.now();
         const results: any[] = [];
+        let cumulativeTime = 0;
 
         for (let i = 0; i < this.spec.iterations; i++) {
             this.showProgress(i, this.spec.iterations);
@@ -417,11 +418,14 @@ export class SimulationRunner {
             // Recalculate gear stats for this iteration (for trinket queue rotation)
             this.applyGearStats(i);
 
-            // Recreate simulator with updated stats
-            const iterationSimulator = this.createSimulator();
+            // Recreate simulator with updated stats, iteration number, and cumulative time
+            const iterationSimulator = this.createSimulator(i, cumulativeTime);
 
             // Run single iteration
             results.push(iterationSimulator.simulate());
+
+            // Update cumulative time for next iteration
+            cumulativeTime += this.spec.fightLength * 1000;
         }
 
         this.clearProgress();

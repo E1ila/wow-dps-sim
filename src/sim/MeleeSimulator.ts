@@ -1,6 +1,6 @@
 import {BaseSimulator} from './BaseSimulator';
 import {AttackResult, AttackType, Buff, MeleeSimulationState, Weapon, WeaponEnchant} from '../types';
-import {isHit} from '../globals';
+import {isHit, ITEM_IDS} from '../globals';
 import {MeleeDamageCalculator} from "../mechanics/MeleeDamageCalculator";
 
 export enum MeleeAbility {
@@ -58,7 +58,7 @@ export abstract class MeleeSimulator extends BaseSimulator {
    protected checkThunderfuryProc(weapon: Weapon): void {
       // Thunderfury procs 6 times per minute on average (6.0 PPM)
       // Proc chance per hit = (weapon_speed / 60) * 6.0
-      if (this.hasThunderfury) {
+      if (this.hasEquippedItem(ITEM_IDS.Thunderfury)) {
          const procChance = (weapon.speed / 60) * 6.0;
          if (Math.random() < procChance) {
             this.addProc('Thunderfury');
@@ -77,6 +77,7 @@ export abstract class MeleeSimulator extends BaseSimulator {
       if (!this.spec.postCycleResourceGeneration) {
          this.handleResourceGeneration();
       }
+      this.activateTrinkets();
       this.handleAutoAttacks();
       this.updateBuffs();
       this.executeRotation();

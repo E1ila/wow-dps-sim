@@ -127,7 +127,7 @@
         }
     ],
     "simulationConfig": {
-        "fightLength": 120,
+        "fightLength": 45,
         "targetLevel": 63,
         "targetArmor": 3731,
         "targetType": "undead",

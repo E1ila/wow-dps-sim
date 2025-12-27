@@ -19,8 +19,8 @@ export class ShamanSimulator extends BaseSimulator {
    protected agilityToAttackPower = 0;
    protected strengthToAttackPower = 2;
 
-   constructor(spec: SimulationSpec) {
-      super(spec);
+   constructor(spec: SimulationSpec, iteration: number = 0, startTime: number = 0) {
+      super(spec, iteration, startTime);
       this.talents = spec.talents as ShamanTalents;
       this.healingCalculator = new ShamanHealingCalculator(spec, this);
       this.damageCalculator = this.healingCalculator;
@@ -32,20 +32,20 @@ export class ShamanSimulator extends BaseSimulator {
       const targetMaxHealth = 10000; // Tank has 10k HP
 
       return {
-         currentTime: 0,
+         currentTime: this.startTime,
          targetHealth: 10000000, // Not used for healing sim
-         globalCooldownExpiry: 0,
+         globalCooldownExpiry: this.startTime,
          activeBuffs: [],
          mana: maxMana,
-         currentCastEnd: 0,
+         currentCastEnd: this.startTime,
          castingSpell: null,
-         nextManaTick: MANA_TICK_INTERVAL,
+         nextManaTick: this.startTime + MANA_TICK_INTERVAL,
          totalHealing: 0,
          overhealing: 0,
          targetCurrentHealth: targetMaxHealth,
          targetMaxHealth: targetMaxHealth,
-         naturesSwiftnessCooldown: 0,
-         manaTideCooldown: 0,
+         naturesSwiftnessCooldown: this.startTime,
+         manaTideCooldown: this.startTime,
       };
    }
 

@@ -13,8 +13,8 @@ export class MageSimulator extends BaseSimulator {
    protected damageCalculator: MageDamageCalculator;
    protected talents: MageTalents;
 
-   constructor(spec: SimulationSpec) {
-      super(spec);
+   constructor(spec: SimulationSpec, iteration: number = 0, startTime: number = 0) {
+      super(spec, iteration, startTime);
       this.talents = spec.talents as MageTalents;
       this.damageCalculator = new MageDamageCalculator(spec, this);
       this.state = this.initializeState();
@@ -24,23 +24,23 @@ export class MageSimulator extends BaseSimulator {
       const maxMana = this.getMaxMana();
 
       return {
-         currentTime: 0,
+         currentTime: this.startTime,
          targetHealth: 10000000,
-         globalCooldownExpiry: 0,
+         globalCooldownExpiry: this.startTime,
          activeBuffs: [],
          mana: maxMana,
-         currentCastEnd: 0,
+         currentCastEnd: this.startTime,
          castingSpell: null,
-         nextManaTick: MANA_TICK_INTERVAL,
+         nextManaTick: this.startTime + MANA_TICK_INTERVAL,
          combustionStacks: 0,
          improvedScorchStacks: 0,
          igniteStacks: 0,
-         fireBlastCooldown: 0,
-         arcanePowerCooldown: 0,
-         combustionCooldown: 0,
-         presenceOfMindCooldown: 0,
-         evocationCooldown: 0,
-         iceBarrierCooldown: 0,
+         fireBlastCooldown: this.startTime,
+         arcanePowerCooldown: this.startTime,
+         combustionCooldown: this.startTime,
+         presenceOfMindCooldown: this.startTime,
+         evocationCooldown: this.startTime,
+         iceBarrierCooldown: this.startTime,
       };
    }
 

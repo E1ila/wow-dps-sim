@@ -75,8 +75,8 @@ export class WarriorSimulator extends MeleeSimulator {
    protected intellectPerLevel = 0;
    protected intellectLevel1 = 30;
 
-   constructor(spec: SimulationSpec) {
-      super(spec);
+   constructor(spec: SimulationSpec, iteration: number = 0, startTime: number = 0) {
+      super(spec, iteration, startTime);
       this.talents = spec.talents as WarriorTalents;
       this.damageCalculator = new WarriorDamageCalculator(spec, this, this);
       this.state = this.initializeState();
@@ -84,21 +84,21 @@ export class WarriorSimulator extends MeleeSimulator {
 
    protected initializeState(): WarriorSimulationState {
       return {
-         currentTime: 0,
+         currentTime: this.startTime,
          rage: 0,
          currentStance: WarriorStance.Battle,
          targetHealth: 999999999,
-         mainHandNextSwing: 0,
-         offHandNextSwing: 0,
-         globalCooldownExpiry: 0,
+         mainHandNextSwing: this.startTime,
+         offHandNextSwing: this.startTime,
+         globalCooldownExpiry: this.startTime,
          activeBuffs: [],
-         nextAngerManagementTick: 3000,
+         nextAngerManagementTick: this.startTime + 3000,
 
          // Proc states
          overpowerAvailable: false,
-         overpowerExpiry: 0,
+         overpowerExpiry: this.startTime,
          revengeAvailable: false,
-         revengeExpiry: 0,
+         revengeExpiry: this.startTime,
 
          // Buff stacks
          flurryStacks: 0,
@@ -106,18 +106,18 @@ export class WarriorSimulator extends MeleeSimulator {
          sweepingStrikesStacks: 0,
 
          // Cooldowns
-         bloodthirstCooldown: 0,
-         mortalStrikeCooldown: 0,
-         whirlwindCooldown: 0,
-         revengeCooldown: 0,
-         overpowerCooldown: 0,
-         bloodrageCooldown: 0,
-         berserkerRageCooldown: 0,
-         stanceCooldown: 0,
+         bloodthirstCooldown: this.startTime,
+         mortalStrikeCooldown: this.startTime,
+         whirlwindCooldown: this.startTime,
+         revengeCooldown: this.startTime,
+         overpowerCooldown: this.startTime,
+         bloodrageCooldown: this.startTime,
+         berserkerRageCooldown: this.startTime,
+         stanceCooldown: this.startTime,
 
          // Queue system
          queuedAbility: null,
-         queueActivationTime: 0,
+         queueActivationTime: this.startTime,
       };
    }
 

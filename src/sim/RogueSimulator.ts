@@ -49,8 +49,8 @@ export class RogueSimulator extends MeleeSimulator {
    protected intellectPerLevel = 0;
    protected intellectLevel1 = 35;
 
-   constructor(spec: SimulationSpec) {
-      super(spec);
+   constructor(spec: SimulationSpec, iteration: number = 0, startTime: number = 0) {
+      super(spec, iteration, startTime);
       this.talents = spec.talents as RogueTalents;
       this.damageCalculator = new RogueDamageCalculator(spec, this, this);
       this.state = this.initializeState();
@@ -59,18 +59,18 @@ export class RogueSimulator extends MeleeSimulator {
 
    initializeState(): RogueSimulationState {
       return {
-         currentTime: 0,
+         currentTime: this.startTime,
          energy: this.maxEnergy,
          comboPoints: 0,
          targetHealth: 999999999,
-         mainHandNextSwing: 0,
-         offHandNextSwing: 0,
-         globalCooldownExpiry: 0,
-         nextEnergyTick: 2000,
+         mainHandNextSwing: this.startTime,
+         offHandNextSwing: this.startTime,
+         globalCooldownExpiry: this.startTime,
+         nextEnergyTick: this.startTime + 2000,
          activeBuffs: [],
-         swordSpecICD: 0,
-         sealFateICD: 0,
-         coldBloodCooldown: 0,
+         swordSpecICD: this.startTime,
+         sealFateICD: this.startTime,
+         coldBloodCooldown: this.startTime,
       };
    }
 
@@ -96,7 +96,9 @@ export class RogueSimulator extends MeleeSimulator {
    }
 
    getHasteMultiplier(): number {
-      return this.isBuffActive(Buff.SnD) ? 1 + ROGUE.slnDiceIAS : 1;
+      return this.isBuffActive(Buff.SnD) ?
+         super.getHasteMultiplier() * (1 + ROGUE.slnDiceIAS) :
+         super.getHasteMultiplier();
    }
 
    spendEnergy(amount: number): boolean {
