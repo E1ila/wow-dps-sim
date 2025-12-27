@@ -67,6 +67,10 @@ export abstract class BaseSimulator implements Simulator, BuffsProvider, PlayerS
    // Starting time for this simulation (used for persisting time across iterations)
    protected startTime: number = 0;
 
+   // Jom Gabbar stacking trinket state
+   protected jomGabbarStacks: number = 0;
+   protected jomGabbarNextStack: number = 0;
+
    statistics: SimulationStatistics = {
       critCount: 0,
       hitCount: 0,
@@ -112,6 +116,8 @@ export abstract class BaseSimulator implements Simulator, BuffsProvider, PlayerS
 
    protected activateTrinkets(): void {
       this.activateKissOfTheSpider();
+      this.activateEarthstrike();
+      this.activateJomGabbar();
    }
 
    private canActivateTrinket(itemId: number, cooldown: number): boolean {
@@ -130,9 +136,59 @@ export abstract class BaseSimulator implements Simulator, BuffsProvider, PlayerS
          const duration = 15000; // 15 seconds
 
          if (this.canActivateTrinket(itemId, cooldown)) {
+            // console.log(`${this.iteration} Kiss of the Spider ${this.state.currentTime}`)
             this.activateBuff(Buff.KissOfTheSpider, duration);
             this.trinketActivated(itemId);
          }
+      }
+   }
+
+   private activateEarthstrike(): void {
+      if (this.hasEquippedItem(ITEM_IDS.Earthstrike)) {
+         const itemId = ITEM_IDS.Earthstrike;
+         const cooldown = 120000; // 2 minutes
+         const duration = 20000; // 20 seconds
+
+         if (this.canActivateTrinket(itemId, cooldown)) {
+            // console.log(`${this.iteration} Earthstrike        ${this.state.currentTime}`)
+            this.activateBuff(Buff.Earthstrike, duration);
+            this.trinketActivated(itemId);
+         }
+      }
+   }
+
+   private activateJomGabbar(): void {
+      if (this.hasEquippedItem(ITEM_IDS.JomGabbar)) {
+         this.updateJomGabbarStacks();
+
+         const itemId = ITEM_IDS.JomGabbar;
+         const cooldown = 120000; // 2 minutes
+         const duration = 20000; // 20 seconds
+
+         if (this.canActivateTrinket(itemId, cooldown)) {
+            // console.log(`${this.iteration} Jom Gabbar        ${this.state.currentTime}`)
+            this.activateBuff(Buff.JomGabbar, duration);
+            this.trinketActivated(itemId);
+            // Initialize stacks: starts at 1 stack (65 AP)
+            this.jomGabbarStacks = 1;
+            // Next stack in 2 seconds
+            this.jomGabbarNextStack = this.state.currentTime + 2000;
+         }
+      }
+   }
+
+   private updateJomGabbarStacks(): void {
+      // Only update stacks if buff is active
+      if (this.hasBuff(Buff.JomGabbar)) {
+         // Check if it's time to add another stack
+         if (this.state.currentTime >= this.jomGabbarNextStack) {
+            this.jomGabbarStacks++;
+            this.jomGabbarNextStack = this.state.currentTime + 2000;
+         }
+      } else {
+         // Buff expired, reset stacks
+         this.jomGabbarStacks = 0;
+         this.jomGabbarNextStack = 0;
       }
    }
 
@@ -776,6 +832,14 @@ export abstract class BaseSimulator implements Simulator, BuffsProvider, PlayerS
 
       if (this.hasEquippedItem(ITEM_IDS.MarkOfTheChampionMelee, ITEM_IDS.MarkOfTheChampionSpells) && this.targetIsDemonOrUndead) {
          extra += 150;
+      }
+
+      if (this.hasBuff(Buff.Earthstrike)) {
+         extra += 280;
+      }
+
+      if (this.hasBuff(Buff.JomGabbar)) {
+         extra += this.jomGabbarStacks * 65;
       }
 
       return Math.max(1, this.playerLevel * this.attackPowerPerLevel - 20)

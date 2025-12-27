@@ -32,6 +32,8 @@ export const c = {
 export const ITEM_IDS = {
    // Trinkets
    KissOfTheSpider: 22954,
+   Earthstrike: 21180,
+   JomGabbar: 23570,
    MarkOfTheChampionSpells: 23207,
    MarkOfTheChampionMelee: 23206,
 

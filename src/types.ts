@@ -30,6 +30,8 @@ export enum Buff {
    ImprovedScorch = 'ImprovedScorch',
    // Trinket buffs
    KissOfTheSpider = 'KissOfTheSpider',
+   Earthstrike = 'Earthstrike',
+   JomGabbar = 'JomGabbar',
 }
 
 export enum CharacterClass {
