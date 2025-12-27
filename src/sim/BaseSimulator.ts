@@ -355,7 +355,7 @@ export abstract class BaseSimulator implements Simulator, BuffsProvider, PlayerS
    simulate(): SimulationResult {
       this.prepareSimulation();
       const fightLengthMs = this.spec.fightLength * 1000;
-      while (this.state.currentTime < fightLengthMs) {
+      while (this.state.currentTime - this.startTime < fightLengthMs) {
          this.processTimeStep();
          this.advanceTime();
       }
@@ -410,9 +410,9 @@ export abstract class BaseSimulator implements Simulator, BuffsProvider, PlayerS
       const result = this.getSimulationResult();
       console.log('\n=== Playback Complete ===');
       const label = this.spec.isHealerSpec ? 'HPS' : 'DPS';
-      console.log(` ${c.green}*********************${c.reset}`);
+      console.log(` ${c.green}*****************${c.reset}`);
       console.log(` ${c.green}**  ${c.brightGreen}${label} ${result.dps.toFixed(2).padEnd(6)} ${c.green}**${c.reset}`);
-      console.log(` ${c.green}*********************${c.reset}`);
+      console.log(` ${c.green}*****************${c.reset}`);
    }
 
    protected abstract getStateText(): string;
@@ -641,7 +641,9 @@ export abstract class BaseSimulator implements Simulator, BuffsProvider, PlayerS
             }
          }
          const label = simulator.spec.isHealerSpec ? 'HPS' : 'DPS';
-         console.log(` ${c.green}**  ${c.brightGreen}${label} ${avgDPS.toFixed(2)} ${c.green}**${c.reset}`);
+         console.log(` ${c.green}*******************${c.reset}`);
+         console.log(` ${c.green}**  ${c.brightGreen}${label} ${avgDPS.toFixed(2).padEnd(8)} ${c.green}**${c.reset}`);
+         console.log(` ${c.green}*******************${c.reset}`);
       }
       return jsonResults;
    }
