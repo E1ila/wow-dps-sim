@@ -94,16 +94,8 @@
             "name": "Kiss of the Spider"
         },
         {
-            "itemIds": [
-                23570,
-                21180,
-                19406
-            ],
-            "names": [
-                "Jom Gabbar",
-                "Earthstrike",
-                "Drake Fang Talisman"
-            ]
+            "itemId": 23206,
+            "name": "Mark of the Champion"
         },
         {
             "itemId": 23054,
@@ -125,7 +117,7 @@
         "targetLevel": 63,
         "targetArmor": 3731,
         "targetType": "undead",
-        "iterations": 4000,
+        "iterations": 10000,
         "postCycleResourceGeneration": true
     }
 }
