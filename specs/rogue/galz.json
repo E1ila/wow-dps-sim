@@ -90,12 +90,26 @@
             "name": "Band of Unnatural Forces"
         },
         {
-            "itemId": 22954,
-            "name": "Kiss of the Spider"
+            "itemIds": [
+                22954,
+                21180,
+                19406
+            ],
+            "names": [
+                "Kiss of the Spider",
+                "Earthstrike",
+                "Drake Fang Talisman"
+            ]
         },
         {
-            "itemId": 23206,
-            "name": "Mark of the Champion"
+            "itemIds": [
+                23570,
+                23206
+            ],
+            "names": [
+                "Jom Gabbar",
+                "Mark of the Champion"
+            ]
         },
         {
             "itemId": 23054,

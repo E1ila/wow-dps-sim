@@ -73,12 +73,18 @@ export type EquippedItemSlot = EquippedItem|EquippedItemQueue;
 
 /**
  * Extracts the relevant EquippedItem from an EquippedItemSlot.
- * For now, returns the item directly if it's a single item, or the first item if it's a queue.
- * Later this will include more sophisticated logic for item selection.
+ * Returns the item directly if it's a single item.
+ * For queues, cycles through items based on the iteration number.
+ *
+ * @param slot The equipment slot (single item or queue)
+ * @param iteration The current iteration number (0-based). Used to cycle through queues.
  */
-export function getItemFromSlot(slot: EquippedItemSlot): EquippedItem | undefined {
+export function getItemFromSlot(slot: EquippedItemSlot, iteration: number = 0): EquippedItem | undefined {
    if (Array.isArray(slot)) {
-      return slot[0];
+      if (slot.length === 0) return undefined;
+      // Cycle through the queue based on iteration number
+      const index = iteration % slot.length;
+      return slot[index];
    }
    return slot;
 }

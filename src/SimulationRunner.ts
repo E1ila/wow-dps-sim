@@ -7,7 +7,7 @@ import {RogueSimulator} from "./sim/RogueSimulator";
 import {ShamanSimulator} from "./sim/ShamanSimulator";
 import path from "node:path";
 import {Database} from "./Database";
-import {EquippedItemQueue, getItemFromSlot, PlayerSetup, SimulationOptions, SimulationSpec} from "./SimulationSpec";
+import {EquippedItemQueue, PlayerSetup, SimulationOptions, SimulationSpec} from "./SimulationSpec";
 import {RogueTalents, ShamanTalents, WarriorTalents} from "./talents";
 import {GearParser} from "./GearParser";
 import {applyWorldBuffs} from "./worldbuffs";
@@ -43,8 +43,8 @@ export class SimulationRunner {
         }
     }
 
-    private applyGearStats(): void {
-        this.spec.extraStats = this.gearParser.aggregateStats(this.spec.gear);
+    private applyGearStats(iteration: number = 0): void {
+        this.spec.extraStats = this.gearParser.aggregateStats(this.spec.gear, iteration);
         if (this.spec.worldBuffs)
             applyWorldBuffs(this.spec.worldBuffs, this.spec.extraStats)
         if (this.spec.consumables)
@@ -316,20 +316,36 @@ export class SimulationRunner {
         console.log(`\n${c.cyan}Equipped Gear:${c.reset}`);
         this.spec.gear.forEach((slot, index) => {
             const slotName = EQUIPMENT_SLOTS[index]?.name;
-            const equippedItem = getItemFromSlot(slot);
-            if (!slotName || !equippedItem || equippedItem.itemId === 0) return;
+            if (!slotName || !slot) return;
 
-            const item = this.db.getItem(equippedItem.itemId);
-            const itemName = item?.name || `Unknown Item (${equippedItem.itemId})`;
+            const getItemDisplay = (equippedItem: any) => {
+                if (equippedItem.itemId === 0) return null;
 
-            let enchantText = '';
-            if (equippedItem.spellId) {
-                const enchant = this.db.getEnchant(equippedItem.spellId);
-                const enchantName = enchant?.name || `Unknown Enchant (${equippedItem.spellId})`;
-                enchantText = ` ${c.magenta}[${enchantName}]${c.reset}`;
+                const item = this.db.getItem(equippedItem.itemId);
+                const itemName = item?.name || `Unknown Item (${equippedItem.itemId})`;
+
+                let enchantText = '';
+                if (equippedItem.spellId) {
+                    const enchant = this.db.getEnchant(equippedItem.spellId);
+                    const enchantName = enchant?.name || `Unknown Enchant (${equippedItem.spellId})`;
+                    enchantText = ` ${c.magenta}[${enchantName}]${c.reset}`;
+                }
+
+                return `${c.white}${itemName}${c.reset}${enchantText}`;
+            };
+
+            if (Array.isArray(slot)) {
+                if (slot.length === 0) return;
+                const display = getItemDisplay(slot[0]);
+                if (display) {
+                    console.log(`  ${slotName.padEnd(10)}: ${display} ${c.gray}(+${slot.length - 1} more)${c.reset}`);
+                }
+            } else {
+                const display = getItemDisplay(slot);
+                if (display) {
+                    console.log(`  ${slotName.padEnd(10)}: ${display}`);
+                }
             }
-
-            console.log(`  ${slotName.padEnd(10)}: ${c.white}${itemName}${c.reset}${enchantText}`);
         });
         console.log();
 
@@ -375,8 +391,48 @@ export class SimulationRunner {
         await simulator.simulateWithPlayback(this.options.playbackSpeed!);
     }
 
+    private showProgress(current: number, total: number): void {
+        if (this.options.quiet) return;
+
+        const progress = ((current + 1) / total) * 100;
+        const barLength = 30;
+        const filledLength = Math.floor((current + 1) / total * barLength);
+        const bar = '='.repeat(filledLength) + ' '.repeat(barLength - filledLength);
+        process.stdout.write(`\r${c.cyan}Progress:${c.reset} [${bar}] ${progress.toFixed(1)}% (${current + 1}/${total})`);
+    }
+
+    private clearProgress(): void {
+        if (!this.options.quiet) {
+            process.stdout.write('\r' + ' '.repeat(80) + '\r');
+        }
+    }
+
+    private executeIterations(): { results: any[], executionTimeMs: number } {
+        const startTime = Date.now();
+        const results: any[] = [];
+
+        for (let i = 0; i < this.spec.iterations; i++) {
+            this.showProgress(i, this.spec.iterations);
+
+            // Recalculate gear stats for this iteration (for trinket queue rotation)
+            this.applyGearStats(i);
+
+            // Recreate simulator with updated stats
+            const iterationSimulator = this.createSimulator();
+
+            // Run single iteration
+            results.push(iterationSimulator.simulate());
+        }
+
+        this.clearProgress();
+
+        const executionTimeMs = Date.now() - startTime;
+        return { results, executionTimeMs };
+    }
+
     private runMultipleIterations(simulator: BaseSimulator): void {
-        const {results, executionTimeMs} = simulator.runMultipleIterations();
+        const { results, executionTimeMs } = this.executeIterations();
+
         const jsonResults = BaseSimulator.printResults(
             results,
             simulator,
@@ -393,8 +449,10 @@ export class SimulationRunner {
     runAndGetResults(): any {
         this.loadSpec();
 
+        // Create initial simulator for printResults
         const simulator = this.createSimulator();
-        const {results, executionTimeMs} = simulator.runMultipleIterations();
+
+        const { results, executionTimeMs } = this.executeIterations();
 
         return BaseSimulator.printResults(
             results,

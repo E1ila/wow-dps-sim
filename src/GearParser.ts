@@ -61,9 +61,10 @@ export class GearParser {
     /**
      * Parse gear items from JSON and calculate aggregate stats
      * @param gear Array of equipped item slots
+     * @param iteration Current iteration number (for cycling through item queues)
      * @returns Calculated GearStats object
      */
-    aggregateStats(gear: EquippedItemSlot[]): Stats {
+    aggregateStats(gear: EquippedItemSlot[], iteration: number = 0): Stats {
         if (!gear || gear.length === 0) {
             // Return minimal stats if no gear provided
             return {
@@ -107,7 +108,7 @@ export class GearParser {
 
         // Process each gear item
         for (const slot of gear) {
-            const equippedItem = getItemFromSlot(slot);
+            const equippedItem = getItemFromSlot(slot, iteration);
             if (!equippedItem) {
                 continue;
             }

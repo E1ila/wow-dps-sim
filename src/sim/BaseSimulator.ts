@@ -366,7 +366,9 @@ export abstract class BaseSimulator implements Simulator, BuffsProvider, PlayerS
       const result = this.getSimulationResult();
       console.log('\n=== Playback Complete ===');
       const label = this.spec.isHealerSpec ? 'HPS' : 'DPS';
-      console.log(` ${c.green}**  ${c.brightGreen}${label} ${result.dps.toFixed(2)} ${c.green}**${c.reset}`);
+      console.log(` ${c.green}*********************${c.reset}`);
+      console.log(` ${c.green}**  ${c.brightGreen}${label} ${result.dps.toFixed(2).padEnd(6)} ${c.green}**${c.reset}`);
+      console.log(` ${c.green}*********************${c.reset}`);
    }
 
    protected abstract getStateText(): string;
